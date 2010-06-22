@@ -6,17 +6,11 @@
 package com.heeere.opencl;
 
 import com.heeere.opencl.demo.ImageStackViewer;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.BufferedImageOp;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
-import java.awt.image.RescaleOp;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
@@ -29,11 +23,22 @@ public class TestPyramidOnLena {
         String input = "../media/lena512color.png";
         BufferedImage im = ImageIO.read(new File(input));
 
-        Pyramid py = PyramidProcessor.processPyramid(im, PyramidProcessor.java2dImplementation());
+        Map<String, PyramidProcessor.Requirements> implementations = new LinkedHashMap<String, PyramidProcessor.Requirements>();
+        implementations.put("warmup(Java2D)", PyramidImpl.java2dImplementation());
+        implementations.put("Java2D", PyramidImpl.java2dImplementation());
+        //implementations.put("warmup(JOCL)", PyramidImpl.joclImplementation());
+        implementations.put("JOCL", PyramidImpl.joclImplementation());
 
-        ImageStackViewer viewer = new ImageStackViewer("Pyramid", true, true);
-        for (BufferedImage i : py.l) {
-            viewer.addImage(i);
+        for (Map.Entry<String, PyramidProcessor.Requirements> e : implementations.entrySet()) {
+            long start = System.nanoTime();
+            Pyramid py = PyramidProcessor.processPyramid(im, e.getValue());
+            long end = System.nanoTime();
+            System.err.format("%s: %.3f ms\n", e.getKey(), ((end - start) / 1000000.f));
+
+            ImageStackViewer viewer = new ImageStackViewer("Pyramid " + e.getKey(), true, true);
+            for (BufferedImage i : py.l) {
+                viewer.addImage(i);
+            }
         }
     }
     
