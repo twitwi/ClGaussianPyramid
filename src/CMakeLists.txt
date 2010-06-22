@@ -1,19 +1,11 @@
-
-project(ClGaussianPyramid)
-
-cmake_minimum_required(VERSION 2.6)
-
-#set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake)
-
-#find_package(OpenCV REQUIRED)
-
-include_directories(.)
-include_directories(/home/twilight/app/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc)
+SET(cmake_include_current_dir YES)
+INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIR})
 
 #add_definitions(-DPASSIVE_GSP_FRAMEWORK)
 
-add_library(clgp SHARED ImageSource CvViewer Convolution)
-target_link_libraries(clgp cxcore highgui OpenCL)
+ADD_LIBRARY(clgp SHARED ImageSource.cpp CvViewer.cpp Convolution.cpp)
+TARGET_LINK_LIBRARIES(clgp ${OpenCL_LIBRARIES} ${OPENCV_LIBRARIES})
 
 #add_library(Incubator SHARED CustomSource ImageSource CvViewer OpticalFlow RenderVectorField)
 #target_link_libraries(Incubator cxcore highgui)
