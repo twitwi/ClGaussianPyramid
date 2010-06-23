@@ -43,10 +43,6 @@ public class JOCLConvolveOp implements BufferedImageOp {
     public static JOCLConvolveOp createGoodConvolution(Kernel kernel) {
         return create("../cl/GoodConvolution.cl", kernel);
     }
-    /**
-     * The name of the source file for the OpenCL kernel
-     */
-    private final String kernelSourceFileName;
 
     /**
      * Compute the value which is the smallest multiple
@@ -183,7 +179,6 @@ public class JOCLConvolveOp implements BufferedImageOp {
      * @param kernel The kernel to apply
      */
     public JOCLConvolveOp(String kernelSourceFileName, cl_context context, cl_command_queue commandQueue, Kernel kernel) {
-        this.kernelSourceFileName = kernelSourceFileName;
         this.context = context;
         this.commandQueue = commandQueue;
         this.kernel = kernel;
