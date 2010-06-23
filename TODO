@@ -1,0 +1,7 @@
+
+write a simple 2x downscale in opencl
+write (reuse/adapt) a proper convolution filter in opencl
+write a 2x downscale + convolve in opencl
+
+remanage host code to avoid going back and forth between CPU and GPU
+
