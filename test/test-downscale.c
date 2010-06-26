@@ -8,7 +8,7 @@
 
 #include <downscale.h>
 
-extern const char kernel_src[];
+extern const char clgp_downscale_kernel_src[];
 
 cl_context clgp_context;
 cl_command_queue clgp_queue;
@@ -28,7 +28,7 @@ main(int argc, char *argv[])
     cl_uint n_devs = 0;
     int mydevice = 0;
     cl_device_id device = 0;
-    char *source = (char *)kernel_src;
+    char *source = (char *)clgp_downscale_kernel_src;
     size_t source_size = 0;
     cl_program program = 0;
     char build_log[20000];

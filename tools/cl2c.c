@@ -44,7 +44,7 @@ main(int argc, char *argv[])
                 usage();
                 exit(0);
             case 'n':
-                outfile_path = optarg;
+                var_name = optarg;
                 break;
             case 'o':
                 outfile_path = optarg;
