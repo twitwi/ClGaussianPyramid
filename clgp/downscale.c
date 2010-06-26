@@ -25,7 +25,7 @@ clgp_downscale(
     cl_int err = CL_SUCCESS;
 
     clSetKernelArg(clgp_downscale_kernel, 0, sizeof(cl_mem), (void *)&downscaled_image);
-    clSetKernelArg(clgp_downscale_kernel, 0, sizeof(cl_mem), (void *)&input_image);
+    clSetKernelArg(clgp_downscale_kernel, 1, sizeof(cl_mem), (void *)&input_image);
     clFinish(clgp_queue);
 
     err = 
