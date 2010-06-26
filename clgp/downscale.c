@@ -19,8 +19,8 @@ clgp_downscale(
 
     local_work_size[0] = 16;
     local_work_size[1] = 16;
-    global_work_size[0] = (width/2-1) / local_work_size[0] + 1;
-    global_work_size[1] = (height/2-1) / local_work_size[1] + 1;
+    global_work_size[0] = ((width/2-1) / local_work_size[0] + 1)*16;
+    global_work_size[1] = ((height/2-1) / local_work_size[1] + 1)*16;
 
     cl_int err = CL_SUCCESS;
 
