@@ -2,10 +2,11 @@
 
 #include <CL/cl.h>
 
-extern cl_kernel clgp_downscale_kernel;
-
 extern cl_context clgp_context;
 extern cl_command_queue clgp_queue;
+
+extern cl_kernel clgp_downscale_kernel;
+
 
 void
 clgp_downscale(
