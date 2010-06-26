@@ -33,12 +33,12 @@ main(int argc, char *argv[])
     cl_program program = 0;
     char build_log[20000];
 
-    IplImage *input = NULL, *output = NULL, *tmp = NULL;
+    IplImage *scale1 = NULL, *scale2 = NULL, *scale4 = NULL, *tmp = NULL;
 
     cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1}; /* To update when we got image size */
-    cl_mem climage_input = 0, climage_output = 0;
+    cl_mem climage_scale1 = 0, climage_scale2 = 0, climage_scale4 = 0;
 
     /* OpenCL init, many should go in a clgp_init() function */
     /* Enumerate platforms */
@@ -127,116 +127,162 @@ main(int argc, char *argv[])
 
 
     /* Load image */
-    input = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
-    if (input == NULL) {
+    scale1 = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
+    if (scale1 == NULL) {
         fprintf(stderr, "Could not load file %s\n", argv[1]);
         exit(1);
     }
-    cvNamedWindow("input image", CV_WINDOW_AUTOSIZE);
-    cvShowImage("input image", input);
 
     /* Convert to an acceptable OpenCL format (we don't do {RGB, UINT8} */
     tmp = 
         cvCreateImage(
-                cvSize(input->width, input->height), 
-                input->depth, 
+                cvSize(scale1->width, scale1->height), 
+                scale1->depth, 
                 4);
-    cvCvtColor(input, tmp, CV_BGR2BGRA);
-    cvReleaseImage(&input);
-    input = tmp;
+    cvCvtColor(scale1, tmp, CV_BGR2BGRA);
+    cvReleaseImage(&scale1);
+    scale1 = tmp;
     tmp = NULL;
 
-    climage_input =
+    climage_scale1 =
         clCreateImage2D(
                 clgp_context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
-                input->width,
-                input->height,
+                scale1->width,
+                scale1->height,
                 0,
                 NULL,
                 &err);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not allocate climage_input\n");
+        fprintf(stderr, "Could not allocate climage_scale1\n");
         exit(1);
     }
 
-    climage_output =
+    climage_scale2 =
         clCreateImage2D(
                 clgp_context,
                 CL_MEM_WRITE_ONLY,
                 &imageformat,
-                input->width/2,
-                input->height/2,
+                scale1->width/2,
+                scale1->height/2,
                 0,
                 NULL,
                 &err);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not allocate climage_output\n");
+        fprintf(stderr, "Could not allocate climage_scale2\n");
         exit(1);
     }
 
-    region[0] = input->width;
-    region[1] = input->height;
+    climage_scale4 =
+        clCreateImage2D(
+                clgp_context,
+                CL_MEM_WRITE_ONLY,
+                &imageformat,
+                scale1->width/4,
+                scale1->height/4,
+                0,
+                NULL,
+                &err);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not allocate climage_scale4\n");
+        exit(1);
+    }
+
+    region[0] = scale1->width;
+    region[1] = scale1->height;
     err =
         clEnqueueWriteImage(
                 clgp_queue,
-                climage_input,
+                climage_scale1,
                 CL_TRUE,
                 origin,
                 region,
-                input->widthStep,
+                scale1->widthStep,
                 0,
-                input->imageData,
+                scale1->imageData,
                 0,
                 NULL,
                 NULL);
     clFinish(clgp_queue);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy input data on device (%i)\n", err);
+        fprintf(stderr, "Could not copy scale1 data on device (%i)\n", err);
         exit(1);
     }
 
 
     /* At last, call our downscale function */
     clgp_downscale(
-            climage_output, 
-            climage_input,
-            input->width,
-            input->height);
+            climage_scale2, 
+            climage_scale1,
+            scale1->width,
+            scale1->height);
+    clgp_downscale(
+            climage_scale4, 
+            climage_scale2,
+            scale1->width/2,
+            scale1->height/2);
 
 
-    /* Retrieve image */
-    output = 
+    /* Retrieve scale2 image */
+    scale2 = 
         cvCreateImage(
-                cvSize(input->width/2, input->height/2), 
-                input->depth, 
+                cvSize(scale1->width/2, scale1->height/2), 
+                scale1->depth, 
                 4);
-    region[0] = output->width;
-    region[1] = output->height;
+    region[0] = scale2->width;
+    region[1] = scale2->height;
     err = 
         clEnqueueReadImage(
                 clgp_queue,
-                climage_output,
+                climage_scale2,
                 CL_TRUE,
                 origin,
                 region,
-                output->widthStep,
+                scale2->widthStep,
                 0,
-                output->imageData,
+                scale2->imageData,
                 0,
                 NULL,
                 NULL);
     clFinish(clgp_queue);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy output data on host (%i)\n", err);
+        fprintf(stderr, "Could not copy scale2 data on host (%i)\n", err);
+        exit(1);
+    }
+
+    /* Retrieve scale4 image */
+    scale4 = 
+        cvCreateImage(
+                cvSize(scale1->width/4, scale1->height/4), 
+                scale1->depth, 
+                4);
+    region[0] = scale4->width;
+    region[1] = scale4->height;
+    err = 
+        clEnqueueReadImage(
+                clgp_queue,
+                climage_scale4,
+                CL_TRUE,
+                origin,
+                region,
+                scale4->widthStep,
+                0,
+                scale4->imageData,
+                0,
+                NULL,
+                NULL);
+    clFinish(clgp_queue);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not copy scale4 data on host (%i)\n", err);
         exit(1);
     }
 
 
     /* Release device ressources */
-    clReleaseMemObject(climage_input);
-    clReleaseMemObject(climage_output);
+    clReleaseMemObject(climage_scale1);
+    clReleaseMemObject(climage_scale2);
+    clReleaseMemObject(climage_scale4);
 
     clReleaseKernel(clgp_downscale_kernel);
     clReleaseProgram(program);
@@ -245,14 +291,20 @@ main(int argc, char *argv[])
 
 
     /* Show results */
-    cvNamedWindow("output image", CV_WINDOW_AUTOSIZE);
-    cvShowImage("output image", output);
+    cvNamedWindow("scale1 image", CV_WINDOW_AUTOSIZE);
+    cvShowImage("scale1 image", scale1);
+    cvNamedWindow("scale2 image", CV_WINDOW_AUTOSIZE);
+    cvShowImage("scale2 image", scale2);
+    cvNamedWindow("scale4 image", CV_WINDOW_AUTOSIZE);
+    cvShowImage("scale4 image", scale4);
     cvWaitKey(0);
-    cvDestroyWindow("input image");
-    cvDestroyWindow("output image");
+    cvDestroyWindow("scale1 image");
+    cvDestroyWindow("scale2 image");
+    cvDestroyWindow("scale4 image");
 
-    cvReleaseImage(&input);
-    cvReleaseImage(&output);
+    cvReleaseImage(&scale1);
+    cvReleaseImage(&scale2);
+    cvReleaseImage(&scale4);
 
     return 0;
 }
