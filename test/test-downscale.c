@@ -6,14 +6,9 @@
 #include <cv.h>
 #include <highgui.h>
 
+#include <clgp.h>
 #include <downscale.h>
 
-extern const char clgp_downscale_kernel_src[];
-
-cl_context clgp_context;
-cl_command_queue clgp_queue;
-
-cl_kernel clgp_downscale_kernel;
 
 int 
 main(int argc, char *argv[])
@@ -28,10 +23,8 @@ main(int argc, char *argv[])
     cl_uint n_devs = 0;
     int mydevice = 0;
     cl_device_id device = 0;
-    char *source = (char *)clgp_downscale_kernel_src;
-    size_t source_size = 0;
-    cl_program program = 0;
-    char build_log[20000];
+    cl_context context = 0;
+    cl_command_queue queue = 0;
 
     IplImage *scale1 = NULL, *scale2 = NULL, *scale4 = NULL, *tmp = NULL;
 
@@ -75,56 +68,26 @@ main(int argc, char *argv[])
     /* Choose a device */
     device = devices[mydevice];
 
-    /* Create a clgp_context on this device */
-    clgp_context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
+    /* Create a context on this device */
+    context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not create a clgp_context for the device\n");
+        fprintf(stderr, "Could not create a context for the device\n");
         exit(1);
     }
 
-    /* Create command clgp_queue associated with the clgp_context */
-    clgp_queue = clCreateCommandQueue(clgp_context, device, 0, &err);
+    /* Create a command queue for the library */
+    queue = clCreateCommandQueue(context, device, 0, &err);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Error: could not create command clgp_queue\n");
+        fprintf(stderr, "Could not create a command queue for the device\n");
         exit(1);
     }
 
-    /* Create the program object */
-    program =
-        clCreateProgramWithSource(
-                clgp_context,
-                1,
-                (char const **)&source,
-                NULL,
-                &err);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr,
-                "Could not create the program: openCL internal error\n");
+
+    /* Initialize the clgp library */
+    if (clgp_init(context, queue) != 0) {
+        fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
-
-    /* Try to build the program */
-    err =
-        clBuildProgram(program, 0, NULL, "", NULL, NULL);
-    if (err != CL_SUCCESS) {
-        clGetProgramBuildInfo(
-                program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, "== Build errors ==\n%s\n", build_log);
-        exit(1);
-    }
-
-    /* Get the downscale kernel */
-    clgp_downscale_kernel = clCreateKernel(program, "downscale", &err);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, "Error: downscale kernel not found\n");
-        exit(1);
-    }
-
 
     /* Load image */
     scale1 = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
@@ -146,7 +109,7 @@ main(int argc, char *argv[])
 
     climage_scale1 =
         clCreateImage2D(
-                clgp_context,
+                context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
                 scale1->width,
@@ -161,7 +124,7 @@ main(int argc, char *argv[])
 
     climage_scale2 =
         clCreateImage2D(
-                clgp_context,
+                context,
                 CL_MEM_WRITE_ONLY,
                 &imageformat,
                 scale1->width/2,
@@ -176,7 +139,7 @@ main(int argc, char *argv[])
 
     climage_scale4 =
         clCreateImage2D(
-                clgp_context,
+                context,
                 CL_MEM_WRITE_ONLY,
                 &imageformat,
                 scale1->width/4,
@@ -193,7 +156,7 @@ main(int argc, char *argv[])
     region[1] = scale1->height;
     err =
         clEnqueueWriteImage(
-                clgp_queue,
+                queue,
                 climage_scale1,
                 CL_TRUE,
                 origin,
@@ -204,7 +167,7 @@ main(int argc, char *argv[])
                 0,
                 NULL,
                 NULL);
-    clFinish(clgp_queue);
+    clFinish(queue);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not copy scale1 data on device (%i)\n", err);
         exit(1);
@@ -234,7 +197,7 @@ main(int argc, char *argv[])
     region[1] = scale2->height;
     err = 
         clEnqueueReadImage(
-                clgp_queue,
+                queue,
                 climage_scale2,
                 CL_TRUE,
                 origin,
@@ -245,7 +208,7 @@ main(int argc, char *argv[])
                 0,
                 NULL,
                 NULL);
-    clFinish(clgp_queue);
+    clFinish(queue);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not copy scale2 data on host (%i)\n", err);
         exit(1);
@@ -261,7 +224,7 @@ main(int argc, char *argv[])
     region[1] = scale4->height;
     err = 
         clEnqueueReadImage(
-                clgp_queue,
+                queue,
                 climage_scale4,
                 CL_TRUE,
                 origin,
@@ -272,11 +235,15 @@ main(int argc, char *argv[])
                 0,
                 NULL,
                 NULL);
-    clFinish(clgp_queue);
+    clFinish(queue);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not copy scale4 data on host (%i)\n", err);
         exit(1);
     }
+
+
+    /* Release the clgp library */
+    clgp_release();
 
 
     /* Release device ressources */
@@ -284,10 +251,8 @@ main(int argc, char *argv[])
     clReleaseMemObject(climage_scale2);
     clReleaseMemObject(climage_scale4);
 
-    clReleaseKernel(clgp_downscale_kernel);
-    clReleaseProgram(program);
-    clReleaseCommandQueue(clgp_queue);
-    clReleaseContext(clgp_context);
+    clReleaseContext(context);
+    clReleaseCommandQueue(queue);
 
 
     /* Show results */

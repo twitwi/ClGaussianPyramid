@@ -15,7 +15,7 @@ FOREACH(CL_SRC ${CL_SRCS})
   SET(CL_C_SRCS ${CL_C_SRCS} "${CL_SRC}.c")
 ENDFOREACH(CL_SRC ${CL_SRCS})
 
-ADD_LIBRARY(clgp SHARED downscale.c ${CL_C_SRCS})
+ADD_LIBRARY(clgp SHARED downscale.c downscale.h clgp.c clgp.h ${CL_C_SRCS})
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
 
 #add_definitions(-DPASSIVE_GSP_FRAMEWORK)
