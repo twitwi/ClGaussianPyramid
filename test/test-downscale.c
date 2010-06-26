@@ -35,7 +35,7 @@ main(int argc, char *argv[])
 
     IplImage *input = NULL, *output = NULL, *tmp = NULL;
 
-    cl_image_format imageformat = {CL_RGBA, CL_UNSIGNED_INT8};
+    cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1}; /* To update when we got image size */
     cl_mem climage_input = 0, climage_output = 0;
@@ -141,7 +141,7 @@ main(int argc, char *argv[])
                 cvSize(input->width, input->height), 
                 input->depth, 
                 4);
-    cvCvtColor(input, tmp, CV_BGR2RGBA);
+    cvCvtColor(input, tmp, CV_BGR2BGRA);
     cvReleaseImage(&input);
     input = tmp;
     tmp = NULL;
