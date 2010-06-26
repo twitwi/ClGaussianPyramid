@@ -87,6 +87,7 @@ main(int argc, char *argv[])
             fprintf(outfile, "\n\t");
         }
     }
+    fprintf(outfile, "0x00");
     fprintf(outfile, "\n};\n\n");
     fprintf(outfile, "%s", outfile_end);
 
