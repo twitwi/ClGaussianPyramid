@@ -14,7 +14,10 @@ downscale(
 
     int4 c;
 
-    c = read_imageui(input_image, sampler, (int2)(x_in_input, y_in_input));
+    c = read_imageui(
+            input_image, 
+            sampler, 
+            (float2)(x_in_input+0.5f, y_in_input+0.5f));
     write_imageui(downscaled_image, (int2)(x_in_output, y_in_output), c);
 }
 
