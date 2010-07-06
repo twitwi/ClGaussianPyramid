@@ -18,7 +18,6 @@ ENDFOREACH(CL_SRC ${CL_SRCS})
 ADD_LIBRARY(clgp SHARED downscale.c downscale.h clgp.c clgp.h ${CL_C_SRCS})
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
 
-#add_definitions(-DPASSIVE_GSP_FRAMEWORK)
 
 #ADD_LIBRARY(clgp SHARED ImageSource.cpp CvViewer.cpp Convolution.cpp)
 #TARGET_LINK_LIBRARIES(clgp ${OpenCL_LIBRARIES} ${OPENCV_LIBRARIES})
