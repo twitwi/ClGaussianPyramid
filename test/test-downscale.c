@@ -26,7 +26,7 @@ main(int argc, char *argv[])
     cl_context context = 0;
     cl_command_queue queue = 0;
 
-    IplImage *scale1 = NULL, *scale2 = NULL, *scale4 = NULL, *tmp = NULL;
+    IplImage *input = NULL, *tmp = NULL, *output = NULL;
 
     cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
@@ -90,8 +90,8 @@ main(int argc, char *argv[])
     }
 
     /* Load image */
-    scale1 = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
-    if (scale1 == NULL) {
+    input = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
+    if (input == NULL) {
         fprintf(stderr, "Could not load file %s\n", argv[1]);
         exit(1);
     }
@@ -99,12 +99,12 @@ main(int argc, char *argv[])
     /* Convert to an acceptable OpenCL format (we don't do {RGB, UINT8} */
     tmp = 
         cvCreateImage(
-                cvSize(scale1->width, scale1->height), 
-                scale1->depth, 
+                cvSize(input->width, input->height), 
+                input->depth, 
                 4);
-    cvCvtColor(scale1, tmp, CV_BGR2BGRA);
-    cvReleaseImage(&scale1);
-    scale1 = tmp;
+    cvCvtColor(input, tmp, CV_BGR2BGRA);
+    cvReleaseImage(&input);
+    input = tmp;
     tmp = NULL;
 
     climage_scale1 =
@@ -112,8 +112,8 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
-                scale1->width,
-                scale1->height,
+                input->width,
+                input->height,
                 0,
                 NULL,
                 &err);
@@ -127,8 +127,8 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_WRITE_ONLY,
                 &imageformat,
-                scale1->width/2,
-                scale1->height/2,
+                input->width/2,
+                input->height/2,
                 0,
                 NULL,
                 &err);
@@ -142,8 +142,8 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_WRITE_ONLY,
                 &imageformat,
-                scale1->width/4,
-                scale1->height/4,
+                input->width/4,
+                input->height/4,
                 0,
                 NULL,
                 &err);
@@ -152,8 +152,8 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    region[0] = scale1->width;
-    region[1] = scale1->height;
+    region[0] = input->width;
+    region[1] = input->height;
     err =
         clEnqueueWriteImage(
                 queue,
@@ -161,15 +161,15 @@ main(int argc, char *argv[])
                 CL_TRUE,
                 origin,
                 region,
-                scale1->widthStep,
+                input->widthStep,
                 0,
-                scale1->imageData,
+                input->imageData,
                 0,
                 NULL,
                 NULL);
     clFinish(queue);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy scale1 data on device (%i)\n", err);
+        fprintf(stderr, "Could not copy input data on device (%i)\n", err);
         exit(1);
     }
 
@@ -178,23 +178,47 @@ main(int argc, char *argv[])
     clgp_downscale(
             climage_scale2, 
             climage_scale1,
-            scale1->width,
-            scale1->height);
+            input->width,
+            input->height);
     clgp_downscale(
             climage_scale4, 
             climage_scale2,
-            scale1->width/2,
-            scale1->height/2);
+            input->width/2,
+            input->height/2);
 
+
+    /* Create output image */
+    output = 
+        cvCreateImage(
+                cvSize(input->width*1.5, input->height),
+                input->depth, 
+                4);
+
+    /* Retrieve input image -- to see if the GPU did not corrupt it */
+    region[0] = input->width;
+    region[1] = input->height;
+    err = 
+        clEnqueueReadImage(
+                queue,
+                climage_scale1,
+                CL_TRUE,
+                origin,
+                region,
+                output->widthStep,
+                0,
+                output->imageData,
+                0,
+                NULL,
+                NULL);
+    clFinish(queue);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not copy input data on host (%i)\n", err);
+        exit(1);
+    }
 
     /* Retrieve scale2 image */
-    scale2 = 
-        cvCreateImage(
-                cvSize(scale1->width/2, scale1->height/2), 
-                scale1->depth, 
-                4);
-    region[0] = scale2->width;
-    region[1] = scale2->height;
+    region[0] = input->width/2;
+    region[1] = input->height/2;
     err = 
         clEnqueueReadImage(
                 queue,
@@ -202,9 +226,9 @@ main(int argc, char *argv[])
                 CL_TRUE,
                 origin,
                 region,
-                scale2->widthStep,
+                output->widthStep,
                 0,
-                scale2->imageData,
+                ((char *)output->imageData + input->width*4),
                 0,
                 NULL,
                 NULL);
@@ -215,13 +239,8 @@ main(int argc, char *argv[])
     }
 
     /* Retrieve scale4 image */
-    scale4 = 
-        cvCreateImage(
-                cvSize(scale1->width/4, scale1->height/4), 
-                scale1->depth, 
-                4);
-    region[0] = scale4->width;
-    region[1] = scale4->height;
+    region[0] = input->width/4;
+    region[1] = input->height/4;
     err = 
         clEnqueueReadImage(
                 queue,
@@ -229,9 +248,9 @@ main(int argc, char *argv[])
                 CL_TRUE,
                 origin,
                 region,
-                scale4->widthStep,
+                output->widthStep,
                 0,
-                scale4->imageData,
+                ((char *)output->imageData + (input->height/2)*output->widthStep + input->width*4),
                 0,
                 NULL,
                 NULL);
@@ -256,20 +275,13 @@ main(int argc, char *argv[])
 
 
     /* Show results */
-    cvNamedWindow("scale1 image", CV_WINDOW_AUTOSIZE);
-    cvShowImage("scale1 image", scale1);
-    cvNamedWindow("scale2 image", CV_WINDOW_AUTOSIZE);
-    cvShowImage("scale2 image", scale2);
-    cvNamedWindow("scale4 image", CV_WINDOW_AUTOSIZE);
-    cvShowImage("scale4 image", scale4);
+    cvNamedWindow("downscaling", CV_WINDOW_AUTOSIZE);
+    cvShowImage("downscaling", output);
     cvWaitKey(0);
-    cvDestroyWindow("scale1 image");
-    cvDestroyWindow("scale2 image");
-    cvDestroyWindow("scale4 image");
+    cvDestroyWindow("downscaling");
 
-    cvReleaseImage(&scale1);
-    cvReleaseImage(&scale2);
-    cvReleaseImage(&scale4);
+    cvReleaseImage(&input);
+    cvReleaseImage(&output);
 
     return 0;
 }
