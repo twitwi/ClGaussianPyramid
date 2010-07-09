@@ -31,7 +31,7 @@ main(int argc, char *argv[])
     cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1}; /* To update when we got image size */
-    cl_mem climage_scale1 = 0, climage_scale2 = 0, climage_scale4 = 0;
+    cl_mem climage_scale1 = 0, climage_scale2 = 0, climage_scale4 = 0, climage_scale8 = 0;
 
     /* OpenCL init, many should go in a clgp_init() function */
     /* Enumerate platforms */
@@ -152,6 +152,21 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    climage_scale8 =
+        clCreateImage2D(
+                context,
+                CL_MEM_WRITE_ONLY,
+                &imageformat,
+                input->width/8,
+                input->height/8,
+                0,
+                NULL,
+                &err);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not allocate climage_scale8\n");
+        exit(1);
+    }
+
     region[0] = input->width;
     region[1] = input->height;
     err =
@@ -185,6 +200,11 @@ main(int argc, char *argv[])
             climage_scale2,
             input->width/2,
             input->height/2);
+    clgp_downscale(
+            climage_scale8, 
+            climage_scale4,
+            input->width/4,
+            input->height/4);
 
 
     /* Create output image */
@@ -260,6 +280,28 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+    /* Retrieve scale2 image */
+    region[0] = input->width/8;
+    region[1] = input->height/8;
+    err = 
+        clEnqueueReadImage(
+                queue,
+                climage_scale8,
+                CL_TRUE,
+                origin,
+                region,
+                output->widthStep,
+                0,
+                ((char *)output->imageData + (input->height/2 + input->height/4)*output->widthStep + input->width*4),
+                0,
+                NULL,
+                NULL);
+    clFinish(queue);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not copy scale8 data on host (%i)\n", err);
+        exit(1);
+    }
+
 
     /* Release the clgp library */
     clgp_release();
@@ -269,6 +311,7 @@ main(int argc, char *argv[])
     clReleaseMemObject(climage_scale1);
     clReleaseMemObject(climage_scale2);
     clReleaseMemObject(climage_scale4);
+    clReleaseMemObject(climage_scale8);
 
     clReleaseContext(context);
     clReleaseCommandQueue(queue);
