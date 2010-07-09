@@ -6,6 +6,6 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ADD_EXECUTABLE(test-downscale test-downscale.c)
 TARGET_LINK_LIBRARIES(test-downscale clgp ${OpenCV_LIBRARIES})
 
-#add_executable(test-box test-box)
-#target_link_libraries(optical-flow Incubator)
+ADD_EXECUTABLE(test-convolution test-convolution.c)
+TARGET_LINK_LIBRARIES(test-convolution clgp ${OpenCV_LIBRARIES})
 

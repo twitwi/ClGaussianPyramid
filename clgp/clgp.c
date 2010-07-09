@@ -15,7 +15,9 @@ cl_program clgp_downscale_program;
 cl_kernel clgp_downscale_kernel;
 
 /* Ressources for the convolution */
-/* ... */
+extern const char clgp_convolution_kernel_src[];
+cl_program clgp_convolution_program;
+cl_kernel clgp_convolution_kernel;
 
 void clgp_release();
 
@@ -89,7 +91,53 @@ clgp_init(cl_context context, cl_command_queue queue)
         goto end;
     }
     /* Convolution */
-    /* ... */
+    source = (char *)clgp_convolution_kernel_src;
+    clgp_convolution_program =
+        clCreateProgramWithSource(
+                context,
+                1,
+                (char const **)&source,
+                NULL,
+                &cl_err);
+    if (cl_err != CL_SUCCESS) {
+        fprintf(stderr,
+                "Could not create the clgp_convolution program\n");
+        clgp_err = -1;
+        goto end;
+    }
+    cl_err =
+        clBuildProgram(clgp_convolution_program, 0, NULL, "", NULL, NULL);
+    if (cl_err != CL_SUCCESS) {
+#ifdef DEBUG
+        clGetContextInfo(
+                context,
+                CL_CONTEXT_DEVICES,
+                1,
+                &device,
+                NULL);
+        clGetProgramBuildInfo(
+                clgp_convolution_program,
+                device,
+                CL_PROGRAM_BUILD_LOG,
+                sizeof(build_log),
+                build_log,
+                NULL);
+        fprintf(stderr, 
+                "Could not build the clgp_convolution program\n%s\n", build_log);
+#else
+        fprintf(stderr,
+                "Could not build the clgp_convolution program\n");
+#endif
+        clgp_err = -1;
+        goto end;
+    }
+    clgp_convolution_kernel = 
+        clCreateKernel(clgp_convolution_program, "convolution", &cl_err);
+    if (cl_err != CL_SUCCESS) {
+        fprintf(stderr, "Error: convolution kernel not found\n");
+        clgp_err = -1;
+        goto end;
+    }
 
     clgp_context = context;
     clgp_queue = queue;
