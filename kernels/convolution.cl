@@ -27,7 +27,7 @@ convolution(
     int y = get_global_id(1);
     int i, j;
 
-    float4 c = 0.f;
+    float4 c = (float4)0.f;
     
     for (j = 0; j < 5; j++) { /* Manual unloop? */
         for (i = 0; i < 5; i++) { /* Manual unloop? */
