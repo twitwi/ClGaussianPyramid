@@ -9,3 +9,6 @@ TARGET_LINK_LIBRARIES(test-downscale clgp ${OpenCV_LIBRARIES})
 ADD_EXECUTABLE(test-convolution test-convolution.c)
 TARGET_LINK_LIBRARIES(test-convolution clgp ${OpenCV_LIBRARIES})
 
+ADD_EXECUTABLE(test-pyramid test-pyramid.c)
+TARGET_LINK_LIBRARIES(test-pyramid clgp m ${OpenCV_LIBRARIES})
+

@@ -13,6 +13,17 @@ clgp_init(cl_context context, cl_command_queue queue);
 void
 clgp_release();
 
+int
+clgp_maxscale(int width, int height);
+
+int
+clgp_pyramid(
+        cl_mem *pyramid_images,
+        cl_mem input_image,
+        int width,
+        int height,
+        int maxscale);
+
 #ifdef __cplusplus
 }
 #endif
