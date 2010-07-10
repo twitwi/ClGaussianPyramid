@@ -194,17 +194,20 @@ main(int argc, char *argv[])
             climage_scale2, 
             climage_scale1,
             input->width,
-            input->height);
+            input->height,
+            1);
     clgp_downscale(
             climage_scale4, 
-            climage_scale2,
-            input->width/2,
-            input->height/2);
+            climage_scale1,
+            input->width,
+            input->height,
+            2);
     clgp_downscale(
             climage_scale8, 
-            climage_scale4,
-            input->width/4,
-            input->height/4);
+            climage_scale1,
+            input->width,
+            input->height,
+            3);
 
 
     /* Create output image */

@@ -216,8 +216,9 @@ clgp_pyramid(
         clgp_downscale(
                 pyramid_images[scale+1], 
                 pyramid_images[scale], 
-                width/(1<<scale),
-                height/(1<<scale));
+                width,
+                height,
+                1);
     }
 
     /* Now the convolution */
