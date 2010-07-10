@@ -190,47 +190,59 @@ clgp_pyramid(
         int height,
         int maxscale)
 {
+    cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {width, height, 1};
+    cl_mem tmp_image = 0;
 
     int scale = 0;
 
     cl_int cl_err;
 
-    /* First do the downscales */
-    if (scale < maxscale) {
-        cl_err =
-            clEnqueueCopyImage(
-                    clgp_queue,
-                    input_image,
-                    pyramid_images[0],
-                    origin,
-                    origin,
-                    region,
-                    0,
-                    NULL,
-                    NULL);
-        clFinish(clgp_queue);
-    }
-    for (scale = 0; scale < maxscale; scale++) {
-        clgp_downscale(
-                pyramid_images[scale+1], 
-                pyramid_images[scale], 
+    /* Allocate a temporary image to store reduced images before convolution */
+    tmp_image =
+        clCreateImage2D(
+                clgp_context,
+                CL_MEM_READ_WRITE,
+                &imageformat,
                 width,
                 height,
-                1);
+                0,
+                NULL,
+                &cl_err);
+    if (cl_err != CL_SUCCESS) {
+        fprintf(stderr, "Could not allocate tmp_image\n");
     }
 
-    /* Now the convolution */
+    /* Compute the pyramid */
+    cl_err =
+        clEnqueueCopyImage(
+                clgp_queue,
+                input_image,
+                tmp_image,
+                origin,
+                origin,
+                region,
+                0,
+                NULL,
+                NULL);
+    clFinish(clgp_queue);
     for (scale = 0; scale < maxscale; scale++) {
-/*
+        clgp_downscale(
+                tmp_image, 
+                input_image, 
+                width,
+                height,
+                scale);
         clgp_convolution(
                 pyramid_images[scale], 
                 tmp_image,
                 width/(1<<scale),
                 height/(1<<scale));
-*/
     }
+
+    clReleaseMemObject(tmp_image);
 
     return 0;
 }
+
