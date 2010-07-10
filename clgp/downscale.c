@@ -24,8 +24,6 @@ clgp_downscale(
     global_work_size[0] = ((width/(1<<scale)-1) / local_work_size[0] + 1)*16;
     global_work_size[1] = ((height/(1<<scale)-1) / local_work_size[1] + 1)*16;
 
-    printf("global_work_size = {%i, %i}\n", global_work_size[0], global_work_size[1]);
-
     cl_int err = CL_SUCCESS;
 
     clSetKernelArg(clgp_downscale_kernel, 0, sizeof(cl_mem), (void *)&downscaled_image);
