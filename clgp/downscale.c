@@ -13,20 +13,24 @@ clgp_downscale(
         cl_mem downscaled_image, 
         cl_mem input_image,
         int width,
-        int height)
+        int height,
+        int scale)
 {
     size_t local_work_size[2];
     size_t global_work_size[2];
 
     local_work_size[0] = 16;
     local_work_size[1] = 16;
-    global_work_size[0] = ((width/2-1) / local_work_size[0] + 1)*16;
-    global_work_size[1] = ((height/2-1) / local_work_size[1] + 1)*16;
+    global_work_size[0] = ((width/(1<<scale)-1) / local_work_size[0] + 1)*16;
+    global_work_size[1] = ((height/(1<<scale)-1) / local_work_size[1] + 1)*16;
+
+    printf("global_work_size = {%i, %i}\n", global_work_size[0], global_work_size[1]);
 
     cl_int err = CL_SUCCESS;
 
     clSetKernelArg(clgp_downscale_kernel, 0, sizeof(cl_mem), (void *)&downscaled_image);
     clSetKernelArg(clgp_downscale_kernel, 1, sizeof(cl_mem), (void *)&input_image);
+    clSetKernelArg(clgp_downscale_kernel, 2, sizeof(int), &scale);
     clFinish(clgp_queue);
 
     err = 

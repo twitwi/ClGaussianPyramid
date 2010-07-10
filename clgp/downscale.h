@@ -12,7 +12,8 @@ clgp_downscale(
         cl_mem downscaled_image, 
         cl_mem input_image,
         int width,
-        int height);
+        int height,
+        int scale);
 
 #ifdef __cplusplus
 }
