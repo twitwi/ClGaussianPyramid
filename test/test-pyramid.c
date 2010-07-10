@@ -13,22 +13,7 @@
 #define SCALE_OFFSET_X(scale, width, height) \
     ((scale != 0)*width)
 #define SCALE_OFFSET_Y(scale, width, height) \
-    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) /* Make libcuda.so segfault????? */
-
-int scale_offset_y(int scale, int width, int height) /* Tmp replacement */
-{
-    float res = 0.f;
-
-    if (scale < 2) {
-        return 0;
-    }
-
-    for (int s = 2; s <= scale; s++) {
-        res += height/(1<<(s-1));
-    }
-
-    return (int)res;
-}
+    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
 
 int
 main(int argc, char *argv[])
@@ -219,7 +204,7 @@ main(int argc, char *argv[])
                     region,
                     output->widthStep,
                     0,
-                    ((char *)output->imageData + SCALE_OFFSET_X(scale, input->width, input->height)*4 + scale_offset_y(scale, input->width, input->height)*output->widthStep),
+                    ((char *)output->imageData + SCALE_OFFSET_X(scale, input->width, input->height)*4 + SCALE_OFFSET_Y(scale, input->width, input->height)*output->widthStep),
                     0,
                     NULL,
                     NULL);
