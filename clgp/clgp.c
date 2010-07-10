@@ -6,6 +6,10 @@
 #include "convolution.h"
 #include "downscale.h"
 
+#ifndef CLFLAGS
+# define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
+#endif
+
 /* Global variables for the library */
 /* The context the library will use, for now allow only one instance related
  * to one context. */
@@ -62,7 +66,7 @@ clgp_init(cl_context context, cl_command_queue queue)
         goto end;
     }
     cl_err =
-        clBuildProgram(clgp_downscale_program, 0, NULL, "", NULL, NULL);
+        clBuildProgram(clgp_downscale_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (cl_err != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
@@ -110,7 +114,7 @@ clgp_init(cl_context context, cl_command_queue queue)
         goto end;
     }
     cl_err =
-        clBuildProgram(clgp_convolution_program, 0, NULL, "", NULL, NULL);
+        clBuildProgram(clgp_convolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (cl_err != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
