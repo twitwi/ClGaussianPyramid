@@ -1,6 +1,10 @@
+#include <math.h>
 #include <stdio.h>
 
 #include <CL/cl.h>
+
+#include "convolution.h"
+#include "downscale.h"
 
 /* Global variables for the library */
 /* The context the library will use, for now allow only one instance related
@@ -165,3 +169,67 @@ clgp_release()
     }
 }
 
+/* Util function to get the max scale for an image */
+int
+clgp_maxscale(int width, int height)
+{
+    /* 32x32 is the pratical min size of reduced image because we use 16x16
+     * NDRange... To get around this limitation, we could trigger smaller 
+     * sizes in downscale/convolution functions when width or height 
+     * reach that limit (TODO) */ 
+    return (int)log2f((float)((width > height) ? width : height)/32.f) + 1;
+}
+
+/* Build an array of images that are the different layers of the gaussian
+ * pyramid */
+int
+clgp_pyramid(
+        cl_mem *pyramid_images,
+        cl_mem input_image,
+        int width,
+        int height,
+        int maxscale)
+{
+    size_t origin[3] = {0, 0, 0};
+    size_t region[3] = {width, height, 1};
+
+    int scale = 0;
+
+    cl_int cl_err;
+
+    /* First do the downscales */
+    if (scale < maxscale) {
+        cl_err =
+            clEnqueueCopyImage(
+                    clgp_queue,
+                    input_image,
+                    pyramid_images[0],
+                    origin,
+                    origin,
+                    region,
+                    0,
+                    NULL,
+                    NULL);
+        clFinish(clgp_queue);
+    }
+    for (scale = 0; scale < maxscale; scale++) {
+        clgp_downscale(
+                pyramid_images[scale+1], 
+                pyramid_images[scale], 
+                width/(1<<scale),
+                height/(1<<scale));
+    }
+
+    /* Now the convolution */
+    for (scale = 0; scale < maxscale; scale++) {
+/*
+        clgp_convolution(
+                pyramid_images[scale], 
+                tmp_image,
+                width/(1<<scale),
+                height/(1<<scale));
+*/
+    }
+
+    return 0;
+}
