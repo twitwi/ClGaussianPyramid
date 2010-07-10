@@ -31,7 +31,7 @@ convolution(
     
     for (j = 0; j < 5; j++) { /* Manual unloop? */
         for (i = 0; i < 5; i++) { /* Manual unloop? */
-            c += convert_float4(read_imageui(input_image, sampler, (float2)(x-2.5+i, y+2.5+j))) * mask[i][j];
+            c += convert_float4(read_imageui(input_image, sampler, (float2)(x-2.5+i, y-2.5+j))) * mask[i][j];
         }
     }
 
