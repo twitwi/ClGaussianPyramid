@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #include <CL/cl.h>
 
@@ -53,6 +54,8 @@ main(int argc, char *argv[])
     cl_mem climage_input, climage_pyramid[16];
     
     int scale = 0, maxscale = 0;
+
+    struct timeval start, stop;
 
     /* OpenCL init, many should go in a clgp_init() function */
     /* Enumerate platforms */
@@ -184,12 +187,16 @@ main(int argc, char *argv[])
 
 
     /* At last, call our pyramid function */
+    gettimeofday(&start, NULL);
     clgp_pyramid(
             climage_pyramid, 
             climage_input, 
             input->width, 
             input->height, 
             maxscale);
+    gettimeofday(&stop, NULL);
+    printf(" - Done in %f ms\n", 
+            (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
 
 
     /* Create output image */
