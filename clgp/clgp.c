@@ -127,7 +127,7 @@ clgp_maxscale(int width, int height)
      * NDRange... To get around this limitation, we could trigger smaller 
      * sizes downscaled convolution functions when width or height 
      * reach that limit (TODO) */ 
-    return (int)log2f((float)((width > height) ? width : height)/32.f) + 1;
+    return (int)log2f((float)((width > height) ? width : height)/16.f) + 1;
 }
 
 /* Build an array of images that are the different layers of the gaussian
