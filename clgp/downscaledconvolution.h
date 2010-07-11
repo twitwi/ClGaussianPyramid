@@ -7,7 +7,7 @@ extern "C" {
 
 #include <CL/cl.h>
 
-void
+int
 clgp_downscaledconvolution(
         cl_mem convoluted_image, 
         cl_mem input_image,
@@ -19,5 +19,5 @@ clgp_downscaledconvolution(
 }
 #endif
 
-#endif /* ndef _CLGP_CONVOLUTION_H */
+#endif /* ndef _CLGP_CONVOLUTION_H_ */
 

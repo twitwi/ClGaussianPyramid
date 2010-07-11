@@ -4,10 +4,13 @@
 #include <CL/cl.h>
 
 #include "downscaledconvolution.h"
+#include "error.h"
 
 #ifndef CLFLAGS
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
 #endif
+
+extern cl_int clgp_clerr;
 
 /* Global variables for the library */
 /* The context the library will use, for now allow only one instance related
@@ -28,8 +31,7 @@ void clgp_release();
 int
 clgp_init(cl_context context, cl_command_queue queue)
 {
-    cl_int cl_err = 0;
-    int clgp_err = 0;
+    int err = 0;
 
     char *source = NULL;
 
@@ -50,16 +52,16 @@ clgp_init(cl_context context, cl_command_queue queue)
                 1,
                 (char const **)&source,
                 NULL,
-                &cl_err);
-    if (cl_err != CL_SUCCESS) {
+                &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
                 "Could not create the clgp_downscaledconvolution program\n");
-        clgp_err = -1;
+        err = CLGP_CL_ERROR;
         goto end;
     }
-    cl_err =
+    clgp_clerr =
         clBuildProgram(clgp_downscaledconvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (cl_err != CL_SUCCESS) {
+    if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
                 context,
@@ -80,24 +82,24 @@ clgp_init(cl_context context, cl_command_queue queue)
         fprintf(stderr,
                 "Could not build the clgp_downscaledconvolution program\n");
 #endif
-        clgp_err = -1;
+        err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_downscaledconvolution_kernel = 
-        clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &cl_err);
-    if (cl_err != CL_SUCCESS) {
+        clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "Error: downscaledconvolution kernel not found\n");
-        clgp_err = -1;
+        err = CLGP_CL_ERROR;
         goto end;
     }
 
     clgp_context = context;
     clgp_queue = queue;
 end:
-    if (clgp_err != 0) {
+    if (err != 0) {
         clgp_release();
     }
-    return clgp_err;
+    return err;
 }
 
 /* Release the ressources used by the library, this do NOT destroy the context 
@@ -138,25 +140,27 @@ clgp_pyramid(
         int height,
         int maxscale)
 {
-    cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
+    int err = 0;
+
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {width, height, 1};
-    cl_mem tmp_image = 0;
 
     int scale = 0;
 
-    cl_int cl_err;
-
     /* Compute the pyramid */
     for (scale = 0; scale < maxscale; scale++) {
-        clgp_downscaledconvolution(
-                pyramid_images[scale], 
-                input_image,
-                width,
-                height,
-                scale);
+        err = 
+            clgp_downscaledconvolution(
+                    pyramid_images[scale], 
+                    input_image,
+                    width,
+                    height,
+                    scale);
+        if (err != 0) {
+            break;
+        }
     }
 
-    return 0;
+    return err;
 }
 

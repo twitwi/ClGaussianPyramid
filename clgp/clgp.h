@@ -28,5 +28,5 @@ clgp_pyramid(
 }
 #endif
 
-#endif /* ndef _CLGP_H */
+#endif /* ndef _CLGP_H_ */
 
