@@ -15,6 +15,14 @@ FOREACH(CL_SRC ${CL_SRCS})
   SET(CL_C_SRCS ${CL_C_SRCS} "${CL_SRC}.c")
 ENDFOREACH(CL_SRC ${CL_SRCS})
 
-ADD_LIBRARY(clgp SHARED downscaledconvolution.c downscaledconvolution.h clgp.c clgp.h ${CL_C_SRCS})
+SET(clgp_SRCS 
+    clgp.c
+    clgp.h
+    downscaledconvolution.c
+    downscaledconvolution.h
+    error.c
+    error.h
+    ${CL_C_SRCS})
+ADD_LIBRARY(clgp SHARED ${clgp_SRCS})
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
 
