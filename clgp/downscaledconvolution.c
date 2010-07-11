@@ -25,8 +25,8 @@ clgp_downscaledconvolution(
     size_t local_work_size[2];
     size_t global_work_size[2];
 
-    local_work_size[0] = 16;
-    local_work_size[1] = 16;
+    local_work_size[0] = (width >= 32) ? 16 : 8;
+    local_work_size[1] = (height >= 32) ? 16 : 8;
     global_work_size[0] = ((width/(1<<scale)-1) / local_work_size[0] + 1)*16;
     global_work_size[1] = ((height/(1<<scale)-1) / local_work_size[1] + 1)*16;
 
