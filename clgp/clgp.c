@@ -3,8 +3,7 @@
 
 #include <CL/cl.h>
 
-#include "convolution.h"
-#include "downscale.h"
+#include "downscaledconvolution.h"
 
 #ifndef CLFLAGS
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
@@ -17,15 +16,10 @@ cl_context clgp_context;
 /* The command queue used by every clpg function */
 cl_command_queue clgp_queue; 
 
-/* Ressources for the downscaling */
-extern const char clgp_downscale_kernel_src[];
-cl_program clgp_downscale_program;
-cl_kernel clgp_downscale_kernel;
-
-/* Ressources for the convolution */
-extern const char clgp_convolution_kernel_src[];
-cl_program clgp_convolution_program;
-cl_kernel clgp_convolution_kernel;
+/* Ressources for the downscaledconvolution */
+extern const char clgp_downscaledconvolution_kernel_src[];
+cl_program clgp_downscaledconvolution_program;
+cl_kernel clgp_downscaledconvolution_kernel;
 
 void clgp_release();
 
@@ -46,13 +40,11 @@ clgp_init(cl_context context, cl_command_queue queue)
 
     clgp_context = 0;
     clgp_queue = 0;
-    clgp_downscale_program = 0;
-    clgp_downscale_kernel = 0;
 
     /* Build the programs, find the kernels... */
-    /* Downscaling */
-    source = (char *)clgp_downscale_kernel_src;
-    clgp_downscale_program =
+    /* Downscaled convolution */
+    source = (char *)clgp_downscaledconvolution_kernel_src;
+    clgp_downscaledconvolution_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -61,12 +53,12 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &cl_err);
     if (cl_err != CL_SUCCESS) {
         fprintf(stderr,
-                "Could not create the clgp_downscale program\n");
+                "Could not create the clgp_downscaledconvolution program\n");
         clgp_err = -1;
         goto end;
     }
     cl_err =
-        clBuildProgram(clgp_downscale_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(clgp_downscaledconvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (cl_err != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
@@ -76,73 +68,25 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &device,
                 NULL);
         clGetProgramBuildInfo(
-                clgp_downscale_program,
+                clgp_downscaledconvolution_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "Could not build the clgp_downscale program\n%s\n", build_log);
+                "Could not build the clgp_downscaledconvolution program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "Could not build the clgp_downscale program\n");
+                "Could not build the clgp_downscaledconvolution program\n");
 #endif
         clgp_err = -1;
         goto end;
     }
-    clgp_downscale_kernel = 
-        clCreateKernel(clgp_downscale_program, "downscale", &cl_err);
+    clgp_downscaledconvolution_kernel = 
+        clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &cl_err);
     if (cl_err != CL_SUCCESS) {
-        fprintf(stderr, "Error: downscale kernel not found\n");
-        clgp_err = -1;
-        goto end;
-    }
-    /* Convolution */
-    source = (char *)clgp_convolution_kernel_src;
-    clgp_convolution_program =
-        clCreateProgramWithSource(
-                context,
-                1,
-                (char const **)&source,
-                NULL,
-                &cl_err);
-    if (cl_err != CL_SUCCESS) {
-        fprintf(stderr,
-                "Could not create the clgp_convolution program\n");
-        clgp_err = -1;
-        goto end;
-    }
-    cl_err =
-        clBuildProgram(clgp_convolution_program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (cl_err != CL_SUCCESS) {
-#ifdef DEBUG
-        clGetContextInfo(
-                context,
-                CL_CONTEXT_DEVICES,
-                1,
-                &device,
-                NULL);
-        clGetProgramBuildInfo(
-                clgp_convolution_program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, 
-                "Could not build the clgp_convolution program\n%s\n", build_log);
-#else
-        fprintf(stderr,
-                "Could not build the clgp_convolution program\n");
-#endif
-        clgp_err = -1;
-        goto end;
-    }
-    clgp_convolution_kernel = 
-        clCreateKernel(clgp_convolution_program, "convolution", &cl_err);
-    if (cl_err != CL_SUCCESS) {
-        fprintf(stderr, "Error: convolution kernel not found\n");
+        fprintf(stderr, "Error: downscaledconvolution kernel not found\n");
         clgp_err = -1;
         goto end;
     }
@@ -165,11 +109,11 @@ clgp_release()
     clFinish(clgp_queue);
     
     /* Free our program and kernels */
-    if (clgp_downscale_kernel != 0) {
-        clReleaseKernel(clgp_downscale_kernel);
+    if (clgp_downscaledconvolution_kernel != 0) {
+        clReleaseKernel(clgp_downscaledconvolution_kernel);
     }
-    if (clgp_downscale_program != 0) {
-        clReleaseProgram(clgp_downscale_program);
+    if (clgp_downscaledconvolution_program != 0) {
+        clReleaseProgram(clgp_downscaledconvolution_program);
     }
 }
 
@@ -179,7 +123,7 @@ clgp_maxscale(int width, int height)
 {
     /* 32x32 is the pratical min size of reduced image because we use 16x16
      * NDRange... To get around this limitation, we could trigger smaller 
-     * sizes in downscale/convolution functions when width or height 
+     * sizes downscaled convolution functions when width or height 
      * reach that limit (TODO) */ 
     return (int)log2f((float)((width > height) ? width : height)/32.f) + 1;
 }
@@ -203,49 +147,15 @@ clgp_pyramid(
 
     cl_int cl_err;
 
-    /* Allocate a temporary image to store reduced images before convolution */
-    tmp_image =
-        clCreateImage2D(
-                clgp_context,
-                CL_MEM_READ_WRITE,
-                &imageformat,
-                width,
-                height,
-                0,
-                NULL,
-                &cl_err);
-    if (cl_err != CL_SUCCESS) {
-        fprintf(stderr, "Could not allocate tmp_image\n");
-    }
-
     /* Compute the pyramid */
-    cl_err =
-        clEnqueueCopyImage(
-                clgp_queue,
-                input_image,
-                tmp_image,
-                origin,
-                origin,
-                region,
-                0,
-                NULL,
-                NULL);
-    clFinish(clgp_queue);
     for (scale = 0; scale < maxscale; scale++) {
-        clgp_downscale(
-                tmp_image, 
-                input_image, 
+        clgp_downscaledconvolution(
+                pyramid_images[scale], 
+                input_image,
                 width,
                 height,
                 scale);
-        clgp_convolution(
-                pyramid_images[scale], 
-                tmp_image,
-                width/(1<<scale),
-                height/(1<<scale));
     }
-
-    clReleaseMemObject(tmp_image);
 
     return 0;
 }
