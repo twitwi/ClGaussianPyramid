@@ -15,43 +15,44 @@ downscaledconvolution(
     const sampler_t sampler = 
         CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
+    int sf = 1<<scale;
+
     int x_in_output = get_global_id(0);
     int y_in_output = get_global_id(1);
 
-    int x_in_input = x_in_output*(1<<scale);
-    int y_in_input = y_in_output*(1<<scale);
+    int x_in_input = x_in_output*sf;
+    int y_in_input = y_in_output*sf;
 
     int i, j;
 
-    int ss = 1<<scale;
 
     float4 c = (float4)0.f;
 
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*ss, y_in_input-2*ss))) * mask[0][0];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*ss, y_in_input-2*ss))) * mask[1][0];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*ss, y_in_input-2*ss))) * mask[2][0];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*ss, y_in_input-2*ss))) * mask[3][0];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*ss, y_in_input-2*ss))) * mask[4][0];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*ss, y_in_input-1*ss))) * mask[0][1];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*ss, y_in_input-1*ss))) * mask[1][1];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*ss, y_in_input-1*ss))) * mask[2][1];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*ss, y_in_input-1*ss))) * mask[3][1];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*ss, y_in_input-1*ss))) * mask[4][1];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*ss, y_in_input+0*ss))) * mask[0][2];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*ss, y_in_input+0*ss))) * mask[1][2];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*ss, y_in_input+0*ss))) * mask[2][2];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*ss, y_in_input+0*ss))) * mask[3][2];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*ss, y_in_input+0*ss))) * mask[4][2];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*ss, y_in_input+1*ss))) * mask[0][3];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*ss, y_in_input+1*ss))) * mask[1][3];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*ss, y_in_input+1*ss))) * mask[2][3];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*ss, y_in_input+1*ss))) * mask[3][3];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*ss, y_in_input+1*ss))) * mask[4][3];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*ss, y_in_input+2*ss))) * mask[0][4];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*ss, y_in_input+2*ss))) * mask[1][4];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*ss, y_in_input+2*ss))) * mask[2][4];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*ss, y_in_input+2*ss))) * mask[3][4];
-    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*ss, y_in_input+2*ss))) * mask[4][4];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*sf, y_in_input-2*sf))) * mask[0][0];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*sf, y_in_input-2*sf))) * mask[1][0];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*sf, y_in_input-2*sf))) * mask[2][0];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input-2*sf))) * mask[3][0];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input-2*sf))) * mask[4][0];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*sf, y_in_input-1*sf))) * mask[0][1];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*sf, y_in_input-1*sf))) * mask[1][1];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*sf, y_in_input-1*sf))) * mask[2][1];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input-1*sf))) * mask[3][1];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input-1*sf))) * mask[4][1];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*sf, y_in_input+0*sf))) * mask[0][2];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*sf, y_in_input+0*sf))) * mask[1][2];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*sf, y_in_input+0*sf))) * mask[2][2];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input+0*sf))) * mask[3][2];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input+0*sf))) * mask[4][2];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*sf, y_in_input+1*sf))) * mask[0][3];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*sf, y_in_input+1*sf))) * mask[1][3];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*sf, y_in_input+1*sf))) * mask[2][3];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input+1*sf))) * mask[3][3];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input+1*sf))) * mask[4][3];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-2*sf, y_in_input+2*sf))) * mask[0][4];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input-1*sf, y_in_input+2*sf))) * mask[1][4];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+0*sf, y_in_input+2*sf))) * mask[2][4];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input+2*sf))) * mask[3][4];
+    c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input+2*sf))) * mask[4][4];
 
     write_imageui(convoluted_image, (int2)(x_in_output, y_in_output), convert_int4(c));
 }
