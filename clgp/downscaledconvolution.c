@@ -5,12 +5,12 @@
 extern cl_context clgp_context;
 extern cl_command_queue clgp_queue;
 
-extern cl_kernel clgp_downscale_kernel;
+extern cl_kernel clgp_downscaledconvolution_kernel;
 
 
 void
-clgp_downscale(
-        cl_mem downscaled_image, 
+clgp_downscaledconvolution(
+        cl_mem convoluted_image, 
         cl_mem input_image,
         int width,
         int height,
@@ -26,15 +26,15 @@ clgp_downscale(
 
     cl_int err = CL_SUCCESS;
 
-    clSetKernelArg(clgp_downscale_kernel, 0, sizeof(cl_mem), (void *)&downscaled_image);
-    clSetKernelArg(clgp_downscale_kernel, 1, sizeof(cl_mem), (void *)&input_image);
-    clSetKernelArg(clgp_downscale_kernel, 2, sizeof(int), &scale);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), (void *)&convoluted_image);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), (void *)&input_image);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &scale);
     clFinish(clgp_queue);
 
     err = 
         clEnqueueNDRangeKernel(
                 clgp_queue, 
-                clgp_downscale_kernel, 
+                clgp_downscaledconvolution_kernel, 
                 2, 
                 NULL,
                 &global_work_size[0], 
@@ -44,7 +44,7 @@ clgp_downscale(
                 NULL);
     clFinish(clgp_queue);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not run the downscale kernel on device\n");
+        fprintf(stderr, "Could not run the downscaled convolution kernel on device\n");
     }
 }
 

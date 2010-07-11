@@ -1,7 +1,7 @@
 SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-SET(CL_SRCS downscale.cl convolution.cl)
+SET(CL_SRCS downscaledconvolution.cl)
 FOREACH(CL_SRC ${CL_SRCS})
   # Check CL_SRC syntax a first time at compilation time, then build a C source
   # file that will contains a string with the program source from CL_SRC
@@ -15,6 +15,6 @@ FOREACH(CL_SRC ${CL_SRCS})
   SET(CL_C_SRCS ${CL_C_SRCS} "${CL_SRC}.c")
 ENDFOREACH(CL_SRC ${CL_SRCS})
 
-ADD_LIBRARY(clgp SHARED downscale.c downscale.h clgp.c clgp.h convolution.c convolution.h ${CL_C_SRCS})
+ADD_LIBRARY(clgp SHARED downscaledconvolution.c downscaledconvolution.h clgp.c clgp.h ${CL_C_SRCS})
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
 

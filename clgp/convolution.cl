@@ -1,1 +1,0 @@
-../kernels/convolution.cl

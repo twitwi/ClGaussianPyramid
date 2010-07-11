@@ -8,11 +8,12 @@ extern "C" {
 #include <CL/cl.h>
 
 void
-clgp_convolution(
+clgp_downscaledconvolution(
         cl_mem convoluted_image, 
         cl_mem input_image,
         int width,
-        int height);
+        int height,
+        int scale);
 
 #ifdef __cplusplus
 }
