@@ -27,8 +27,7 @@ clgp_pyramid(
         cl_mem pyramid_image,
         cl_mem input_image,
         int width,
-        int height,
-        int maxscale);
+        int height);
 
 #ifdef __cplusplus
 }
