@@ -6,6 +6,7 @@
 
 #define SCALE_OFFSET_X(scale, width, height) \
     ((scale != 0)*width)
+
 #define SCALE_OFFSET_Y(scale, width, height) \
     ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
 

@@ -10,11 +10,6 @@
 
 #include <clgp.h>
 
-#define SCALE_OFFSET_X(scale, width, height) \
-    ((scale != 0)*width)
-#define SCALE_OFFSET_Y(scale, width, height) \
-    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
-
 int
 main(int argc, char *argv[])
 {
@@ -105,7 +100,14 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    /* Convert to an acceptable OpenCL format (we don't do {RGB, UINT8} */
+    /* Create output image */
+    output = 
+        cvCreateImage(
+                cvSize(input->width*1.5, input->height),
+                input->depth, 
+                4);
+
+    /* Convert input to an acceptable OpenCL format (we don't do {RGB,UINT8}) */
     tmp = 
         cvCreateImage(
                 cvSize(input->width, input->height), 
@@ -181,13 +183,6 @@ main(int argc, char *argv[])
     printf(" - Done in %f ms\n", 
             (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
 
-
-    /* Create output image */
-    output = 
-        cvCreateImage(
-                cvSize(input->width*1.5, input->height),
-                input->depth, 
-                4);
 
     /* Retrieve images */
     region[0] = input->width*1.5;
