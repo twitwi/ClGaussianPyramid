@@ -40,8 +40,11 @@ main(int argc, char *argv[])
 
     while ((c = getopt(argc, argv, ":n:ho:")) != -1) {
         switch (c) {
+            case 'h':
+                usage();
+                exit(0);
             case 'n':
-                outfile_path = optarg;
+                var_name = optarg;
                 break;
             case 'o':
                 outfile_path = optarg;
@@ -84,6 +87,7 @@ main(int argc, char *argv[])
             fprintf(outfile, "\n\t");
         }
     }
+    fprintf(outfile, "0x00");
     fprintf(outfile, "\n};\n\n");
     fprintf(outfile, "%s", outfile_end);
 

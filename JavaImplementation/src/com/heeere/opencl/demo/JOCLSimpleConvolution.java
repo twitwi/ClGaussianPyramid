@@ -352,7 +352,7 @@ class JOCLConvolveOp implements BufferedImageOp
      * The name of the source file for the OpenCL kernel
      */
     private static final String KERNEL_SOURCE_FILE_NAME =
-        "../cl/SimpleConvolution.cl";
+        "../kernels/SimpleConvolution.cl";
 
     /**
      * Compute the value which is the smallest multiple

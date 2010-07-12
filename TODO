@@ -1,7 +1,4 @@
-
-write a simple 2x downscale in opencl
-write (reuse/adapt) a proper convolution filter in opencl
-write a 2x downscale + convolve in opencl
-
-remanage host code to avoid going back and forth between CPU and GPU
-
+* Stabilize the pyramid outut (array of images? mipmap representation?)
+* Finish functions
+* Write a square root 2 version of the pyramid
+* Keep the java version?
