@@ -9,20 +9,14 @@
 #include <highgui.h>
 
 #include <clgp.h>
+#include <utils.h>
 
 int
 main(int argc, char *argv[])
 {
     cl_int err = 0;
 
-    cl_platform_id platforms[1];
-    cl_uint n_platforms = 0;
-    int myplatform = 0;
-    cl_platform_id platform;
-    cl_device_id devices[1];
-    cl_uint n_devs = 0;
-    int mydevice = 0;
-    cl_device_id device = 0;
+    cl_device_id device;
     cl_context context = 0;
     cl_command_queue queue = 0;
 
@@ -37,40 +31,8 @@ main(int argc, char *argv[])
 
     struct timeval start, stop;
 
-    /* OpenCL init, many should go in a clgp_init() function */
-    /* Enumerate platforms */
-    err =
-        clGetPlatformIDs(
-                1,
-                platforms,
-                &n_platforms);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not check for platforms\n");
-        exit(1);
-    }
-
-    /* Choose a platform */
-    platform = platforms[myplatform];
-
-    /* Enumerate devices */
-    err =
-        clGetDeviceIDs(
-                platform,
-                CL_DEVICE_TYPE_GPU,
-                1,
-                devices,
-                &n_devs);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not check for devices\n");
-        exit(1);
-    }
-    if (n_devs == 0) {
-        fprintf(stderr, "No device available on this host\n");
-        exit(1);
-    }
-
-    /* Choose a device */
-    device = devices[mydevice];
+    /* OpenCL init, using our utils functions */
+    clgp_maxflops_device(&device);
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);

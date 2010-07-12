@@ -55,7 +55,7 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
-                "Could not create the clgp_downscaledconvolution program\n");
+                "clgp: Could not create the clgp_downscaledconvolution program\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -77,10 +77,10 @@ clgp_init(cl_context context, cl_command_queue queue)
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "Could not build the clgp_downscaledconvolution program\n%s\n", build_log);
+                "clgp: Could not build the clgp_downscaledconvolution program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "Could not build the clgp_downscaledconvolution program\n");
+                "clgp: Could not build the clgp_downscaledconvolution program\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
@@ -88,7 +88,7 @@ clgp_init(cl_context context, cl_command_queue queue)
     clgp_downscaledconvolution_kernel = 
         clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "Error: downscaledconvolution kernel not found\n");
+        fprintf(stderr, "clgp: downscaledconvolution kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
