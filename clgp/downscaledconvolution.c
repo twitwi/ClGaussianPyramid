@@ -4,10 +4,10 @@
 
 #include "error.h"
 
-#define SCALE_OFFSET_X(scale, width, height) \
+#define SCALE_ORIGIN_X(scale, width, height) \
     ((scale != 0)*width)
 
-#define SCALE_OFFSET_Y(scale, width, height) \
+#define SCALE_ORIGIN_Y(scale, width, height) \
     ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
 
 extern cl_int clgp_clerr;
@@ -28,8 +28,8 @@ clgp_downscaledconvolution(
 {
     int err = 0;
 
-    int origin_x = SCALE_OFFSET_X(scale, width, height);
-    int origin_y = SCALE_OFFSET_Y(scale, width, height);
+    int origin_x = SCALE_ORIGIN_X(scale, width, height);
+    int origin_y = SCALE_ORIGIN_Y(scale, width, height);
 
     size_t local_work_size[2];
     size_t global_work_size[2];
