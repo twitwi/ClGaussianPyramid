@@ -11,6 +11,66 @@
 #include <clgp.h>
 #include <utils.h>
 
+cl_int
+read_clImage2D(
+        cl_command_queue queue, 
+        IplImage *iplImage,
+        cl_mem clImage2D,
+        int width,
+        int height)
+{
+    cl_int err = 0;
+
+    size_t origin[3] = {0, 0, 0};
+    size_t region[3] = {width, height, 1};
+
+    err = 
+        clEnqueueReadImage(
+                queue,
+                clImage2D,
+                CL_TRUE,
+                origin,
+                region,
+                iplImage->widthStep,
+                0,
+                iplImage->imageData,
+                0,
+                NULL,
+                NULL);
+
+    return err;
+}
+
+cl_int
+write_clImage2D(
+        cl_command_queue queue, 
+        cl_mem clImage2D,
+        IplImage *iplImage,
+        int width,
+        int height)
+{
+    cl_int err = 0;
+
+    size_t origin[3] = {0, 0, 0};
+    size_t region[3] = {width, height, 1};
+
+    err =
+        clEnqueueWriteImage(
+                queue,
+                clImage2D,
+                CL_TRUE,
+                origin,
+                region,
+                iplImage->widthStep,
+                0,
+                iplImage->imageData,
+                0,
+                NULL,
+                NULL);
+
+    return err;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -20,11 +80,9 @@ main(int argc, char *argv[])
     cl_context context = 0;
     cl_command_queue queue = 0;
 
-    IplImage *input = NULL, *tmp = NULL, *output = NULL;
+    IplImage *ipl_input = NULL, *ipl_tmp = NULL, *ipl_pyramid = NULL;
 
     cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {0, 0, 1}; /* To update when we got image size */
     cl_mem climage_input, climage_pyramid;
     
     struct timeval start, stop;
@@ -54,37 +112,38 @@ main(int argc, char *argv[])
     }
 
     /* Load image */
-    input = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
-    if (input == NULL) {
+    ipl_input = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
+    if (ipl_input == NULL) {
         fprintf(stderr, "Could not load file %s\n", argv[1]);
         exit(1);
     }
 
-    /* Create output image */
-    output = 
+    /* Convert ipl_input to an acceptable OpenCL format (we don't do {RGB,UINT8}) */
+    ipl_tmp = 
         cvCreateImage(
-                cvSize(input->width*1.5, input->height),
-                input->depth, 
+                cvSize(ipl_input->width, ipl_input->height), 
+                ipl_input->depth, 
+                4);
+    cvCvtColor(ipl_input, ipl_tmp, CV_BGR2BGRA);
+    cvReleaseImage(&ipl_input);
+    ipl_input = ipl_tmp;
+    ipl_tmp = NULL;
+
+    /* Create ipl_pyramid image */
+    ipl_pyramid = 
+        cvCreateImage(
+                cvSize(ipl_input->width*1.5, ipl_input->height),
+                ipl_input->depth, 
                 4);
 
-    /* Convert input to an acceptable OpenCL format (we don't do {RGB,UINT8}) */
-    tmp = 
-        cvCreateImage(
-                cvSize(input->width, input->height), 
-                input->depth, 
-                4);
-    cvCvtColor(input, tmp, CV_BGR2BGRA);
-    cvReleaseImage(&input);
-    input = tmp;
-    tmp = NULL;
-
+    /* Create buffers on device */
     climage_input =
         clCreateImage2D(
                 context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
-                input->width,
-                input->height,
+                ipl_input->width,
+                ipl_input->height,
                 0,
                 NULL,
                 &err);
@@ -98,8 +157,8 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_READ_WRITE,
                 &imageformat,
-                input->width*1.5,
-                input->height,
+                ipl_input->width*1.5,
+                ipl_input->height,
                 0,
                 NULL,
                 &err);
@@ -108,24 +167,16 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    region[0] = input->width;
-    region[1] = input->height;
+    /* Send input image on device */
     err =
-        clEnqueueWriteImage(
+        write_clImage2D(
                 queue,
-                climage_input,
-                CL_TRUE,
-                origin,
-                region,
-                input->widthStep,
-                0,
-                input->imageData,
-                0,
-                NULL,
-                NULL);
-    clFinish(queue);
+                climage_input, 
+                ipl_input, 
+                ipl_input->width,  
+                ipl_input->height);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy input data on device (%i)\n", err);
+        fprintf(stderr, "Could not copy ipl_input data on device (%i)\n", err);
         exit(1);
     }
 
@@ -135,30 +186,21 @@ main(int argc, char *argv[])
     clgp_pyramid(
             climage_pyramid, 
             climage_input, 
-            input->width, 
-            input->height);
+            ipl_input->width, 
+            ipl_input->height);
     gettimeofday(&stop, NULL);
     printf(" - Done in %f ms\n", 
             (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
 
 
     /* Retrieve images */
-    region[0] = input->width*1.5;
-    region[1] = input->height;
-    err = 
-        clEnqueueReadImage(
+    err =
+        read_clImage2D(
                 queue,
-                climage_pyramid,
-                CL_TRUE,
-                origin,
-                region,
-                output->widthStep,
-                0,
-                output->imageData,
-                0,
-                NULL,
-                NULL);
-    clFinish(queue);
+                ipl_pyramid, 
+                climage_pyramid, 
+                ipl_pyramid->width,  
+                ipl_pyramid->height);
     if (err != CL_SUCCESS) {
         fprintf(stderr, 
                 "Could not copy data on host (%i)\n", err);
@@ -180,12 +222,12 @@ main(int argc, char *argv[])
 
     /* Show results */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
-    cvShowImage("gaussian pyramid", output);
+    cvShowImage("gaussian pyramid", ipl_pyramid);
     cvWaitKey(0);
     cvDestroyWindow("gaussian pyramid");
 
-    cvReleaseImage(&input);
-    cvReleaseImage(&output);
+    cvReleaseImage(&ipl_input);
+    cvReleaseImage(&ipl_pyramid);
 
     return 0;
 }

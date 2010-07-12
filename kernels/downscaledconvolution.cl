@@ -1,6 +1,6 @@
 __kernel void
 downscaledconvolution(
-        __write_only image2d_t convoluted_image, 
+        __write_only image2d_t output_image, 
         __read_only image2d_t input_image,
         int origin_x,
         int origin_y,
@@ -56,6 +56,6 @@ downscaledconvolution(
     c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+1*sf, y_in_input+2*sf))) * mask[3][4];
     c += convert_float4(read_imageui(input_image, sampler, (int2)(x_in_input+2*sf, y_in_input+2*sf))) * mask[4][4];
 
-    write_imageui(convoluted_image, (int2)(x_in_output, y_in_output), convert_int4(c));
+    write_imageui(output_image, (int2)(x_in_output, y_in_output), convert_int4(c));
 }
 
