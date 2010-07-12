@@ -9,7 +9,7 @@ extern "C" {
 
 int
 clgp_downscaledconvolution(
-        cl_mem convoluted_image, 
+        cl_mem output_image, 
         cl_mem input_image,
         int width,
         int height,

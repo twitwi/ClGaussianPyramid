@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 
 #include <CL/cl.h>
@@ -20,7 +21,7 @@ extern cl_kernel clgp_downscaledconvolution_kernel;
 
 int
 clgp_downscaledconvolution(
-        cl_mem convoluted_image, 
+        cl_mem output_image, 
         cl_mem input_image,
         int width,
         int height,
@@ -39,7 +40,7 @@ clgp_downscaledconvolution(
     global_work_size[0] = ((width/(1<<scale)-1) / local_work_size[0] + 1)*16;
     global_work_size[1] = ((height/(1<<scale)-1) / local_work_size[1] + 1)*16;
 
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), (void *)&convoluted_image);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), (void *)&output_image);
     clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), (void *)&input_image);
     clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &origin_x);
     clSetKernelArg(clgp_downscaledconvolution_kernel, 3, sizeof(int), &origin_y);
