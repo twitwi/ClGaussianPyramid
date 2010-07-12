@@ -2,6 +2,8 @@ __kernel void
 downscaledconvolution(
         __write_only image2d_t convoluted_image, 
         __read_only image2d_t input_image,
+        int origin_x,
+        int origin_y,
         int scale)
 {
     const float mask[5][5] = {
@@ -17,11 +19,11 @@ downscaledconvolution(
 
     int sf = 1<<scale;
 
-    int x_in_output = get_global_id(0);
-    int y_in_output = get_global_id(1);
+    int x_in_output = origin_x + get_global_id(0);
+    int y_in_output = origin_y + get_global_id(1);
 
-    int x_in_input = x_in_output*sf;
-    int y_in_input = y_in_output*sf;
+    int x_in_input = get_global_id(0)*sf;
+    int y_in_input = get_global_id(1)*sf;
 
     int i, j;
 

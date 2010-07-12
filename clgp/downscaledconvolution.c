@@ -4,6 +4,11 @@
 
 #include "error.h"
 
+#define SCALE_OFFSET_X(scale, width, height) \
+    ((scale != 0)*width)
+#define SCALE_OFFSET_Y(scale, width, height) \
+    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
+
 extern cl_int clgp_clerr;
 
 extern cl_context clgp_context;
@@ -22,6 +27,9 @@ clgp_downscaledconvolution(
 {
     int err = 0;
 
+    int origin_x = SCALE_OFFSET_X(scale, width, height);
+    int origin_y = SCALE_OFFSET_Y(scale, width, height);
+
     size_t local_work_size[2];
     size_t global_work_size[2];
 
@@ -32,7 +40,9 @@ clgp_downscaledconvolution(
 
     clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), (void *)&convoluted_image);
     clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), (void *)&input_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &scale);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &origin_x);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 3, sizeof(int), &origin_y);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 4, sizeof(int), &scale);
     clFinish(clgp_queue);
 
     clgp_clerr = 
