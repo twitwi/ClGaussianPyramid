@@ -123,10 +123,8 @@ clgp_release()
 int
 clgp_maxscale(int width, int height)
 {
-    /* 32x32 is the pratical min size of reduced image because we use 16x16
-     * NDRange... To get around this limitation, we could trigger smaller 
-     * sizes downscaled convolution functions when width or height 
-     * reach that limit (TODO) */ 
+    /* 16x16 is the pratical min size of reduced image because of a strange
+     * bug when trying to go for 8x8 */
     return (int)log2f((float)((width > height) ? width : height)/16.f) + 1;
 }
 
@@ -137,15 +135,17 @@ clgp_pyramid(
         cl_mem pyramid_image,
         cl_mem input_image,
         int width,
-        int height,
-        int maxscale)
+        int height)
 {
     int err = 0;
 
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {width, height, 1};
 
+    int maxscale = 0;
     int scale = 0;
+
+    maxscale = clgp_maxscale(width, height);
 
     /* Compute the pyramid */
     for (scale = 0; scale < maxscale; scale++) {

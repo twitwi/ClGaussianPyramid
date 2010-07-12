@@ -95,7 +95,6 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    maxscale = clgp_maxscale(input->width, input->height);
     climage_pyramid =
         clCreateImage2D(
                 context,
@@ -139,8 +138,7 @@ main(int argc, char *argv[])
             climage_pyramid, 
             climage_input, 
             input->width, 
-            input->height, 
-            maxscale);
+            input->height);
     gettimeofday(&stop, NULL);
     printf(" - Done in %f ms\n", 
             (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
