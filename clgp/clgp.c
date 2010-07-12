@@ -134,7 +134,7 @@ clgp_maxscale(int width, int height)
  * pyramid */
 int
 clgp_pyramid(
-        cl_mem *pyramid_images,
+        cl_mem pyramid_image,
         cl_mem input_image,
         int width,
         int height,
@@ -151,7 +151,7 @@ clgp_pyramid(
     for (scale = 0; scale < maxscale; scale++) {
         err = 
             clgp_downscaledconvolution(
-                    pyramid_images[scale], 
+                    pyramid_image, 
                     input_image,
                     width,
                     height,

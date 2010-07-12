@@ -36,7 +36,7 @@ main(int argc, char *argv[])
     cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1}; /* To update when we got image size */
-    cl_mem climage_input, climage_pyramid[16];
+    cl_mem climage_input, climage_pyramid;
     
     int scale = 0, maxscale = 0;
 
@@ -132,21 +132,19 @@ main(int argc, char *argv[])
     }
 
     maxscale = clgp_maxscale(input->width, input->height);
-    for (scale = 0; scale < maxscale; scale++) {
-        climage_pyramid[scale] =
-            clCreateImage2D(
-                    context,
-                    CL_MEM_READ_WRITE,
-                    &imageformat,
-                    input->width/(1<<scale),
-                    input->height/(1<<scale),
-                    0,
-                    NULL,
-                    &err);
-        if (err != CL_SUCCESS) {
-            fprintf(stderr, "Could not allocate climage_pyramid[%i]\n", scale);
-            exit(1);
-        }
+    climage_pyramid =
+        clCreateImage2D(
+                context,
+                CL_MEM_READ_WRITE,
+                &imageformat,
+                input->width*1.5,
+                input->height/(1<<scale),
+                0,
+                NULL,
+                &err);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "Could not allocate climage_pyramid\n");
+        exit(1);
     }
 
     region[0] = input->width;
@@ -192,28 +190,26 @@ main(int argc, char *argv[])
                 4);
 
     /* Retrieve images */
-    for (scale = 0; scale < maxscale; scale++) {
-        region[0] = input->width/(1<<scale);
-        region[1] = input->height/(1<<scale);
-        err = 
-            clEnqueueReadImage(
-                    queue,
-                    climage_pyramid[scale],
-                    CL_TRUE,
-                    origin,
-                    region,
-                    output->widthStep,
-                    0,
-                    ((char *)output->imageData + SCALE_OFFSET_X(scale, input->width, input->height)*4 + SCALE_OFFSET_Y(scale, input->width, input->height)*output->widthStep),
-                    0,
-                    NULL,
-                    NULL);
-        clFinish(queue);
-        if (err != CL_SUCCESS) {
-            fprintf(stderr, 
-                    "Could not copy scale %i data on host (%i)\n", scale, err);
-            exit(1);
-        }
+    region[0] = input->width*1.5;
+    region[1] = input->height;
+    err = 
+        clEnqueueReadImage(
+                queue,
+                climage_pyramid,
+                CL_TRUE,
+                origin,
+                region,
+                output->widthStep,
+                0,
+                output->imageData,
+                0,
+                NULL,
+                NULL);
+    clFinish(queue);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, 
+                "Could not copy data on host (%i)\n", err);
+        exit(1);
     }
 
 
@@ -223,9 +219,7 @@ main(int argc, char *argv[])
 
     /* Release device ressources */
     clReleaseMemObject(climage_input);
-    for (scale = 0; scale < maxscale; scale++) {
-        clReleaseMemObject(climage_pyramid[scale]);
-    }
+    clReleaseMemObject(climage_pyramid);
 
     clReleaseContext(context);
     clReleaseCommandQueue(queue);

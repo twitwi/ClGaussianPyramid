@@ -18,7 +18,7 @@ clgp_maxscale(int width, int height);
 
 int
 clgp_pyramid(
-        cl_mem *pyramid_images,
+        cl_mem pyramid_image,
         cl_mem input_image,
         int width,
         int height,
