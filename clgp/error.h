@@ -7,7 +7,7 @@ extern "C" {
 
 #include <CL/cl.h>
 
-#define CLGP_CL_ERROR 1
+#define CLGP_CL_ERROR -1
 
 cl_int
 clgp_clerror();

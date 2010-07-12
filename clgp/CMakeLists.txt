@@ -22,6 +22,8 @@ SET(clgp_SRCS
     downscaledconvolution.h
     error.c
     error.h
+    utils.c
+    utils.h
     ${CL_C_SRCS})
 ADD_LIBRARY(clgp SHARED ${clgp_SRCS})
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
