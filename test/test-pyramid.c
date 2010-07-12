@@ -27,8 +27,6 @@ main(int argc, char *argv[])
     size_t region[3] = {0, 0, 1}; /* To update when we got image size */
     cl_mem climage_input, climage_pyramid;
     
-    int scale = 0, maxscale = 0;
-
     struct timeval start, stop;
 
     /* OpenCL init, using our utils functions */
@@ -101,7 +99,7 @@ main(int argc, char *argv[])
                 CL_MEM_READ_WRITE,
                 &imageformat,
                 input->width*1.5,
-                input->height/(1<<scale),
+                input->height,
                 0,
                 NULL,
                 &err);
