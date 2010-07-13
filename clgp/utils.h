@@ -7,9 +7,12 @@ extern "C" {
 
 #include <CL/cl.h>
 
+/* Retrieve the cl_device_id of the first GPU on the system */
 int
 clgp_first_device(cl_device_id *id);
 
+/* Retrieve the cl_device_id of the more powerful (in terms of flops) GPU on
+ * the system */
 int
 clgp_maxflops_device(cl_device_id *id);
 
