@@ -71,6 +71,37 @@ write_clImage2D(
     return err;
 }
 
+void
+fill_pyramid(IplImage *ipl_pyramid, int width, int height)
+{
+    int scale = 0, maxscale = 0;
+
+    maxscale = clgp_maxscale(width, height);
+
+    for (scale = 2; scale < maxscale; scale++) {
+        cvRectangle(
+                ipl_pyramid,
+                cvPoint(SCALE_ORIGIN_X(scale, width, height) + width/(1<<scale),
+                        SCALE_ORIGIN_Y(scale, width, height)),
+                cvPoint(width*1.5, height),
+                cvScalar(0, 0, 0, 0),
+                CV_FILLED,
+                0,
+                0);
+    }
+    if (scale >= 2) { /* Last part of the image */
+        cvRectangle(
+                ipl_pyramid,
+                cvPoint(SCALE_ORIGIN_X(scale, width, height),
+                        SCALE_ORIGIN_Y(scale, width, height)),
+                cvPoint(width*1.5, height),
+                cvScalar(0, 0, 0, 0),
+                CV_FILLED,
+                0,
+                0);
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -221,6 +252,9 @@ main(int argc, char *argv[])
 
 
     /* Show results */
+    /* Fill outside of the pyramid with black, more displayable */
+    fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
+    /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);
     cvWaitKey(0);
