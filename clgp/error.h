@@ -7,8 +7,10 @@ extern "C" {
 
 #include <CL/cl.h>
 
-#define CLGP_CL_ERROR 1
+/* clgp errors, returned by all clgp_ functions */
+#define CLGP_CL_ERROR -1
 
+/* Retrieve the status of the last OpenCL operation */
 cl_int
 clgp_clerror();
 
