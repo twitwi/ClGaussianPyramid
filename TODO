@@ -1,2 +1,3 @@
+
 * Write a square root 2 version of the pyramid
-* Keep the java version?
+* Keep the java version? => recreate it from scratch as an exercice (and benchmark) when the C version will be ok and used as a reference for comparison
