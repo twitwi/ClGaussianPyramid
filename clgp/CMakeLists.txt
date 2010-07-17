@@ -1,7 +1,7 @@
 SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-SET(CL_SRCS downscaledconvolution.cl)
+SET(CL_SRCS downscaledconvolution.cl optionallyDownscaledConvolution.cl)
 FOREACH(CL_SRC ${CL_SRCS})
   # Check CL_SRC syntax a first time at compilation time, then build a C source
   # file that will contains a string with the program source from CL_SRC
