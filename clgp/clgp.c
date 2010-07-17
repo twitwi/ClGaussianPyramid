@@ -4,6 +4,7 @@
 #include <CL/cl.h>
 
 #include "downscaledconvolution.h"
+#include "optionallydownscaledconvolution.h"
 #include "error.h"
 
 #ifndef CLFLAGS
@@ -21,6 +22,7 @@ cl_command_queue clgp_queue = 0;
 
 /* Ressources for the downscaledconvolution */
 extern const char clgp_downscaledconvolution_kernel_src[];
+extern const char clgp_optionallydownscaledconvolution_kernel_src[];
 cl_program clgp_downscaledconvolution_program;
 cl_kernel clgp_downscaledconvolution_kernel;
 
@@ -45,7 +47,7 @@ clgp_init(cl_context context, cl_command_queue queue)
 
     /* Build the programs, find the kernels... */
     /* Downscaled convolution */
-    source = (char *)clgp_downscaledconvolution_kernel_src;
+    source = (char *)clgp_optionallydownscaledconvolution_kernel_src;
     clgp_downscaledconvolution_program =
         clCreateProgramWithSource(
                 context,
@@ -86,9 +88,9 @@ clgp_init(cl_context context, cl_command_queue queue)
         goto end;
     }
     clgp_downscaledconvolution_kernel = 
-        clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &clgp_clerr);
+        clCreateKernel(clgp_downscaledconvolution_program, "optionallydownscaledconvolution", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: downscaledconvolution kernel not found\n");
+        fprintf(stderr, "clgp: optionallydownscaledconvolution kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -148,7 +150,7 @@ clgp_maxscale(int width, int height)
 /* Build an array of images that are the different layers of the gaussian
  * pyramid */
 int
-clgp_pyramid(
+clgp_pyramid_old(
         cl_mem pyramid_image,
         cl_mem input_image,
         int width,
@@ -181,3 +183,70 @@ clgp_pyramid(
     return err;
 }
 
+/* Build an array of images that are the different layers of the gaussian
+ * pyramid */
+int
+clgp_pyramid(
+        cl_mem pyramid_image,
+        cl_mem input_image,
+        int width,
+        int height)
+{
+    int err = 0;
+
+    size_t origin[2] = {0, 0};
+    size_t size[2] = {width, height};
+
+    int maxscale = 0;
+    int scale = 0;
+
+    maxscale = clgp_maxscale(width, height)*2;
+    /* compute the first filtered level */
+    err = 
+        clgp_optionallydownscaledconvolution(
+                    pyramid_image, 
+                    origin[0],
+                    origin[1],
+                    input_image,
+                    0,
+                    0,
+                    size[0],
+                    size[1],
+                    0);
+    if (err != 0) {
+        return err;
+    }
+
+    /* Compute the rest of the pyramid */
+    for (scale = 1; scale < maxscale; scale++) {
+        fprintf(stderr, "SCALE %d %d %d\n", scale, origin[0], origin[1]);
+        int isDownscaling = scale&1;
+        size_t newOrigin[2] = {
+            origin[0] + isDownscaling * size[0],
+            (1-isDownscaling) * size[1],
+        };
+        // TODO double filter when isDownscaling (probably implies that we need more space)
+        err = 
+            clgp_optionallydownscaledconvolution(
+                    pyramid_image, 
+                    newOrigin[0],
+                    newOrigin[1],
+                    pyramid_image,
+                    origin[0],
+                    origin[1],
+                    size[0],
+                    size[1],
+                    isDownscaling);
+        if (err != 0) {
+            break;
+        }
+        origin[0] = newOrigin[0];
+        origin[1] = newOrigin[1];
+        if (isDownscaling) {
+            size[0] >>= 1;
+            size[1] >>= 1;
+        }
+    }
+
+    return err;
+}

@@ -163,7 +163,7 @@ main(int argc, char *argv[])
     /* Create ipl_pyramid image */
     ipl_pyramid = 
         cvCreateImage(
-                cvSize(ipl_input->width*1.5, ipl_input->height),
+                cvSize(ipl_input->width*2, ipl_input->height),
                 ipl_input->depth, 
                 4);
 
@@ -188,7 +188,7 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_READ_WRITE,
                 &imageformat,
-                ipl_input->width*1.5,
+                ipl_input->width*2,
                 ipl_input->height,
                 0,
                 NULL,
@@ -223,7 +223,6 @@ main(int argc, char *argv[])
     printf(" - Done in %f ms\n", 
             (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
 
-
     /* Retrieve images */
     err =
         read_clImage2D(
@@ -253,7 +252,7 @@ main(int argc, char *argv[])
 
     /* Show results */
     /* Fill outside of the pyramid with black, more displayable */
-    fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
+    //fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
     /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);
