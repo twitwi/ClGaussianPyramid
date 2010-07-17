@@ -257,7 +257,7 @@ main(int argc, char *argv[])
     /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);
-    cvWaitKey(0);
+    while (cvWaitKey(0) != 27) {}
     cvDestroyWindow("gaussian pyramid");
 
     cvReleaseImage(&ipl_input);
