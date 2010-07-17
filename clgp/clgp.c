@@ -15,9 +15,9 @@ extern cl_int clgp_clerr;
 /* Global variables for the library */
 /* The context the library will use, for now allow only one instance related
  * to one context. */
-cl_context clgp_context; 
+cl_context clgp_context = 0; 
 /* The command queue used by every clpg function */
-cl_command_queue clgp_queue; 
+cl_command_queue clgp_queue = 0; 
 
 /* Ressources for the downscaledconvolution */
 extern const char clgp_downscaledconvolution_kernel_src[];
@@ -93,8 +93,18 @@ clgp_init(cl_context context, cl_command_queue queue)
         goto end;
     }
 
+    /* Mark the context as used by our library */
+    clgp_clerr = clRetainContext(context);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not retain context\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+
+    /* Finaly, set our internal pointers to the context and command queue */
     clgp_context = context;
     clgp_queue = queue;
+
 end:
     if (err != 0) {
         clgp_release();
@@ -117,6 +127,13 @@ clgp_release()
     if (clgp_downscaledconvolution_program != 0) {
         clReleaseProgram(clgp_downscaledconvolution_program);
     }
+
+    /* Release the context -- the calling app stil has to do its own context
+     * release */
+    clReleaseContext(clgp_context);
+
+    clgp_context = 0;
+    clgp_queue = 0;
 }
 
 /* Util function to get the max scale for an image */
