@@ -1,1 +1,0 @@
-../kernels/optionallyDownscaledConvolution.cl
