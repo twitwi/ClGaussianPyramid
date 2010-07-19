@@ -1,14 +1,14 @@
 __kernel void
-optionallyDownscaledConvolution(
+optionallydownscaledconvolution(
         __write_only image2d_t output_image, 
         int output_origin_x,
         int output_origin_y,
         __read_only image2d_t input_image,
         int input_origin_x,
         int input_origin_y,
-        int scale01)
+        int downscaleOrNot)
 {
-    //*
+    /*
     const float mask[5][5] = {
         0.003906, 0.015625, 0.023438, 0.015625, 0.003906, 
         0.015625, 0.062500, -0.093750, 0.062500, 0.015625, 
@@ -28,7 +28,7 @@ optionallyDownscaledConvolution(
     const sampler_t sampler = 
         CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
-    int sf = scale01 ? 2 : 1;
+    int sf = downscaleOrNot ? 2 : 1;
 
     int x_in_output = output_origin_x + get_global_id(0);
     int y_in_output = output_origin_y + get_global_id(1);
