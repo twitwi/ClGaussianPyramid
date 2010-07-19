@@ -188,7 +188,7 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_READ_WRITE,
                 &imageformat,
-                ipl_input->width*2,
+                ipl_input->width*3,
                 ipl_input->height,
                 0,
                 NULL,

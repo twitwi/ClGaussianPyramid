@@ -225,8 +225,37 @@ clgp_pyramid(
             origin[0] + isDownscaling * size[0],
             (1-isDownscaling) * size[1],
         };
-        // TODO double filter when isDownscaling (probably implies that we need more space)
-        err = 
+        if (1 && isDownscaling) {
+            err = 
+            clgp_optionallydownscaledconvolution(
+                    pyramid_image, 
+                    newOrigin[0] + size[0],
+                    newOrigin[1],
+                    pyramid_image,
+                    origin[0],
+                    origin[1],
+                    size[0],
+                    size[1],
+                    0);
+            if (err != 0) {
+                break;
+            }
+            err = 
+            clgp_optionallydownscaledconvolution(
+                    pyramid_image, 
+                    newOrigin[0],
+                    newOrigin[1],
+                    pyramid_image,
+                    newOrigin[0] + size[0],
+                    newOrigin[1],
+                    size[0],
+                    size[1],
+                    isDownscaling);
+            if (err != 0) {
+                break;
+            }
+        } else {
+            err = 
             clgp_optionallydownscaledconvolution(
                     pyramid_image, 
                     newOrigin[0],
@@ -237,8 +266,9 @@ clgp_pyramid(
                     size[0],
                     size[1],
                     isDownscaling);
-        if (err != 0) {
-            break;
+            if (err != 0) {
+                break;
+            }
         }
         origin[0] = newOrigin[0];
         origin[1] = newOrigin[1];
