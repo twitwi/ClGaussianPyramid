@@ -3,12 +3,19 @@
 
 #include <CL/cl.h>
 
+#include "convolution.h"
 #include "downscaledconvolution.h"
 #include "error.h"
 
 #ifndef CLFLAGS
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
 #endif
+
+#define SCALE_ORIGIN_X(scale, width, height) \
+        (scale == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
+
+#define SCALE_ORIGIN_Y(scale, width, height) \
+        (scale <= 2) ? 0 : (scale & 0x1)*(height>>(scale>>1))
 
 extern cl_int clgp_clerr;
 
@@ -19,6 +26,10 @@ cl_context clgp_context = 0;
 /* The command queue used by every clpg function */
 cl_command_queue clgp_queue = 0; 
 
+/* Ressources for the convolution */
+extern const char clgp_convolution_kernel_src[];
+cl_program clgp_convolution_program;
+cl_kernel clgp_convolution_kernel;
 /* Ressources for the downscaledconvolution */
 extern const char clgp_downscaledconvolution_kernel_src[];
 cl_program clgp_downscaledconvolution_program;
@@ -44,6 +55,54 @@ clgp_init(cl_context context, cl_command_queue queue)
     clgp_queue = 0;
 
     /* Build the programs, find the kernels... */
+    /* Convolution */
+    source = (char *)clgp_convolution_kernel_src;
+    clgp_convolution_program =
+        clCreateProgramWithSource(
+                context,
+                1,
+                (char const **)&source,
+                NULL,
+                &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr,
+                "clgp: Could not create the clgp_convolution program\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_clerr =
+        clBuildProgram(clgp_convolution_program, 0, NULL, CLFLAGS, NULL, NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
+        clGetContextInfo(
+                context,
+                CL_CONTEXT_DEVICES,
+                1,
+                &device,
+                NULL);
+        clGetProgramBuildInfo(
+                clgp_convolution_program,
+                device,
+                CL_PROGRAM_BUILD_LOG,
+                sizeof(build_log),
+                build_log,
+                NULL);
+        fprintf(stderr, 
+                "clgp: Could not build the clgp_convolution program\n%s\n", build_log);
+#else
+        fprintf(stderr,
+                "clgp: Could not build the clgp_convolution program\n");
+#endif
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_convolution_kernel = 
+        clCreateKernel(clgp_convolution_program, "convolution", &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: convolution kernel not found\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
     /* Downscaled convolution */
     source = (char *)clgp_downscaledconvolution_kernel_src;
     clgp_downscaledconvolution_program =
@@ -121,6 +180,12 @@ clgp_release()
     clFinish(clgp_queue);
     
     /* Free our program and kernels */
+    if (clgp_convolution_kernel != 0) {
+        clReleaseKernel(clgp_convolution_kernel);
+    }
+    if (clgp_convolution_program != 0) {
+        clReleaseProgram(clgp_convolution_program);
+    }
     if (clgp_downscaledconvolution_kernel != 0) {
         clReleaseKernel(clgp_downscaledconvolution_kernel);
     }
@@ -142,7 +207,7 @@ clgp_maxscale(int width, int height)
 {
     /* 16x16 is the pratical min size of reduced image because of a strange
      * bug when trying to go for 8x8 */
-    return (int)log2f((float)((width > height) ? width : height)/16.f) + 1;
+    return (int)2.f*log2f((float)((width > height) ? width : height)/16.f) + 1;
 }
 
 /* Build an array of images that are the different layers of the gaussian
@@ -156,26 +221,92 @@ clgp_pyramid(
 {
     int err = 0;
 
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {width, height, 1};
-
     int maxscale = 0;
     int scale = 0;
 
     maxscale = clgp_maxscale(width, height);
 
-    /* Compute the pyramid */
-    for (scale = 0; scale < maxscale; scale++) {
+    /* First iteration manualy */
+    /* First half octave */
+    err = 
+        clgp_convolution(
+                pyramid_image, 
+                0,
+                0,
+                input_image,
+                0,
+                0,
+                width,
+                height);
+    err = 
+        clgp_convolution(
+                pyramid_image, 
+                0,
+                0,
+                pyramid_image,
+                0,
+                0,
+                width,
+                height);
+    /* Second half-octave */
+    err = 
+        clgp_convolution(
+                pyramid_image, 
+                width,
+                0,
+                pyramid_image,
+                0,
+                0,
+                width,
+                height);
+    err = 
+        clgp_convolution(
+                pyramid_image, 
+                width,
+                0,
+                pyramid_image,
+                width,
+                0,
+                width,
+                height);
+
+    /* Now go through the other octaves until we can't reduce */
+    for (scale = 2; scale < maxscale; scale++) {
+        /* First half octave : downscale + convolute */
         err = 
             clgp_downscaledconvolution(
+                    pyramid_image,
+                    SCALE_ORIGIN_X(scale, width, height),
+                    SCALE_ORIGIN_Y(scale, width, height),
+                    pyramid_image,
+                    SCALE_ORIGIN_X(scale-1, width, height),
+                    SCALE_ORIGIN_Y(scale-1, width, height),
+                    width>>((scale-1)>>1),
+                    height>>((scale-1)>>1));
+
+        scale++;
+
+        /* Second half octave : convolute + convolute */
+        err = 
+            clgp_convolution(
                     pyramid_image, 
-                    input_image,
-                    width,
-                    height,
-                    scale);
-        if (err != 0) {
-            break;
-        }
+                    SCALE_ORIGIN_X(scale, width, height),
+                    SCALE_ORIGIN_Y(scale, width, height),
+                    pyramid_image,
+                    SCALE_ORIGIN_X(scale-1, width, height),
+                    SCALE_ORIGIN_Y(scale-1, width, height),
+                    width>>(scale>>1),
+                    height>>(scale>>1));
+        err = 
+            clgp_convolution(
+                    pyramid_image, 
+                    SCALE_ORIGIN_X(scale, width, height),
+                    SCALE_ORIGIN_Y(scale, width, height),
+                    pyramid_image,
+                    SCALE_ORIGIN_X(scale-1, width, height),
+                    SCALE_ORIGIN_Y(scale-1, width, height),
+                    width>>(scale>>1),
+                    height>>(scale>>1));
     }
 
     return err;

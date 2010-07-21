@@ -9,11 +9,11 @@ extern "C" {
 
 /* Get the x origin of the scale in the pyramid image */
 #define SCALE_ORIGIN_X(scale, width, height) \
-    ((scale != 0)*width)
+        (scale == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
 
 /* Get the y origin of the scale in the pyramid image */
 #define SCALE_ORIGIN_Y(scale, width, height) \
-    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
+        (scale <= 2) ? 0 : (scale & 0x1)*(height>>(scale>>1))
 
 /* Initialize the clgp library, must be called before any other function */
 int

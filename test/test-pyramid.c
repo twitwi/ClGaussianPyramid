@@ -37,6 +37,7 @@ read_clImage2D(
                 0,
                 NULL,
                 NULL);
+    clFinish(queue);
 
     return err;
 }
@@ -67,6 +68,7 @@ write_clImage2D(
                 0,
                 NULL,
                 NULL);
+    clFinish(queue);
 
     return err;
 }
@@ -83,7 +85,7 @@ fill_pyramid(IplImage *ipl_pyramid, int width, int height)
                 ipl_pyramid,
                 cvPoint(SCALE_ORIGIN_X(scale, width, height) + width/(1<<scale),
                         SCALE_ORIGIN_Y(scale, width, height)),
-                cvPoint(width*1.5, height),
+                cvPoint(width*3, height),
                 cvScalar(0, 0, 0, 0),
                 CV_FILLED,
                 0,
@@ -94,7 +96,7 @@ fill_pyramid(IplImage *ipl_pyramid, int width, int height)
                 ipl_pyramid,
                 cvPoint(SCALE_ORIGIN_X(scale, width, height),
                         SCALE_ORIGIN_Y(scale, width, height)),
-                cvPoint(width*1.5, height),
+                cvPoint(width*3, height),
                 cvScalar(0, 0, 0, 0),
                 CV_FILLED,
                 0,
@@ -163,7 +165,7 @@ main(int argc, char *argv[])
     /* Create ipl_pyramid image */
     ipl_pyramid = 
         cvCreateImage(
-                cvSize(ipl_input->width*1.5, ipl_input->height),
+                cvSize(ipl_input->width*3, ipl_input->height),
                 ipl_input->depth, 
                 4);
 
@@ -188,7 +190,7 @@ main(int argc, char *argv[])
                 context,
                 CL_MEM_READ_WRITE,
                 &imageformat,
-                ipl_input->width*1.5,
+                ipl_input->width*3,
                 ipl_input->height,
                 0,
                 NULL,
@@ -234,7 +236,7 @@ main(int argc, char *argv[])
                 ipl_pyramid->height);
     if (err != CL_SUCCESS) {
         fprintf(stderr, 
-                "Could not copy data on host (%i)\n", err);
+                "Could not copy climage_pyramid data on host (%i)\n", err);
         exit(1);
     }
 
@@ -253,7 +255,7 @@ main(int argc, char *argv[])
 
     /* Show results */
     /* Fill outside of the pyramid with black, more displayable */
-    fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
+    /*fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);*/
     /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);

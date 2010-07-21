@@ -5,12 +5,6 @@
 
 #include "error.h"
 
-#define SCALE_ORIGIN_X(scale, width, height) \
-    ((scale != 0)*width)
-
-#define SCALE_ORIGIN_Y(scale, width, height) \
-    ((scale >= 2) ? (int)((( (1.f - powf(0.5f, (float)scale)) / (1.f-0.5f) ) - 1.f)*(float)height) : 0) 
-
 extern cl_int clgp_clerr;
 
 extern cl_context clgp_context;
@@ -22,29 +16,32 @@ extern cl_kernel clgp_downscaledconvolution_kernel;
 int
 clgp_downscaledconvolution(
         cl_mem output_image, 
+        int output_origin_x,
+        int output_origin_y,
         cl_mem input_image,
+        int input_origin_x,
+        int input_origin_y,
         int width,
-        int height,
-        int scale)
+        int height)
 {
     int err = 0;
-
-    int origin_x = SCALE_ORIGIN_X(scale, width, height);
-    int origin_y = SCALE_ORIGIN_Y(scale, width, height);
 
     size_t local_work_size[2];
     size_t global_work_size[2];
 
     local_work_size[0] = (width >= 32) ? 16 : 8;
     local_work_size[1] = (height >= 32) ? 16 : 8;
-    global_work_size[0] = ((width/(1<<scale)-1) / local_work_size[0] + 1)*local_work_size[0];
-    global_work_size[1] = ((height/(1<<scale)-1) / local_work_size[1] + 1)*local_work_size[1];
+    global_work_size[0] = 
+        ((width/2-1) / local_work_size[0] + 1)*local_work_size[0];
+    global_work_size[1] = 
+        ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), (void *)&output_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), (void *)&input_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &origin_x);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 3, sizeof(int), &origin_y);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 4, sizeof(int), &scale);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(int), &output_origin_x);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &output_origin_y);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 3, sizeof(cl_mem), &input_image);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 4, sizeof(int), &input_origin_x);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 5, sizeof(int), &input_origin_y);
     clFinish(clgp_queue);
 
     clgp_clerr = 
