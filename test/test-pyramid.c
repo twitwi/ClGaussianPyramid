@@ -207,7 +207,7 @@ main(int argc, char *argv[])
                 ipl_input->width,  
                 ipl_input->height);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy ipl_input data on device (%i)\n", err);
+        fprintf(stderr, "Could not copy ipl_input data on device (%d)\n", err);
         exit(1);
     }
 
