@@ -80,11 +80,11 @@ fill_pyramid(IplImage *ipl_pyramid, int width, int height)
 
     maxscale = clgp_maxscale(width, height);
 
-    for (scale = 2; scale < maxscale; scale++) {
+    for (scale = 2; scale < maxscale; scale+=2) {
         cvRectangle(
                 ipl_pyramid,
-                cvPoint(SCALE_ORIGIN_X(scale, width, height) + width/(1<<scale),
-                        SCALE_ORIGIN_Y(scale, width, height)),
+                cvPoint(SCALE_ORIGIN_X(scale, width, height),
+                        height/(1<<(scale/2))*2),
                 cvPoint(width*3, height),
                 cvScalar(0, 0, 0, 0),
                 CV_FILLED,
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
 
     /* Show results */
     /* Fill outside of the pyramid with black, more displayable */
-    /*fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);*/
+    fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
     /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);
