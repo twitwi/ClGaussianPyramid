@@ -207,7 +207,7 @@ clgp_maxscale(int width, int height)
 {
     /* 16x16 is the pratical min size of reduced image because of a strange
      * bug when trying to go for 8x8 */
-    return (int)2.f*log2f((float)((width > height) ? width : height)/16.f) + 1;
+    return 2*((int)log2f((float)((width > height) ? width : height)/16.f) + 1);
 }
 
 /* Build an array of images that are the different layers of the gaussian
