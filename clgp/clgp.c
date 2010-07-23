@@ -303,8 +303,8 @@ clgp_pyramid(
                     SCALE_ORIGIN_X(scale, width, height),
                     SCALE_ORIGIN_Y(scale, width, height),
                     pyramid_image,
-                    SCALE_ORIGIN_X(scale-1, width, height),
-                    SCALE_ORIGIN_Y(scale-1, width, height),
+                    SCALE_ORIGIN_X(scale, width, height),
+                    SCALE_ORIGIN_Y(scale, width, height),
                     width>>(scale>>1),
                     height>>(scale>>1));
     }
