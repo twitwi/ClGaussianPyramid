@@ -29,7 +29,7 @@ int
 clgp_maxscale(int width, int height);
 
 /* Create the pyramid from input -- both images must be allocated and the 
- * pyramid must be at least of size width*1.5 x height */
+ * pyramid must be at least of size width*3 x height */
 int
 clgp_pyramid(
         cl_mem pyramid_image,
