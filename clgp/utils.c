@@ -6,6 +6,8 @@
 
 extern cl_int clgp_clerr;
 
+extern cl_context clgp_context; 
+
 int
 clgpFirstDevice(cl_device_id *id)
 {
@@ -141,3 +143,74 @@ end:
     return err;
 }
 
+cl_mem
+clgpCreateImage2D (
+        cl_mem_flags flags, 
+        const cl_image_format *image_format, 
+        size_t image_width, 
+        size_t image_height, 
+        cl_int *errcode_ret)
+{
+    return 
+        clCreateImage2D(
+                clgp_context, 
+                flags, 
+                image_format, 
+                image_width, 
+                image_height, 
+                0, 
+                NULL, 
+                errcode_ret);
+}
+
+cl_mem
+clgpCreatePyramid2D(
+        cl_mem image,
+        cl_int *errcode_ret)
+{
+    cl_image_format image_format;
+    size_t image_width = 0;
+    size_t image_height = 0;
+
+    *errcode_ret =
+        clGetImageInfo(
+                image, 
+                CL_IMAGE_FORMAT, 
+                sizeof(cl_image_format), 
+                &image_format, 
+                NULL);
+    if (*errcode_ret != CL_SUCCESS) {
+        return 0;
+    }
+    *errcode_ret =
+        clGetImageInfo(
+                image, 
+                CL_IMAGE_WIDTH, 
+                sizeof(size_t), 
+                &image_width, 
+                NULL);
+    if (*errcode_ret != CL_SUCCESS) {
+        return 0;
+    }
+    *errcode_ret =
+        clGetImageInfo(
+                image, 
+                CL_IMAGE_HEIGHT, 
+                sizeof(size_t), 
+                &image_height, 
+                NULL);
+    if (*errcode_ret != CL_SUCCESS) {
+        return 0;
+    }
+
+    return 
+        clCreateImage2D(
+                clgp_context, 
+                CL_MEM_READ_WRITE, 
+                &image_format, 
+                image_width*3, 
+                image_height, 
+                0, 
+                NULL, 
+                errcode_ret);
+}

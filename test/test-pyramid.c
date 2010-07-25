@@ -171,14 +171,11 @@ main(int argc, char *argv[])
 
     /* Create buffers on device */
     climage_input =
-        clCreateImage2D(
-                context,
+        clgpCreateImage2D (
                 CL_MEM_READ_ONLY,
                 &imageformat,
                 ipl_input->width,
                 ipl_input->height,
-                0,
-                NULL,
                 &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not allocate climage_input\n");
@@ -186,14 +183,8 @@ main(int argc, char *argv[])
     }
 
     climage_pyramid =
-        clCreateImage2D(
-                context,
-                CL_MEM_READ_WRITE,
-                &imageformat,
-                ipl_input->width*3,
-                ipl_input->height,
-                0,
-                NULL,
+        clgpCreatePyramid2D(
+                climage_input,
                 &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not allocate climage_pyramid\n");
