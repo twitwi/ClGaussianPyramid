@@ -12,7 +12,7 @@ extern "C" {
 
 /* Retrieve the status of the last OpenCL operation */
 cl_int
-clgp_clerror();
+clgpClError();
 
 #ifdef __cplusplus
 }

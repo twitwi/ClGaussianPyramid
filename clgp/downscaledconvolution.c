@@ -14,7 +14,7 @@ extern cl_kernel clgp_downscaledconvolution_kernel;
 
 
 int
-clgp_downscaledconvolution(
+clgpDownscaledConvolution(
         cl_mem output_image, 
         int output_origin_x,
         int output_origin_y,

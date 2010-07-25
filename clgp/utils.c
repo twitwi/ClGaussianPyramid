@@ -7,7 +7,7 @@
 extern cl_int clgp_clerr;
 
 int
-clgp_first_device(cl_device_id *id)
+clgpFirstDevice(cl_device_id *id)
 {
     int err = 0;
 
@@ -55,7 +55,7 @@ end:
 }
 
 int
-clgp_maxflops_device(cl_device_id *id)
+clgpMaxflopsDevice(cl_device_id *id)
 {
     int err = 0;
 

@@ -9,12 +9,12 @@ extern "C" {
 
 /* Retrieve the cl_device_id of the first GPU on the system */
 int
-clgp_first_device(cl_device_id *id);
+clgpFirstDevice(cl_device_id *id);
 
 /* Retrieve the cl_device_id of the more powerful (in terms of flops) GPU on
  * the system */
 int
-clgp_maxflops_device(cl_device_id *id);
+clgpMaxflopsDevice(cl_device_id *id);
 
 #ifdef __cplusplus
 }
