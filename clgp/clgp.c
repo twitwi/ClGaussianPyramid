@@ -28,19 +28,19 @@ cl_command_queue clgp_queue = 0;
 
 /* Ressources for the convolution */
 extern const char clgp_convolution_kernel_src[];
-cl_program clgp_convolution_program;
+cl_program clgpConvolution_program;
 cl_kernel clgp_convolution_kernel;
 /* Ressources for the downscaledconvolution */
 extern const char clgp_downscaledconvolution_kernel_src[];
-cl_program clgp_downscaledconvolution_program;
+cl_program clgpDownscaledConvolution_program;
 cl_kernel clgp_downscaledconvolution_kernel;
 
-void clgp_release();
+void clgpRelease();
 
 /* Create the command queue for clgp operation, build kernels, must be called
  * before any other function */
 int
-clgp_init(cl_context context, cl_command_queue queue)
+clgpInit(cl_context context, cl_command_queue queue)
 {
     int err = 0;
 
@@ -57,7 +57,7 @@ clgp_init(cl_context context, cl_command_queue queue)
     /* Build the programs, find the kernels... */
     /* Convolution */
     source = (char *)clgp_convolution_kernel_src;
-    clgp_convolution_program =
+    clgpConvolution_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -66,12 +66,12 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
-                "clgp: Could not create the clgp_convolution program\n");
+                "clgp: Could not create the clgpConvolution program\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgp_convolution_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(clgpConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
@@ -81,23 +81,23 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &device,
                 NULL);
         clGetProgramBuildInfo(
-                clgp_convolution_program,
+                clgpConvolution_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgp_convolution program\n%s\n", build_log);
+                "clgp: Could not build the clgpConvolution program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "clgp: Could not build the clgp_convolution program\n");
+                "clgp: Could not build the clgpConvolution program\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_convolution_kernel = 
-        clCreateKernel(clgp_convolution_program, "convolution", &clgp_clerr);
+        clCreateKernel(clgpConvolution_program, "convolution", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: convolution kernel not found\n");
         err = CLGP_CL_ERROR;
@@ -105,7 +105,7 @@ clgp_init(cl_context context, cl_command_queue queue)
     }
     /* Downscaled convolution */
     source = (char *)clgp_downscaledconvolution_kernel_src;
-    clgp_downscaledconvolution_program =
+    clgpDownscaledConvolution_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -114,12 +114,12 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
-                "clgp: Could not create the clgp_downscaledconvolution program\n");
+                "clgp: Could not create the clgpDownscaledConvolution program\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgp_downscaledconvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(clgpDownscaledConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetContextInfo(
@@ -129,23 +129,23 @@ clgp_init(cl_context context, cl_command_queue queue)
                 &device,
                 NULL);
         clGetProgramBuildInfo(
-                clgp_downscaledconvolution_program,
+                clgpDownscaledConvolution_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgp_downscaledconvolution program\n%s\n", build_log);
+                "clgp: Could not build the clgpDownscaledConvolution program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "clgp: Could not build the clgp_downscaledconvolution program\n");
+                "clgp: Could not build the clgpDownscaledConvolution program\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_downscaledconvolution_kernel = 
-        clCreateKernel(clgp_downscaledconvolution_program, "downscaledconvolution", &clgp_clerr);
+        clCreateKernel(clgpDownscaledConvolution_program, "downscaledconvolution", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: downscaledconvolution kernel not found\n");
         err = CLGP_CL_ERROR;
@@ -166,7 +166,7 @@ clgp_init(cl_context context, cl_command_queue queue)
 
 end:
     if (err != 0) {
-        clgp_release();
+        clgpRelease();
     }
     return err;
 }
@@ -174,7 +174,7 @@ end:
 /* Release the ressources used by the library, this do NOT destroy the context 
  * which was passed from outside */
 void
-clgp_release()
+clgpRelease()
 {
     /* Wait for unfinished jobs */
     clFinish(clgp_queue);
@@ -183,14 +183,14 @@ clgp_release()
     if (clgp_convolution_kernel != 0) {
         clReleaseKernel(clgp_convolution_kernel);
     }
-    if (clgp_convolution_program != 0) {
-        clReleaseProgram(clgp_convolution_program);
+    if (clgpConvolution_program != 0) {
+        clReleaseProgram(clgpConvolution_program);
     }
     if (clgp_downscaledconvolution_kernel != 0) {
         clReleaseKernel(clgp_downscaledconvolution_kernel);
     }
-    if (clgp_downscaledconvolution_program != 0) {
-        clReleaseProgram(clgp_downscaledconvolution_program);
+    if (clgpDownscaledConvolution_program != 0) {
+        clReleaseProgram(clgpDownscaledConvolution_program);
     }
 
     /* Release the context -- the calling app stil has to do its own context
@@ -203,7 +203,7 @@ clgp_release()
 
 /* Util function to get the max scale for an image */
 int
-clgp_maxscale(int width, int height)
+clgpMaxscale(int width, int height)
 {
     /* 16x16 is the pratical min size of reduced image because of a strange
      * bug when trying to go for 8x8 */
@@ -213,7 +213,7 @@ clgp_maxscale(int width, int height)
 /* Build an array of images that are the different layers of the gaussian
  * pyramid */
 int
-clgp_pyramid(
+clgpBuildPyramid(
         cl_mem pyramid_image,
         cl_mem input_image,
         int width,
@@ -224,12 +224,12 @@ clgp_pyramid(
     int maxscale = 0;
     int scale = 0;
 
-    maxscale = clgp_maxscale(width, height);
+    maxscale = clgpMaxscale(width, height);
 
     /* First iteration manualy */
     /* First half octave */
     err = 
-        clgp_convolution(
+        clgpConvolution(
                 pyramid_image, 
                 0,
                 0,
@@ -239,7 +239,7 @@ clgp_pyramid(
                 width,
                 height);
     err = 
-        clgp_convolution(
+        clgpConvolution(
                 pyramid_image, 
                 0,
                 0,
@@ -250,7 +250,7 @@ clgp_pyramid(
                 height);
     /* Second half-octave */
     err = 
-        clgp_convolution(
+        clgpConvolution(
                 pyramid_image, 
                 width,
                 0,
@@ -260,7 +260,7 @@ clgp_pyramid(
                 width,
                 height);
     err = 
-        clgp_convolution(
+        clgpConvolution(
                 pyramid_image, 
                 width,
                 0,
@@ -274,7 +274,7 @@ clgp_pyramid(
     for (scale = 2; scale < maxscale; scale++) {
         /* First half octave : downscale + convolute */
         err = 
-            clgp_downscaledconvolution(
+            clgpDownscaledConvolution(
                     pyramid_image,
                     SCALE_ORIGIN_X(scale, width, height),
                     SCALE_ORIGIN_Y(scale, width, height),
@@ -288,7 +288,7 @@ clgp_pyramid(
 
         /* Second half octave : convolute + convolute */
         err = 
-            clgp_convolution(
+            clgpConvolution(
                     pyramid_image, 
                     SCALE_ORIGIN_X(scale, width, height),
                     SCALE_ORIGIN_Y(scale, width, height),
@@ -298,7 +298,7 @@ clgp_pyramid(
                     width>>(scale>>1),
                     height>>(scale>>1));
         err = 
-            clgp_convolution(
+            clgpConvolution(
                     pyramid_image, 
                     SCALE_ORIGIN_X(scale, width, height),
                     SCALE_ORIGIN_Y(scale, width, height),

@@ -8,7 +8,7 @@ extern "C" {
 #include <CL/cl.h>
 
 int
-clgp_downscaledconvolution(
+clgpDownscaledConvolution(
         cl_mem output_image, 
         int output_origin_x,
         int output_origin_y,

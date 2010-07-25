@@ -12,7 +12,7 @@
 #include <utils.h>
 
 cl_int
-read_clImage2D(
+readClImage2D(
         cl_command_queue queue, 
         IplImage *iplImage,
         cl_mem clImage2D,
@@ -43,7 +43,7 @@ read_clImage2D(
 }
 
 cl_int
-write_clImage2D(
+writeClImage2D(
         cl_command_queue queue, 
         cl_mem clImage2D,
         IplImage *iplImage,
@@ -74,11 +74,11 @@ write_clImage2D(
 }
 
 void
-fill_pyramid(IplImage *ipl_pyramid, int width, int height)
+fillPyramid(IplImage *ipl_pyramid, int width, int height)
 {
     int scale = 0, maxscale = 0;
 
-    maxscale = clgp_maxscale(width, height);
+    maxscale = clgpMaxscale(width, height);
 
     for (scale = 2; scale < maxscale; scale+=2) {
         cvRectangle(
@@ -121,7 +121,7 @@ main(int argc, char *argv[])
     struct timeval start, stop;
 
     /* OpenCL init, using our utils functions */
-    clgp_maxflops_device(&device);
+    clgpMaxflopsDevice(&device);
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -139,7 +139,7 @@ main(int argc, char *argv[])
 
 
     /* Initialize the clgp library */
-    if (clgp_init(context, queue) != 0) {
+    if (clgpInit(context, queue) != 0) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
@@ -202,7 +202,7 @@ main(int argc, char *argv[])
 
     /* Send input image on device */
     err =
-        write_clImage2D(
+        writeClImage2D(
                 queue,
                 climage_input, 
                 ipl_input, 
@@ -216,7 +216,7 @@ main(int argc, char *argv[])
 
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
-    clgp_pyramid(
+    clgpBuildPyramid(
             climage_pyramid, 
             climage_input, 
             ipl_input->width, 
@@ -228,7 +228,7 @@ main(int argc, char *argv[])
 
     /* Retrieve images */
     err =
-        read_clImage2D(
+        readClImage2D(
                 queue,
                 ipl_pyramid, 
                 climage_pyramid, 
@@ -242,7 +242,7 @@ main(int argc, char *argv[])
 
 
     /* Release the clgp library */
-    clgp_release();
+    clgpRelease();
 
 
     /* Release device ressources */
@@ -255,7 +255,7 @@ main(int argc, char *argv[])
 
     /* Show results */
     /* Fill outside of the pyramid with black, more displayable */
-    fill_pyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
+    fillPyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
     /* Display */
     cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
     cvShowImage("gaussian pyramid", ipl_pyramid);

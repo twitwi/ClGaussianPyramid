@@ -3,7 +3,7 @@
 cl_int clgp_clerr;
 
 cl_int
-clgp_clerror() {
+clgpClError() {
     return clgp_clerr;
 }
 

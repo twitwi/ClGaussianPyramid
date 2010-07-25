@@ -14,7 +14,7 @@ extern cl_kernel clgp_convolution_kernel;
 
 
 int
-clgp_convolution(
+clgpConvolution(
         cl_mem output_image, 
         int output_origin_x,
         int output_origin_y,
