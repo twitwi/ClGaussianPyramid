@@ -22,8 +22,6 @@ SET(clgp_SRCS
     convolution.h
     downscaledconvolution.c
     downscaledconvolution.h
-    optionallydownscaledconvolution.c
-    optionallydownscaledconvolution.h
     error.c
     error.h
     utils.c
