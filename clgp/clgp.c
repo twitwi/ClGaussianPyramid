@@ -5,6 +5,7 @@
 
 #include "convolution.h"
 #include "downscaledconvolution.h"
+#include "optionallydownscaledconvolution.h"
 #include "error.h"
 
 #ifndef CLFLAGS
@@ -147,7 +148,7 @@ clgpInit(cl_context context, cl_command_queue queue)
     clgp_downscaledconvolution_kernel = 
         clCreateKernel(clgpDownscaledConvolution_program, "downscaledconvolution", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: downscaledconvolution kernel not found\n");
+        fprintf(stderr, "clgp: optionallydownscaledconvolution kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }

@@ -216,7 +216,6 @@ main(int argc, char *argv[])
     printf(" - Done in %f ms\n", 
             (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
 
-
     /* Retrieve images */
     err =
         readClImage2D(
