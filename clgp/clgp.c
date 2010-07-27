@@ -5,7 +5,6 @@
 
 #include "convolution.h"
 #include "downscaledconvolution.h"
-#include "optionallydownscaledconvolution.h"
 #include "error.h"
 
 #ifndef CLFLAGS
