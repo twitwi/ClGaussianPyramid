@@ -119,6 +119,7 @@ main(int argc, char *argv[])
     cl_mem climage_input, climage_pyramid;
     
     struct timeval start, stop;
+    double compute_time = 0., total_time = 0.;
 
     /* OpenCL init, using our utils functions */
     clgpMaxflopsDevice(&device);
@@ -151,7 +152,8 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    /* Convert ipl_input to an acceptable OpenCL format (we don't do {RGB,UINT8}) */
+    /* Convert ipl_input to an acceptable OpenCL format (we don't do 
+     * {RGB,UINT8}) */
     ipl_tmp = 
         cvCreateImage(
                 cvSize(ipl_input->width, ipl_input->height), 
@@ -191,7 +193,9 @@ main(int argc, char *argv[])
         exit(1);
     }
 
+
     /* Send input image on device */
+    gettimeofday(&start, NULL);
     err =
         writeClImage2D(
                 queue,
@@ -203,6 +207,9 @@ main(int argc, char *argv[])
         fprintf(stderr, "Could not copy ipl_input data on device (%d)\n", err);
         exit(1);
     }
+    gettimeofday(&stop, NULL);
+    total_time = 
+        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
 
 
     /* At last, call our pyramid function */
@@ -213,10 +220,13 @@ main(int argc, char *argv[])
             ipl_input->width, 
             ipl_input->height);
     gettimeofday(&stop, NULL);
-    printf(" - Done in %f ms\n", 
-            (stop.tv_sec - start.tv_sec)*1000.f + (stop.tv_usec - start.tv_usec)/1000.f);
+    compute_time = 
+        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
+    total_time += compute_time;
+
 
     /* Retrieve images */
+    gettimeofday(&start, NULL);
     err =
         readClImage2D(
                 queue,
@@ -229,6 +239,9 @@ main(int argc, char *argv[])
                 "Could not copy climage_pyramid data on host (%i)\n", err);
         exit(1);
     }
+    gettimeofday(&stop, NULL);
+    total_time += 
+        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
 
 
     /* Release the clgp library */
@@ -244,6 +257,8 @@ main(int argc, char *argv[])
 
 
     /* Show results */
+    printf(" * Pyramid time: %f ms\n", compute_time);
+    printf(" * Total time: %f ms\n", total_time);
     /* Fill outside of the pyramid with black, more displayable */
     fillPyramid(ipl_pyramid, ipl_input->width, ipl_input->height);
     /* Display */
