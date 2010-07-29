@@ -9,7 +9,9 @@ extern "C" {
 
 /* Get the x origin of the scale in the pyramid image */
 #define SCALE_ORIGIN_X(scale, width, height) \
-        (scale == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
+        (scale == 0) \
+			? 0 \
+			: (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
 
 /* Get the y origin of the scale in the pyramid image */
 #define SCALE_ORIGIN_Y(scale, width, height) \
@@ -19,8 +21,7 @@ extern "C" {
 int
 clgpInit(cl_context context, cl_command_queue queue);
 
-/* Release ressources allocated by the clgp library -- but not the context, 
- * command queue or any images */
+/* Release ressources allocated by the clgp library */
 void
 clgpRelease();
 
