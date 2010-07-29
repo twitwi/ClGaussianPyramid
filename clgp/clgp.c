@@ -159,9 +159,15 @@ clgpInit(cl_context context, cl_command_queue queue)
         err = CLGP_CL_ERROR;
         goto end;
     }
-
-    /* Finaly, set our internal pointers to the context and command queue */
     clgp_context = context;
+
+    /* Mark the command queue as used by our library */
+    clgp_clerr = clRetainCommandQueue(queue);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not retain command queue\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
     clgp_queue = queue;
 
 end:
@@ -171,8 +177,7 @@ end:
     return err;
 }
 
-/* Release the ressources used by the library, this do NOT destroy the context 
- * which was passed from outside */
+/* Release the ressources created by the library */
 void
 clgpRelease()
 {
@@ -193,12 +198,17 @@ clgpRelease()
         clReleaseProgram(clgpDownscaledConvolution_program);
     }
 
-    /* Release the context -- the calling app stil has to do its own context
-     * release */
-    clReleaseContext(clgp_context);
+    /* Release the context from *our* library */
+	if (clgp_context != 0) {
+		clReleaseContext(clgp_context);
+		clgp_context = 0;
+	}
 
-    clgp_context = 0;
-    clgp_queue = 0;
+    /* Release the command queue from *our* library */
+	if (clgp_context != 0) {
+		clReleaseCommandQueue(clgp_queue);
+		clgp_queue = 0;
+	}
 }
 
 /* Util function to get the max scale for an image */
