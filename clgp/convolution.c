@@ -10,7 +10,8 @@ extern cl_int clgp_clerr;
 extern cl_context clgp_context;
 extern cl_command_queue clgp_queue;
 
-extern cl_kernel clgp_convolution_kernel;
+extern cl_kernel clgp_convolution_rows_kernel;
+extern cl_kernel clgp_convolution_cols_kernel;
 
 
 int
@@ -36,18 +37,41 @@ clgpConvolution(
     global_work_size[1] = 
         ((height-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(clgp_convolution_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_convolution_kernel, 1, sizeof(int), &output_origin_x);
-    clSetKernelArg(clgp_convolution_kernel, 2, sizeof(int), &output_origin_y);
-    clSetKernelArg(clgp_convolution_kernel, 3, sizeof(cl_mem), &input_image);
-    clSetKernelArg(clgp_convolution_kernel, 4, sizeof(int), &input_origin_x);
-    clSetKernelArg(clgp_convolution_kernel, 5, sizeof(int), &input_origin_y);
-    clFinish(clgp_queue);
+    clSetKernelArg(clgp_convolution_rows_kernel, 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(clgp_convolution_rows_kernel, 1, sizeof(int), &output_origin_x);
+    clSetKernelArg(clgp_convolution_rows_kernel, 2, sizeof(int), &output_origin_y);
+    clSetKernelArg(clgp_convolution_rows_kernel, 3, sizeof(cl_mem), &input_image);
+    clSetKernelArg(clgp_convolution_rows_kernel, 4, sizeof(int), &input_origin_x);
+    clSetKernelArg(clgp_convolution_rows_kernel, 5, sizeof(int), &input_origin_y);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 clgp_queue, 
-                clgp_convolution_kernel, 
+                clgp_convolution_rows_kernel, 
+                2, 
+                NULL,
+                &global_work_size[0], 
+                &local_work_size[0],
+                0, 
+                NULL, 
+                NULL);
+    clFinish(clgp_queue);
+    if (err != CL_SUCCESS) {
+        fprintf(stderr, "clgp: Could not run the convolution kernel\n");
+        clgp_clerr = CLGP_CL_ERROR;
+    }
+
+    clSetKernelArg(clgp_convolution_cols_kernel, 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(clgp_convolution_cols_kernel, 1, sizeof(int), &output_origin_x);
+    clSetKernelArg(clgp_convolution_cols_kernel, 2, sizeof(int), &output_origin_y);
+    clSetKernelArg(clgp_convolution_cols_kernel, 3, sizeof(cl_mem), &input_image);
+    clSetKernelArg(clgp_convolution_cols_kernel, 4, sizeof(int), &input_origin_x);
+    clSetKernelArg(clgp_convolution_cols_kernel, 5, sizeof(int), &input_origin_y);
+
+    clgp_clerr = 
+        clEnqueueNDRangeKernel(
+                clgp_queue, 
+                clgp_convolution_cols_kernel, 
                 2, 
                 NULL,
                 &global_work_size[0], 
