@@ -219,6 +219,7 @@ main(int argc, char *argv[])
             climage_input, 
             ipl_input->width, 
             ipl_input->height);
+    clFinish(queue);
     gettimeofday(&stop, NULL);
     compute_time = 
         (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
