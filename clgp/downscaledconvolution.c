@@ -55,12 +55,6 @@ clgpDownscaledConvolution(
                 0, 
                 NULL, 
                 NULL);
-    clFinish(clgp_queue);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
 
 end:
     return err;
