@@ -29,7 +29,8 @@ cl_command_queue clgp_queue = 0;
 /* Ressources for the convolution */
 extern const char clgp_convolution_kernel_src[];
 cl_program clgpConvolution_program;
-cl_kernel clgp_convolution_kernel;
+cl_kernel clgp_convolution_rows_kernel;
+cl_kernel clgp_convolution_cols_kernel;
 /* Ressources for the downscaledconvolution */
 extern const char clgp_downscaledconvolution_kernel_src[];
 cl_program clgpDownscaledConvolution_program;
@@ -96,10 +97,17 @@ clgpInit(cl_context context, cl_command_queue queue)
         err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_convolution_kernel = 
-        clCreateKernel(clgpConvolution_program, "convolution", &clgp_clerr);
+    clgp_convolution_rows_kernel = 
+        clCreateKernel(clgpConvolution_program, "convolution_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: convolution kernel not found\n");
+        fprintf(stderr, "clgp: convolution_rows kernel not found\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_convolution_cols_kernel = 
+        clCreateKernel(clgpConvolution_program, "convolution_cols", &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: convolution_cols kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -185,8 +193,11 @@ clgpRelease()
     clFinish(clgp_queue);
     
     /* Free our program and kernels */
-    if (clgp_convolution_kernel != 0) {
-        clReleaseKernel(clgp_convolution_kernel);
+    if (clgp_convolution_rows_kernel != 0) {
+        clReleaseKernel(clgp_convolution_rows_kernel);
+    }
+    if (clgp_convolution_cols_kernel != 0) {
+        clReleaseKernel(clgp_convolution_cols_kernel);
     }
     if (clgpConvolution_program != 0) {
         clReleaseProgram(clgpConvolution_program);
