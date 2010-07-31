@@ -56,9 +56,10 @@ clgpConvolution(
                 NULL, 
                 NULL);
     clFinish(clgp_queue);
-    if (err != CL_SUCCESS) {
+    if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: Could not run the convolution kernel\n");
-        clgp_clerr = CLGP_CL_ERROR;
+        err = CLGP_CL_ERROR;
+        goto end;
     }
 
     clSetKernelArg(clgp_convolution_cols_kernel, 0, sizeof(cl_mem), &output_image);
@@ -80,11 +81,13 @@ clgpConvolution(
                 NULL, 
                 NULL);
     clFinish(clgp_queue);
-    if (err != CL_SUCCESS) {
+    if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: Could not run the convolution kernel\n");
-        clgp_clerr = CLGP_CL_ERROR;
+        err = CLGP_CL_ERROR;
+        goto end;
     }
 
+end:
     return err;
 }
 
