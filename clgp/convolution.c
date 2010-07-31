@@ -59,9 +59,9 @@ clgpConvolution(
     clSetKernelArg(clgp_convolution_cols_kernel, 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(clgp_convolution_cols_kernel, 1, sizeof(int), &output_origin_x);
     clSetKernelArg(clgp_convolution_cols_kernel, 2, sizeof(int), &output_origin_y);
-    clSetKernelArg(clgp_convolution_cols_kernel, 3, sizeof(cl_mem), &input_image);
-    clSetKernelArg(clgp_convolution_cols_kernel, 4, sizeof(int), &input_origin_x);
-    clSetKernelArg(clgp_convolution_cols_kernel, 5, sizeof(int), &input_origin_y);
+    clSetKernelArg(clgp_convolution_cols_kernel, 3, sizeof(cl_mem), &output_image);
+    clSetKernelArg(clgp_convolution_cols_kernel, 4, sizeof(int), &output_origin_x);
+    clSetKernelArg(clgp_convolution_cols_kernel, 5, sizeof(int), &output_origin_y);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(

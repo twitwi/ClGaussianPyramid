@@ -259,16 +259,6 @@ clgpBuildPyramid(
                 0,
                 width,
                 height);
-    err = 
-        clgpConvolution(
-                pyramid_image, 
-                0,
-                0,
-                pyramid_image,
-                0,
-                0,
-                width,
-                height);
     /* Second half-octave */
     err = 
         clgpConvolution(
@@ -277,16 +267,6 @@ clgpBuildPyramid(
                 0,
                 pyramid_image,
                 0,
-                0,
-                width,
-                height);
-    err = 
-        clgpConvolution(
-                pyramid_image, 
-                width,
-                0,
-                pyramid_image,
-                width,
                 0,
                 width,
                 height);
@@ -316,16 +296,6 @@ clgpBuildPyramid(
                     pyramid_image,
                     SCALE_ORIGIN_X(scale-1, width, height),
                     SCALE_ORIGIN_Y(scale-1, width, height),
-                    width>>(scale>>1),
-                    height>>(scale>>1));
-        err = 
-            clgpConvolution(
-                    pyramid_image, 
-                    SCALE_ORIGIN_X(scale, width, height),
-                    SCALE_ORIGIN_Y(scale, width, height),
-                    pyramid_image,
-                    SCALE_ORIGIN_X(scale, width, height),
-                    SCALE_ORIGIN_Y(scale, width, height),
                     width>>(scale>>1),
                     height>>(scale>>1));
     }
