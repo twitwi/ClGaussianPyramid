@@ -45,15 +45,49 @@ clgpInit(cl_context context, cl_command_queue queue)
 {
     int err = 0;
 
+    cl_device_id device = 0;
+    cl_bool has_image = CL_FALSE;
+
     char *source = NULL;
 
 #ifdef DEBUG
     char build_log[20000];
-    cl_device_id device;
 #endif
 
     clgp_context = 0;
     clgp_queue = 0;
+
+    /* Check if device support images */
+    clgp_clerr = 
+        clGetContextInfo(
+                context,
+                CL_CONTEXT_DEVICES,
+                sizeof(cl_device_id),
+                &device,
+                NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not access context's device\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+
+    clgp_clerr = 
+        clGetDeviceInfo(
+                device,
+                CL_DEVICE_IMAGE_SUPPORT,
+                sizeof(cl_bool),
+                &has_image,
+                NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not check device image support\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    if (has_image == CL_FALSE) {
+        fprintf(stderr, "clgp: device do not have image support\n");
+        err = CLGP_NO_IMAGE_SUPPORT;
+        goto end;
+    }
 
     /* Build the programs, find the kernels... */
     /* Convolution */
@@ -75,12 +109,6 @@ clgpInit(cl_context context, cl_command_queue queue)
         clBuildProgram(clgpConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        clGetContextInfo(
-                context,
-                CL_CONTEXT_DEVICES,
-                1,
-                &device,
-                NULL);
         clGetProgramBuildInfo(
                 clgpConvolution_program,
                 device,
@@ -130,12 +158,6 @@ clgpInit(cl_context context, cl_command_queue queue)
         clBuildProgram(clgpDownscaledConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        clGetContextInfo(
-                context,
-                CL_CONTEXT_DEVICES,
-                1,
-                &device,
-                NULL);
         clGetProgramBuildInfo(
                 clgpDownscaledConvolution_program,
                 device,
