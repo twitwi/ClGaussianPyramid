@@ -8,7 +8,8 @@ extern "C" {
 #include <CL/cl.h>
 
 /* clgp errors, returned by all clgp_ functions */
-#define CLGP_CL_ERROR -1
+#define CLGP_CL_ERROR -1 /* Unspecified OpenCL failure */
+#define CLGP_NO_IMAGE_SUPPORT 1 /* The device do not support image processing */
 
 /* Retrieve the status of the last OpenCL operation */
 cl_int
