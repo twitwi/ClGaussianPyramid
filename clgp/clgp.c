@@ -248,8 +248,7 @@ clgpRelease()
 int
 clgpMaxlevel(int width, int height)
 {
-    /* 16x16 is the pratical min size of reduced image because of a strange
-     * bug when trying to go for 8x8 */
+    /* 16x16 is the pratical min size for a double 5x5 filtering */
     return 2*((int)log2f((float)((width > height) ? width : height)/16.f) + 1);
 }
 
