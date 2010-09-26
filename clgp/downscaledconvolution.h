@@ -1,5 +1,5 @@
-#ifndef _CLGP_DOWNSCALEDCONVOLUTION_H_
-#define _CLGP_DOWNSCALEDCONVOLUTION_H_
+#ifndef _CLGP_DOWNLEVELDCONVOLUTION_H_
+#define _CLGP_DOWNLEVELDCONVOLUTION_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,5 +22,5 @@ clgpDownscaledConvolution(
 }
 #endif
 
-#endif /* ndef _CLGP_DOWNSCALEDCONVOLUTION_H_ */
+#endif /* ndef _CLGP_DOWNLEVELDCONVOLUTION_H_ */
 

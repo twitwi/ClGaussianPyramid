@@ -11,11 +11,11 @@
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
 #endif
 
-#define SCALE_ORIGIN_X(scale, width, height) \
-        (scale == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
+#define LEVEL_ORIGIN_X(level, width, height) \
+        (level == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
 
-#define SCALE_ORIGIN_Y(scale, width, height) \
-        (scale <= 2) ? 0 : (scale & 0x1)*(height>>(scale>>1))
+#define LEVEL_ORIGIN_Y(level, width, height) \
+        (level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))
 
 extern cl_int clgp_clerr;
 
@@ -244,9 +244,9 @@ clgpRelease()
 	}
 }
 
-/* Util function to get the max scale for an image */
+/* Util function to get the max level for an image */
 int
-clgpMaxscale(int width, int height)
+clgpMaxlevel(int width, int height)
 {
     /* 16x16 is the pratical min size of reduced image because of a strange
      * bug when trying to go for 8x8 */
@@ -264,10 +264,10 @@ clgpBuildPyramid(
 {
     int err = 0;
 
-    int maxscale = 0;
-    int scale = 0;
+    int maxlevel = 0;
+    int level = 0;
 
-    maxscale = clgpMaxscale(width, height);
+    maxlevel = clgpMaxlevel(width, height);
 
     /* First iteration manualy */
     /* First half octave */
@@ -294,32 +294,32 @@ clgpBuildPyramid(
                 height);
 
     /* Now go through the other octaves until we can't reduce */
-    for (scale = 2; scale < maxscale; scale++) {
-        /* First half octave : downscale + convolute */
+    for (level = 2; level < maxlevel; level++) {
+        /* First half octave : downlevel + convolute */
         err = 
             clgpDownscaledConvolution(
                     pyramid_image,
-                    SCALE_ORIGIN_X(scale, width, height),
-                    SCALE_ORIGIN_Y(scale, width, height),
+                    LEVEL_ORIGIN_X(level, width, height),
+                    LEVEL_ORIGIN_Y(level, width, height),
                     pyramid_image,
-                    SCALE_ORIGIN_X(scale-1, width, height),
-                    SCALE_ORIGIN_Y(scale-1, width, height),
-                    width>>((scale-1)>>1),
-                    height>>((scale-1)>>1));
+                    LEVEL_ORIGIN_X(level-1, width, height),
+                    LEVEL_ORIGIN_Y(level-1, width, height),
+                    width>>((level-1)>>1),
+                    height>>((level-1)>>1));
 
-        scale++;
+        level++;
 
         /* Second half octave : convolute + convolute */
         err = 
             clgpConvolution(
                     pyramid_image, 
-                    SCALE_ORIGIN_X(scale, width, height),
-                    SCALE_ORIGIN_Y(scale, width, height),
+                    LEVEL_ORIGIN_X(level, width, height),
+                    LEVEL_ORIGIN_Y(level, width, height),
                     pyramid_image,
-                    SCALE_ORIGIN_X(scale-1, width, height),
-                    SCALE_ORIGIN_Y(scale-1, width, height),
-                    width>>(scale>>1),
-                    height>>(scale>>1));
+                    LEVEL_ORIGIN_X(level-1, width, height),
+                    LEVEL_ORIGIN_Y(level-1, width, height),
+                    width>>(level>>1),
+                    height>>(level>>1));
     }
 
     return err;
