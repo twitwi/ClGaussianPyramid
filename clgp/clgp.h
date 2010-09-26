@@ -7,15 +7,15 @@ extern "C" {
 
 #include <CL/cl.h>
 
-/* Get the x origin of the scale in the pyramid image */
-#define SCALE_ORIGIN_X(scale, width, height) \
-        (scale == 0) \
+/* Get the x origin of the level in the pyramid image */
+#define LEVEL_ORIGIN_X(level, width, height) \
+        (level == 0) \
 			? 0 \
-			: (int)((( (1.f - powf(0.5f, (float)(scale>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
+			: (int)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
 
-/* Get the y origin of the scale in the pyramid image */
-#define SCALE_ORIGIN_Y(scale, width, height) \
-        (scale <= 2) ? 0 : (scale & 0x1)*(height>>(scale>>1))
+/* Get the y origin of the level in the pyramid image */
+#define LEVEL_ORIGIN_Y(level, width, height) \
+        (level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))
 
 /* Initialize the clgp library, must be called before any other function */
 int
@@ -25,9 +25,9 @@ clgpInit(cl_context context, cl_command_queue queue);
 void
 clgpRelease();
 
-/* Returns the maximum possible scale for an image of size width x height */
+/* Returns the maximum possible level for an image of size width x height */
 int
-clgpMaxscale(int width, int height);
+clgpMaxlevel(int width, int height);
 
 /* Create the pyramid from input -- both images must be allocated and the 
  * pyramid must be at least of size width*3 x height */

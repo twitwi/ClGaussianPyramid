@@ -76,26 +76,26 @@ writeClImage2D(
 void
 fillPyramid(IplImage *ipl_pyramid, int width, int height)
 {
-    int scale = 0, maxscale = 0;
+    int level = 0, maxlevel = 0;
 
-    maxscale = clgpMaxscale(width, height);
+    maxlevel = clgpMaxlevel(width, height);
 
-    for (scale = 2; scale < maxscale; scale+=2) {
+    for (level = 2; level < maxlevel; level+=2) {
         cvRectangle(
                 ipl_pyramid,
-                cvPoint(SCALE_ORIGIN_X(scale, width, height),
-                        height/(1<<(scale/2))*2),
+                cvPoint(LEVEL_ORIGIN_X(level, width, height),
+                        height/(1<<(level/2))*2),
                 cvPoint(width*3, height),
                 cvScalar(0, 0, 0, 0),
                 CV_FILLED,
                 0,
                 0);
     }
-    if (scale >= 2) { /* Last part of the image */
+    if (level >= 2) { /* Last part of the image */
         cvRectangle(
                 ipl_pyramid,
-                cvPoint(SCALE_ORIGIN_X(scale, width, height),
-                        SCALE_ORIGIN_Y(scale, width, height)),
+                cvPoint(LEVEL_ORIGIN_X(level, width, height),
+                        LEVEL_ORIGIN_Y(level, width, height)),
                 cvPoint(width*3, height),
                 cvScalar(0, 0, 0, 0),
                 CV_FILLED,
