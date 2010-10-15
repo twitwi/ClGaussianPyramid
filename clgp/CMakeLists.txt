@@ -12,8 +12,9 @@ FOREACH(CL_SRC ${CL_SRCS})
       COMMAND cl2c -n clgp_${PROGRAM_NAME}_kernel_src -o ${CMAKE_CURRENT_BINARY_DIR}/${CL_SRC}.c ${CMAKE_CURRENT_SOURCE_DIR}/${CL_SRC}
       DEPENDS clc cl2c ${CMAKE_CURRENT_SOURCE_DIR}/${CL_SRC}
       COMMENT "Generating ressource C file for OpenCL program ${PROGRAM_NAME}")
-  SET(CL_C_SRCS ${CL_C_SRCS} "${CL_SRC}.c")
+  SET(CL_C_SRCS "${CL_C_SRCS};${CL_SRC}.c")
 ENDFOREACH(CL_SRC ${CL_SRCS})
+ADD_CUSTOM_TARGET(generate_CL_C_SRCS DEPENDS ${CL_C_SRCS})
 
 SET(clgp_SRCS 
     clgp.c
@@ -28,5 +29,6 @@ SET(clgp_SRCS
     utils.h
     ${CL_C_SRCS})
 ADD_LIBRARY(clgp SHARED ${clgp_SRCS})
+ADD_DEPENDENCIES(clgp generate_CL_C_SRCS)
 TARGET_LINK_LIBRARIES(clgp ${OPENCL_LIBRARIES})
 
