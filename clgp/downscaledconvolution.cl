@@ -1,11 +1,7 @@
 __kernel void
 downscaledconvolution(
         __write_only image2d_t output_image, 
-        int output_origin_x,
-        int output_origin_y,
-        __read_only image2d_t input_image,
-        int input_origin_x,
-        int input_origin_y)
+        __read_only image2d_t input_image)
 {
     const float mask[5][5] = {
         3.90625e-03f, 1.56250e-02f, 2.34375e-02f, 1.56250e-02f, 3.90625e-03f, 
@@ -18,11 +14,11 @@ downscaledconvolution(
     const sampler_t sampler = 
         CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
-    int x_in_output = output_origin_x + get_global_id(0);
-    int y_in_output = output_origin_y + get_global_id(1);
+    int x_in_output = get_global_id(0);
+    int y_in_output = get_global_id(1);
 
-    float x_in_input = (float)(input_origin_x + get_global_id(0)*2);
-    float y_in_input = (float)(input_origin_y + get_global_id(1)*2);
+    float x_in_input = (float)get_global_id(0)*2;
+    float y_in_input = (float)get_global_id(1)*2;
 
     float4 c = 0.f;
 

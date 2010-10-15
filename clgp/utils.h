@@ -25,13 +25,6 @@ clgpCreateImage2D (
         size_t image_height, 
         cl_int *errcode_ret);
 
-/* Create a 2D image object that will store the pyramid (ie allocate
- * an image of size width*3 x height) */
-cl_mem
-clgpCreatePyramid2D(
-        cl_mem image,
-        cl_int *errcode_ret);
-
 #ifdef __cplusplus
 }
 #endif

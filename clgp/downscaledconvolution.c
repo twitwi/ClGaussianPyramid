@@ -16,11 +16,7 @@ extern cl_kernel clgp_downscaledconvolution_kernel;
 int
 clgpDownscaledConvolution(
         cl_mem output_image, 
-        int output_origin_x,
-        int output_origin_y,
         cl_mem input_image,
-        int input_origin_x,
-        int input_origin_y,
         int width,
         int height)
 {
@@ -37,11 +33,7 @@ clgpDownscaledConvolution(
         ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
 
     clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(int), &output_origin_x);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 2, sizeof(int), &output_origin_y);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 3, sizeof(cl_mem), &input_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 4, sizeof(int), &input_origin_x);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 5, sizeof(int), &input_origin_y);
+    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), &input_image);
     clFinish(clgp_queue);
 
     clgp_clerr = 

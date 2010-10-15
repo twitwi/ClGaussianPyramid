@@ -11,12 +11,6 @@
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
 #endif
 
-#define LEVEL_ORIGIN_X(level, width, height) \
-        (level == 0) ? 0 : (int)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width)
-
-#define LEVEL_ORIGIN_Y(level, width, height) \
-        (level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))
-
 extern cl_int clgp_clerr;
 
 /* Global variables for the library */
@@ -256,7 +250,7 @@ clgpMaxlevel(int width, int height)
  * pyramid */
 int
 clgpBuildPyramid(
-        cl_mem pyramid_image,
+        cl_mem pyramid_image[],
         cl_mem input_image,
         int width,
         int height)
@@ -272,23 +266,15 @@ clgpBuildPyramid(
     /* First half octave */
     err = 
         clgpConvolution(
-                pyramid_image, 
-                0,
-                0,
+                pyramid_image[0], 
                 input_image,
-                0,
-                0,
                 width,
                 height);
     /* Second half-octave */
     err = 
         clgpConvolution(
-                pyramid_image, 
-                width,
-                0,
-                pyramid_image,
-                0,
-                0,
+                pyramid_image[1], 
+                pyramid_image[0],
                 width,
                 height);
 
@@ -297,12 +283,8 @@ clgpBuildPyramid(
         /* First half octave : downlevel + convolute */
         err = 
             clgpDownscaledConvolution(
-                    pyramid_image,
-                    LEVEL_ORIGIN_X(level, width, height),
-                    LEVEL_ORIGIN_Y(level, width, height),
-                    pyramid_image,
-                    LEVEL_ORIGIN_X(level-1, width, height),
-                    LEVEL_ORIGIN_Y(level-1, width, height),
+                    pyramid_image[level],
+                    pyramid_image[level-1],
                     width>>((level-1)>>1),
                     height>>((level-1)>>1));
 
@@ -311,12 +293,8 @@ clgpBuildPyramid(
         /* Second half octave : convolute + convolute */
         err = 
             clgpConvolution(
-                    pyramid_image, 
-                    LEVEL_ORIGIN_X(level, width, height),
-                    LEVEL_ORIGIN_Y(level, width, height),
-                    pyramid_image,
-                    LEVEL_ORIGIN_X(level-1, width, height),
-                    LEVEL_ORIGIN_Y(level-1, width, height),
+                    pyramid_image[level], 
+                    pyramid_image[level-1],
                     width>>(level>>1),
                     height>>(level>>1));
     }
