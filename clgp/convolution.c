@@ -17,11 +17,7 @@ extern cl_kernel clgp_convolution_cols_kernel;
 int
 clgpConvolution(
         cl_mem output_image, 
-        int output_origin_x,
-        int output_origin_y,
         cl_mem input_image,
-        int input_origin_x,
-        int input_origin_y,
         int width,
         int height)
 {
@@ -38,11 +34,7 @@ clgpConvolution(
         ((height-1) / local_work_size[1] + 1)*local_work_size[1];
 
     clSetKernelArg(clgp_convolution_rows_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_convolution_rows_kernel, 1, sizeof(int), &output_origin_x);
-    clSetKernelArg(clgp_convolution_rows_kernel, 2, sizeof(int), &output_origin_y);
-    clSetKernelArg(clgp_convolution_rows_kernel, 3, sizeof(cl_mem), &input_image);
-    clSetKernelArg(clgp_convolution_rows_kernel, 4, sizeof(int), &input_origin_x);
-    clSetKernelArg(clgp_convolution_rows_kernel, 5, sizeof(int), &input_origin_y);
+    clSetKernelArg(clgp_convolution_rows_kernel, 1, sizeof(cl_mem), &input_image);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
@@ -66,11 +58,7 @@ clgpConvolution(
 #endif
 
     clSetKernelArg(clgp_convolution_cols_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_convolution_cols_kernel, 1, sizeof(int), &output_origin_x);
-    clSetKernelArg(clgp_convolution_cols_kernel, 2, sizeof(int), &output_origin_y);
-    clSetKernelArg(clgp_convolution_cols_kernel, 3, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_convolution_cols_kernel, 4, sizeof(int), &output_origin_x);
-    clSetKernelArg(clgp_convolution_cols_kernel, 5, sizeof(int), &output_origin_y);
+    clSetKernelArg(clgp_convolution_cols_kernel, 1, sizeof(cl_mem), &output_image);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
