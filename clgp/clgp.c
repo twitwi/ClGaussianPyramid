@@ -3,8 +3,8 @@
 
 #include <CL/cl.h>
 
-#include "convolution.h"
-#include "downscaledconvolution.h"
+#include "gauss9x9.h"
+#include "downscaledgauss5x5.h"
 #include "error.h"
 
 #ifndef CLFLAGS
@@ -20,15 +20,15 @@ cl_context clgp_context = 0;
 /* The command queue used by every clpg function */
 cl_command_queue clgp_queue = 0; 
 
-/* Ressources for the convolution */
-extern const char clgp_convolution_kernel_src[];
-cl_program clgpConvolution_program;
-cl_kernel clgp_convolution_rows_kernel;
-cl_kernel clgp_convolution_cols_kernel;
-/* Ressources for the downscaledconvolution */
-extern const char clgp_downscaledconvolution_kernel_src[];
-cl_program clgpDownscaledConvolution_program;
-cl_kernel clgp_downscaledconvolution_kernel;
+/* Ressources for the downscaledgauss5x5 */
+extern const char clgp_downscaledgauss5x5_kernel_src[];
+cl_program clgpDownscaledGauss5x5_program;
+cl_kernel clgp_downscaledgauss5x5_kernel;
+/* Ressources for the gaussian 9x9 filtering */
+extern const char clgp_gauss9x9_kernel_src[];
+cl_program clgpGauss9x9_program;
+cl_kernel clgp_gauss9x9_rows_kernel;
+cl_kernel clgp_gauss9x9_cols_kernel;
 
 void clgpRelease();
 
@@ -84,58 +84,9 @@ clgpInit(cl_context context, cl_command_queue queue)
     }
 
     /* Build the programs, find the kernels... */
-    /* Convolution */
-    source = (char *)clgp_convolution_kernel_src;
-    clgpConvolution_program =
-        clCreateProgramWithSource(
-                context,
-                1,
-                (char const **)&source,
-                NULL,
-                &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr,
-                "clgp: Could not create the clgpConvolution program\n");
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    clgp_clerr =
-        clBuildProgram(clgpConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        clGetProgramBuildInfo(
-                clgpConvolution_program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, 
-                "clgp: Could not build the clgpConvolution program\n%s\n", build_log);
-#else
-        fprintf(stderr,
-                "clgp: Could not build the clgpConvolution program\n");
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    clgp_convolution_rows_kernel = 
-        clCreateKernel(clgpConvolution_program, "convolution_rows", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: convolution_rows kernel not found\n");
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    clgp_convolution_cols_kernel = 
-        clCreateKernel(clgpConvolution_program, "convolution_cols", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: convolution_cols kernel not found\n");
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
     /* Downscaled convolution */
-    source = (char *)clgp_downscaledconvolution_kernel_src;
-    clgpDownscaledConvolution_program =
+    source = (char *)clgp_downscaledgauss5x5_kernel_src;
+    clgpDownscaledGauss5x5_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -144,34 +95,83 @@ clgpInit(cl_context context, cl_command_queue queue)
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
-                "clgp: Could not create the clgpDownscaledConvolution program\n");
+                "clgp: Could not create the clgpDownscaledGauss5x5 program\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgpDownscaledConvolution_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(clgpDownscaledGauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetProgramBuildInfo(
-                clgpDownscaledConvolution_program,
+                clgpDownscaledGauss5x5_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgpDownscaledConvolution program\n%s\n", build_log);
+                "clgp: Could not build the clgpDownscaledGauss5x5 program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "clgp: Could not build the clgpDownscaledConvolution program\n");
+                "clgp: Could not build the clgpDownscaledGauss5x5 program\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_downscaledconvolution_kernel = 
-        clCreateKernel(clgpDownscaledConvolution_program, "downscaledconvolution", &clgp_clerr);
+    clgp_downscaledgauss5x5_kernel = 
+        clCreateKernel(clgpDownscaledGauss5x5_program, "downscaledgauss5x5", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: optionallydownscaledconvolution kernel not found\n");
+        fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    /* 9x9 gaussian filtering */
+    source = (char *)clgp_gauss9x9_kernel_src;
+    clgpGauss9x9_program =
+        clCreateProgramWithSource(
+                context,
+                1,
+                (char const **)&source,
+                NULL,
+                &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr,
+                "clgp: Could not create the clgpGauss9x9 program\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_clerr =
+        clBuildProgram(clgpGauss9x9_program, 0, NULL, CLFLAGS, NULL, NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
+        clGetProgramBuildInfo(
+                clgpGauss9x9_program,
+                device,
+                CL_PROGRAM_BUILD_LOG,
+                sizeof(build_log),
+                build_log,
+                NULL);
+        fprintf(stderr, 
+                "clgp: Could not build the clgpGauss9x9 program\n%s\n", build_log);
+#else
+        fprintf(stderr,
+                "clgp: Could not build the clgpGauss9x9 program\n");
+#endif
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_gauss9x9_rows_kernel = 
+        clCreateKernel(clgpGauss9x9_program, "gauss9x9_rows", &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: gauss9x9_rows kernel not found\n");
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+    clgp_gauss9x9_cols_kernel = 
+        clCreateKernel(clgpGauss9x9_program, "gauss9x9_cols", &clgp_clerr);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: gauss9x9_cols kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -209,20 +209,20 @@ clgpRelease()
     clFinish(clgp_queue);
     
     /* Free our program and kernels */
-    if (clgp_convolution_rows_kernel != 0) {
-        clReleaseKernel(clgp_convolution_rows_kernel);
+    if (clgp_gauss9x9_rows_kernel != 0) {
+        clReleaseKernel(clgp_gauss9x9_rows_kernel);
     }
-    if (clgp_convolution_cols_kernel != 0) {
-        clReleaseKernel(clgp_convolution_cols_kernel);
+    if (clgp_gauss9x9_cols_kernel != 0) {
+        clReleaseKernel(clgp_gauss9x9_cols_kernel);
     }
-    if (clgpConvolution_program != 0) {
-        clReleaseProgram(clgpConvolution_program);
+    if (clgpGauss9x9_program != 0) {
+        clReleaseProgram(clgpGauss9x9_program);
     }
-    if (clgp_downscaledconvolution_kernel != 0) {
-        clReleaseKernel(clgp_downscaledconvolution_kernel);
+    if (clgp_downscaledgauss5x5_kernel != 0) {
+        clReleaseKernel(clgp_downscaledgauss5x5_kernel);
     }
-    if (clgpDownscaledConvolution_program != 0) {
-        clReleaseProgram(clgpDownscaledConvolution_program);
+    if (clgpDownscaledGauss5x5_program != 0) {
+        clReleaseProgram(clgpDownscaledGauss5x5_program);
     }
 
     /* Release the context from *our* library */
@@ -265,14 +265,14 @@ clgpBuildPyramid(
     /* First iteration manualy */
     /* First half octave */
     err = 
-        clgpConvolution(
+        clgpGauss9x9(
                 pyramid_image[0], 
                 input_image,
                 width,
                 height);
     /* Second half-octave */
     err = 
-        clgpConvolution(
+        clgpGauss9x9(
                 pyramid_image[1], 
                 pyramid_image[0],
                 width,
@@ -282,7 +282,7 @@ clgpBuildPyramid(
     for (level = 2; level < maxlevel; level++) {
         /* First half octave : downlevel + convolute */
         err = 
-            clgpDownscaledConvolution(
+            clgpDownscaledGauss5x5(
                     pyramid_image[level],
                     pyramid_image[level-1],
                     width>>((level-1)>>1),
@@ -292,7 +292,7 @@ clgpBuildPyramid(
 
         /* Second half octave : convolute + convolute */
         err = 
-            clgpConvolution(
+            clgpGauss9x9(
                     pyramid_image[level], 
                     pyramid_image[level-1],
                     width>>(level>>1),

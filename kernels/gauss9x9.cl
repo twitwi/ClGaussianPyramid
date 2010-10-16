@@ -1,11 +1,7 @@
 __kernel void
-convolution_rows(
+gauss9x9_rows(
         __write_only image2d_t output_image, 
-        int output_origin_x,
-        int output_origin_y,
-        __read_only image2d_t input_image,
-        int input_origin_x,
-        int input_origin_y)
+        __read_only image2d_t input_image)
 {
     const float mask[9] = { 
         3.906250e-03f,
@@ -22,11 +18,11 @@ convolution_rows(
     const sampler_t sampler = 
         CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
-    int x_in_output = output_origin_x + get_global_id(0);
-    int y_in_output = output_origin_y + get_global_id(1);
+    int x_in_output = get_global_id(0);
+    int y_in_output = get_global_id(1);
 
-    float x_in_input = (float)(input_origin_x + get_global_id(0));
-    float y_in_input = (float)(input_origin_y + get_global_id(1));
+    float x_in_input = (float)get_global_id(0);
+    float y_in_input = (float)get_global_id(1);
 
     float4 c = 0.f;
 
@@ -46,13 +42,9 @@ convolution_rows(
 }
 
 __kernel void
-convolution_cols(
+gauss9x9_cols(
         __write_only image2d_t output_image, 
-        int output_origin_x,
-        int output_origin_y,
-        __read_only image2d_t input_image,
-        int input_origin_x,
-        int input_origin_y)
+        __read_only image2d_t input_image)
 {
     const float mask[9] = {
         3.906250e-03f,
@@ -69,11 +61,11 @@ convolution_cols(
     const sampler_t sampler = 
         CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
-    int x_in_output = output_origin_x + get_global_id(0);
-    int y_in_output = output_origin_y + get_global_id(1);
+    int x_in_output = get_global_id(0);
+    int y_in_output = get_global_id(1);
 
-    float x_in_input = (float)(input_origin_x + get_global_id(0));
-    float y_in_input = (float)(input_origin_y + get_global_id(1));
+    float x_in_input = (float)get_global_id(0);
+    float y_in_input = (float)get_global_id(1);
 
     float4 c = 0.f;
 

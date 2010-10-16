@@ -10,11 +10,11 @@ extern cl_int clgp_clerr;
 extern cl_context clgp_context;
 extern cl_command_queue clgp_queue;
 
-extern cl_kernel clgp_downscaledconvolution_kernel;
+extern cl_kernel clgp_downscaledgauss5x5_kernel;
 
 
 int
-clgpDownscaledConvolution(
+clgpDownscaledGauss5x5(
         cl_mem output_image, 
         cl_mem input_image,
         int width,
@@ -32,14 +32,14 @@ clgpDownscaledConvolution(
     global_work_size[1] = 
         ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_downscaledconvolution_kernel, 1, sizeof(cl_mem), &input_image);
+    clSetKernelArg(clgp_downscaledgauss5x5_kernel, 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(clgp_downscaledgauss5x5_kernel, 1, sizeof(cl_mem), &input_image);
     clFinish(clgp_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 clgp_queue, 
-                clgp_downscaledconvolution_kernel, 
+                clgp_downscaledgauss5x5_kernel, 
                 2, 
                 NULL,
                 &global_work_size[0], 

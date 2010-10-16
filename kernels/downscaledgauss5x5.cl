@@ -1,5 +1,5 @@
 __kernel void
-downscaledconvolution(
+downscaledgauss5x5(
         __write_only image2d_t output_image, 
         __read_only image2d_t input_image)
 {
