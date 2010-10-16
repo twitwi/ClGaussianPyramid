@@ -135,7 +135,7 @@ main(int argc, char *argv[])
     region[0] = ipl_input->width;
     region[1] = ipl_input->height;
     err = 
-        clEnqueueReadImage(
+        clEnqueueWriteImage(
                 queue,
                 climage_input,
                 CL_TRUE,
