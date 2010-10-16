@@ -1,5 +1,5 @@
-#ifndef _CLGP_CONVOLUTION_H_
-#define _CLGP_CONVOLUTION_H_
+#ifndef _CLGP_GAUSS9X9_H_
+#define _CLGP_GAUSS9X9_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,7 @@ extern "C" {
 #include <CL/cl.h>
 
 int
-clgpConvolution(
+clgpGauss9x9(
         cl_mem output_image, 
         cl_mem input_image,
         int width,
@@ -18,5 +18,5 @@ clgpConvolution(
 }
 #endif
 
-#endif /* ndef _CLGP_CONVOLUTION_H_ */
+#endif /* ndef _CLGP_GAUSS9X9_H_ */
 

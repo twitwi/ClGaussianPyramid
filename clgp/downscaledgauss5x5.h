@@ -1,5 +1,5 @@
-#ifndef _CLGP_DOWNLEVELDCONVOLUTION_H_
-#define _CLGP_DOWNLEVELDCONVOLUTION_H_
+#ifndef _CLGP_DOWNSCALEDGAUSS5X5_H_
+#define _CLGP_DOWNSCALEDGAUSS5X5_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -8,7 +8,7 @@ extern "C" {
 #include <CL/cl.h>
 
 int
-clgpDownscaledConvolution(
+clgpDownscaledGauss5x5(
         cl_mem output_image, 
         cl_mem input_image,
         int width,
@@ -18,5 +18,5 @@ clgpDownscaledConvolution(
 }
 #endif
 
-#endif /* ndef _CLGP_DOWNLEVELDCONVOLUTION_H_ */
+#endif /* ndef _CLGP_DOWNSCALEDGAUSS5X5_H_ */
 
