@@ -48,8 +48,8 @@ downscaledgauss5x5(
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+4.5f))) * mask[3][4];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input+4.5f))) * mask[4][4];
 
-    barrier(CLK_LOCAL_MEM_FENCE);
+    /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normally not necessary */
 
-    write_imageui(output_image, (int2)(x_in_output, y_in_output), convert_int4(c));
+    write_imageui(output_image, (int2)(x_in_output, y_in_output), convert_uint4(c));
 }
 
