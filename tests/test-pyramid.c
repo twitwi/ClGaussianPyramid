@@ -5,11 +5,10 @@
 
 #include <CL/cl.h>
 
-#include <cv.h>
-#include <highgui.h>
-
 #include <clgp.h>
 #include <utils.h>
+
+#include <wand/MagickWand.h>
 
 /* Get the x origin of the level in the pyramid image */
 #define LEVEL_ORIGIN_X(level, width, height) \
@@ -30,10 +29,14 @@ main(int argc, char *argv[])
     cl_context context = 0;
     cl_command_queue queue = 0;
 
-    IplImage *ipl_input = NULL, *ipl_tmp = NULL, *ipl_pyramid = NULL;
+    MagickWand *input_wand = NULL, *pyramid_wand;
+    unsigned char *input_data = NULL, *pyramid_data;
+    unsigned int input_width = 0, pyramid_width = 0;
+    unsigned int input_height = 0, pyramid_height = 0;
+    unsigned int input_nbchannels = 0, pyramid_nbchannels = 0;
 
-    cl_image_format imageformat = {CL_BGRA, CL_UNSIGNED_INT8};
-    cl_mem climage_input, climage_pyramid[32];
+    cl_image_format imageformat = {CL_RGBA, CL_UNSIGNED_INT8};
+    cl_mem input_climage, pyramid_climage[32];
     int maxlevel = 0, level = 0;
     
     size_t origin[3] = {0, 0, 0};
@@ -42,6 +45,9 @@ main(int argc, char *argv[])
     struct timeval start, stop;
     double compute_time = 0., total_time = 0.;
 
+
+    /* ImageMagick init */
+    MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
     clgpMaxflopsDevice(&device);
@@ -68,63 +74,58 @@ main(int argc, char *argv[])
 
 
     /* Load image */
-    ipl_input = cvLoadImage(argv[1], CV_LOAD_IMAGE_COLOR);
-    if (ipl_input == NULL) {
-        fprintf(stderr, "Could not load file %s\n", argv[1]);
+    input_wand = NewMagickWand();
+    if (MagickReadImage(input_wand, argv[1]) != MagickTrue) {
+        fprintf(stderr, "Could not load input image\n");
         exit(1);
     }
-
-    /* Convert ipl_input to an acceptable OpenCL format (we don't do 
-     * {RGB,UINT8}) */
-    ipl_tmp = 
-        cvCreateImage(
-                cvSize(ipl_input->width, ipl_input->height), 
-                ipl_input->depth, 
-                4);
-    cvCvtColor(ipl_input, ipl_tmp, CV_BGR2BGRA);
-    cvReleaseImage(&ipl_input);
-    ipl_input = ipl_tmp;
-    ipl_tmp = NULL;
-
-    /* Create ipl_pyramid image */
-    ipl_pyramid = 
-        cvCreateImage(
-                cvSize(ipl_input->width*3, ipl_input->height),
-                ipl_input->depth, 
-                4);
-    cvRectangle(
-            ipl_pyramid,
-            cvPoint(0, 0),
-            cvPoint(ipl_pyramid->width, ipl_pyramid->height),
-            cvScalar(0, 0, 0, 0),
-            CV_FILLED,
+    input_width = MagickGetImageWidth(input_wand);
+    input_height = MagickGetImageHeight(input_wand);
+    input_nbchannels = 4;
+    input_data = 
+        (unsigned char *)malloc(input_width*input_height*input_nbchannels*sizeof(char));
+    MagickExportImagePixels(
+            input_wand,
             0,
-            0);
+            0,
+            input_width,
+            input_height,
+            "RGBA",
+            CharPixel,
+            input_data);
+
+    /* Create pyramid image */
+    pyramid_wand = NewMagickWand();
+    pyramid_width = 3 * input_width;
+    pyramid_height = input_height;
+    pyramid_nbchannels = input_nbchannels;
+    pyramid_data = 
+        (unsigned char *)malloc(pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
 
     /* Create buffers on device */
-    climage_input =
+    input_climage =
         clgpCreateImage2D(
                 CL_MEM_READ_ONLY,
                 &imageformat,
-                ipl_input->width,
-                ipl_input->height,
+                input_width,
+                input_height,
                 &err);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not allocate climage_input\n");
+        fprintf(stderr, "Could not allocate input_climage\n");
         exit(1);
     }
 
-    maxlevel = clgpMaxlevel(ipl_input->width, ipl_input->height);
+    maxlevel = clgpMaxlevel(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
-        climage_pyramid[level] =
+        pyramid_climage[level] =
             clgpCreateImage2D(
                     CL_MEM_READ_WRITE,
                     &imageformat,
-                    ipl_input->width >> (level>>1),
-                    ipl_input->height >> (level>>1),
+                    input_width >> (level>>1),
+                    input_height >> (level>>1),
                     &err);
         if (err != CL_SUCCESS) {
-            fprintf(stderr, "Could not allocate climage_pyramid[%d]\n", level);
+            fprintf(stderr, "Could not allocate pyramid_climage[%d]\n", level);
             exit(1);
         }
     }
@@ -132,24 +133,24 @@ main(int argc, char *argv[])
 
     /* Send input image on device */
     gettimeofday(&start, NULL);
-    region[0] = ipl_input->width;
-    region[1] = ipl_input->height;
+    region[0] = input_width;
+    region[1] = input_height;
     err = 
         clEnqueueWriteImage(
                 queue,
-                climage_input,
+                input_climage,
                 CL_TRUE,
                 origin,
                 region,
-                ipl_input->widthStep,
+                input_width*input_nbchannels*sizeof(char),
                 0,
-                ipl_input->imageData,
+                input_data,
                 0,
                 NULL,
                 NULL);
     clFinish(queue);
     if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy ipl_input data on device (%d)\n", err);
+        fprintf(stderr, "Could not copy input data on device (%d)\n", err);
         exit(1);
     }
     gettimeofday(&stop, NULL);
@@ -160,10 +161,10 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     clgpBuildPyramid(
-            climage_pyramid, 
-            climage_input, 
-            ipl_input->width, 
-            ipl_input->height);
+            pyramid_climage, 
+            input_climage, 
+            input_width, 
+            input_height);
     clFinish(queue);
     gettimeofday(&stop, NULL);
     compute_time = 
@@ -174,18 +175,18 @@ main(int argc, char *argv[])
     /* Retrieve images */
     gettimeofday(&start, NULL);
     for (level = 0; level < maxlevel; level++) {
-        region[0] = ipl_input->width >> (level>>1);
-        region[1] = ipl_input->height >> (level>>1);
+        region[0] = input_width >> (level>>1);
+        region[1] = input_height >> (level>>1);
         err = 
             clEnqueueReadImage(
                     queue,
-                    climage_pyramid[level],
+                    pyramid_climage[level],
                     CL_TRUE,
                     origin,
                     region,
-                    ipl_pyramid->widthStep,
+                    pyramid_width*pyramid_nbchannels*sizeof(char),
                     0,
-                    (void *)((char *)((char *)ipl_pyramid->imageData + LEVEL_ORIGIN_Y(level, ipl_input->width, ipl_input->height)*ipl_pyramid->widthStep) + LEVEL_ORIGIN_X(level, ipl_input->width, ipl_input->height)*ipl_pyramid->nChannels),
+                    (void *)((char *)((char *)pyramid_data + LEVEL_ORIGIN_Y(level, input_width, input_height)*pyramid_width*pyramid_nbchannels) + LEVEL_ORIGIN_X(level, input_width, input_height)*pyramid_nbchannels),
                     0,
                     NULL,
                     NULL);
@@ -193,7 +194,7 @@ main(int argc, char *argv[])
     clFinish(queue);
     if (err != CL_SUCCESS) {
         fprintf(stderr, 
-                "Could not copy climage_pyramid data on host (%d)\n", err);
+                "Could not copy pyramid data on host (%d)\n", err);
         exit(1);
     }
     gettimeofday(&stop, NULL);
@@ -206,9 +207,9 @@ main(int argc, char *argv[])
 
 
     /* Release device ressources */
-    clReleaseMemObject(climage_input);
+    clReleaseMemObject(input_climage);
     for (level = 0; level < maxlevel; level++) {
-        clReleaseMemObject(climage_pyramid[level]);
+        clReleaseMemObject(pyramid_climage[level]);
     }
 
     clReleaseContext(context);
@@ -219,13 +220,23 @@ main(int argc, char *argv[])
     printf(" * Pyramid time: %f ms\n", compute_time);
     printf(" * Total time: %f ms\n", total_time);
     /* Display */
-    cvNamedWindow("gaussian pyramid", CV_WINDOW_AUTOSIZE);
-    cvShowImage("gaussian pyramid", ipl_pyramid);
-    while (cvWaitKey(0) != -1) {}
-    cvDestroyWindow("gaussian pyramid");
+    MagickConstituteImage(
+            pyramid_wand, 
+            pyramid_width, 
+            pyramid_height, 
+            "RGBA", 
+            CharPixel, 
+            pyramid_data);
+    MagickSetImageOpacity(pyramid_wand, 1.0);
+    MagickDisplayImages(pyramid_wand, NULL);
 
-    cvReleaseImage(&ipl_input);
-    cvReleaseImage(&ipl_pyramid);
+    /* Free images and ImageMagick */
+    free(input_data);
+    free(pyramid_data);
+    DestroyMagickWand(input_wand);
+    DestroyMagickWand(pyramid_wand);
+
+    MagickWandTerminus();
 
 
     return 0;

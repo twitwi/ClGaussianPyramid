@@ -270,6 +270,9 @@ clgpBuildPyramid(
                 input_image,
                 width,
                 height);
+    if (err != 0) {
+        goto end;
+    }
     /* Second half-octave */
     err = 
         clgpGauss9x9(
@@ -277,6 +280,9 @@ clgpBuildPyramid(
                 pyramid_image[0],
                 width,
                 height);
+    if (err != 0) {
+        goto end;
+    }
 
     /* Now go through the other octaves until we can't reduce */
     for (level = 2; level < maxlevel; level++) {
@@ -287,6 +293,9 @@ clgpBuildPyramid(
                     pyramid_image[level-1],
                     width>>((level-1)>>1),
                     height>>((level-1)>>1));
+        if (err != 0) {
+            goto end;
+        }
 
         level++;
 
@@ -297,8 +306,12 @@ clgpBuildPyramid(
                     pyramid_image[level-1],
                     width>>(level>>1),
                     height>>(level>>1));
+        if (err != 0) {
+            goto end;
+        }
     }
 
+end:
     return err;
 }
 
