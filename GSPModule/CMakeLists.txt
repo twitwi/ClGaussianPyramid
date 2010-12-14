@@ -7,5 +7,5 @@ INCLUDE_DIRECTORIES(.)
 INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR}/clgp)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-ADD_LIBRARY ( gspclgp SHARED GaussPyramid.cpp )
+ADD_LIBRARY ( gspclgp SHARED GaussPyramid.cpp PyramidLevelSelector.cpp RGBToIPL.cpp IPLToRGB.cpp)
 TARGET_LINK_LIBRARIES(gspclgp clgp ${OPENCL_LIBRARIES})
