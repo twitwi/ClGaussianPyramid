@@ -11,7 +11,7 @@ extern cl_kernel clgp_downscaledgauss5x5_kernel;
 
 
 int
-clgp_downscaledgauss5x5_program(
+clgp_downscaled5x5_program(
         cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
@@ -22,6 +22,20 @@ clgp_downscaledgauss5x5_program(
 
     size_t local_work_size[2];
     size_t global_work_size[2];
+
+#ifdef DEBUG /* Supposely already done by higher-level functions */
+    cl_image_format input_format;
+    clGetImageInfo(
+            input_image,
+            CL_IMAGE_FORMAT,
+            sizeof(cl_image_format),
+            &input_format,
+            NULL);
+    if (input_format.image_channel_data_type != CL_UNSIGNED_INT8) {
+        fprintf(stderr, "clgp: wrong format\n");
+        goto end;
+    }
+#endif
 
     local_work_size[0] = (width >= 32) ? 16 : 8;
     local_work_size[1] = (height >= 32) ? 16 : 8;

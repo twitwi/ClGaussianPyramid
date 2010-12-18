@@ -194,8 +194,8 @@ end:
 void
 clgpRelease(cl_context context, cl_command_queue command_queue)
 {
-     /* Wait for unfinished jobs */
-     clFinish(command_queue);
+    /* Wait for unfinished jobs */
+    clFinish(command_queue);
 
     /* Free our program and kernels */
     if (clgp_downscaledgauss5x5_kernel != 0) {
@@ -223,7 +223,7 @@ clgpRelease(cl_context context, cl_command_queue command_queue)
 
 /* Util function to get the max level for an image */
 int
-clgpMaxlevel(int width, int height)
+clgpMaxlevel(size_t width, size_t height)
 {
     /* 16x16 is the pratical min size for a double 5x5 filtering */
     return 2*((int)log2f((float)((width > height) ? width : height)/16.f) + 1);
@@ -241,12 +241,24 @@ clgpBuildPyramid(
 
     size_t width = 0;
     size_t height = 0;
+    cl_image_format input_format;
     int maxlevel = 0;
     int level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
     maxlevel = clgpMaxlevel(width, height);
+
+    clGetImageInfo(
+            input_image,
+            CL_IMAGE_FORMAT,
+            sizeof(cl_image_format),
+            &input_format,
+            NULL);
+    if (input_format.image_channel_data_type != CL_UNSIGNED_INT8) {
+        fprintf(stderr, "clgp: wrong format\n");
+        goto end;
+    }
 
     /* First iteration manualy */
     /* First half octave */
