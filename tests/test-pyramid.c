@@ -1,6 +1,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include <CL/cl.h>
@@ -9,6 +10,14 @@
 #include <utils.h>
 
 #include <wand/MagickWand.h>
+
+#if 1 /* RGBA pyramid */
+# define MAGICK_FORMAT "RGBA"
+# define OPENCL_FORMAT CL_RGBA
+#else /* Grayscale pyramid */
+# define MAGICK_FORMAT "I"
+# define OPENCL_FORMAT CL_R
+#endif
 
 /* Get the x origin of the level in the pyramid image */
 #define LEVEL_ORIGIN_X(level, width, height) \
@@ -35,7 +44,7 @@ main(int argc, char *argv[])
     unsigned int input_height = 0, pyramid_height = 0;
     unsigned int input_nbchannels = 0, pyramid_nbchannels = 0;
 
-    cl_image_format imageformat = {CL_RGBA, CL_UNSIGNED_INT8};
+    cl_image_format imageformat = {OPENCL_FORMAT, CL_UNSIGNED_INT8};
     cl_mem input_climage, pyramid_climage[32];
     int maxlevel = 0, level = 0;
     
@@ -50,7 +59,7 @@ main(int argc, char *argv[])
     MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
-    clgpMaxflopsDevice(&device);
+    clgpMaxflopsGPU(&device);
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -81,7 +90,7 @@ main(int argc, char *argv[])
     }
     input_width = MagickGetImageWidth(input_wand);
     input_height = MagickGetImageHeight(input_wand);
-    input_nbchannels = 4;
+    input_nbchannels = strlen(MAGICK_FORMAT);
     input_data = 
         (unsigned char *)malloc(input_width*input_height*input_nbchannels*sizeof(char));
     MagickExportImagePixels(
@@ -90,7 +99,7 @@ main(int argc, char *argv[])
             0,
             input_width,
             input_height,
-            "RGBA",
+            MAGICK_FORMAT,
             CharPixel,
             input_data);
 
@@ -104,11 +113,14 @@ main(int argc, char *argv[])
 
     /* Create buffers on device */
     input_climage =
-        clgpCreateImage2D(
+        clCreateImage2D(
+                context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
                 input_width,
                 input_height,
+                0,
+                NULL,
                 &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not allocate input_climage\n");
@@ -118,11 +130,14 @@ main(int argc, char *argv[])
     maxlevel = clgpMaxlevel(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
-            clgpCreateImage2D(
+            clCreateImage2D(
+                    context,
                     CL_MEM_READ_WRITE,
                     &imageformat,
                     input_width >> (level>>1),
                     input_height >> (level>>1),
+                    0,
+                    NULL,
                     &err);
         if (err != CL_SUCCESS) {
             fprintf(stderr, "Could not allocate pyramid_climage[%d]\n", level);
@@ -155,20 +170,19 @@ main(int argc, char *argv[])
     }
     gettimeofday(&stop, NULL);
     total_time = 
-        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
+        (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
 
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     clgpBuildPyramid(
+            queue,
             pyramid_climage, 
-            input_climage, 
-            input_width, 
-            input_height);
+            input_climage);
     clFinish(queue);
     gettimeofday(&stop, NULL);
     compute_time = 
-        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
+        (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
     total_time += compute_time;
 
 
@@ -199,11 +213,11 @@ main(int argc, char *argv[])
     }
     gettimeofday(&stop, NULL);
     total_time += 
-        (stop.tv_sec-start.tv_sec)*1000.f + (stop.tv_usec-start.tv_usec)/1000.f;
+        (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
 
     /* Release the clgp library */
-    clgpRelease();
+    clgpRelease(context, queue);
 
 
     /* Release device ressources */
@@ -224,7 +238,7 @@ main(int argc, char *argv[])
             pyramid_wand, 
             pyramid_width, 
             pyramid_height, 
-            "RGBA", 
+            MAGICK_FORMAT, 
             CharPixel, 
             pyramid_data);
     MagickSetImageOpacity(pyramid_wand, 1.0);

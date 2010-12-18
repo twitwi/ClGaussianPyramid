@@ -9,20 +9,20 @@ extern "C" {
 
 /* Initialize the clgp library, must be called before any other function */
 int
-clgpInit(cl_context context, cl_command_queue queue);
+clgpInit(cl_context context, cl_command_queue command_queue);
 
 /* Release ressources allocated by the clgp library */
 void
-clgpRelease();
+clgpRelease(cl_context context, cl_command_queue command_queue);
 
-/* Create the pyramid from input as array of (already allocated) climages 
- * whom sizes must be large enough to store the corresponding levels */
+/* Create the classic half octave pyramid from input and output the 
+ * levels in an array of user-allocated climages (whom sizes must be large 
+ * enough to store the level). */
 int
 clgpBuildPyramid(
+        cl_command_queue command_queue,
         cl_mem pyramid_image[],
-        cl_mem input_image,
-        int width,
-        int height);
+        cl_mem input_image);
 
 /* Returns the maximum possible level for an image of size width x height */
 int

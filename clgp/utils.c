@@ -9,7 +9,7 @@ extern cl_int clgp_clerr;
 extern cl_context clgp_context; 
 
 int
-clgpFirstDevice(cl_device_id *id)
+clgpFirstGPU(cl_device_id *id)
 {
     int err = 0;
 
@@ -57,7 +57,7 @@ end:
 }
 
 int
-clgpMaxflopsDevice(cl_device_id *id)
+clgpMaxflopsGPU(cl_device_id *id)
 {
     int err = 0;
 
@@ -141,25 +141,5 @@ clgpMaxflopsDevice(cl_device_id *id)
 
 end:
     return err;
-}
-
-cl_mem
-clgpCreateImage2D (
-        cl_mem_flags flags, 
-        const cl_image_format *image_format, 
-        size_t image_width, 
-        size_t image_height, 
-        cl_int *errcode_ret)
-{
-    return 
-        clCreateImage2D(
-                clgp_context, 
-                flags, 
-                image_format, 
-                image_width, 
-                image_height, 
-                0, 
-                NULL, 
-                errcode_ret);
 }
 

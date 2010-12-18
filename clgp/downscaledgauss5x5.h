@@ -8,11 +8,12 @@ extern "C" {
 #include <CL/cl.h>
 
 int
-clgpDownscaledGauss5x5(
+clgp_downscaledgauss5x5_program(
+        cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
-        int width,
-        int height);
+        size_t width,
+        size_t height);
 
 #ifdef __cplusplus
 }

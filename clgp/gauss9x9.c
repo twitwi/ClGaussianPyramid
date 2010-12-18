@@ -7,19 +7,17 @@
 
 extern cl_int clgp_clerr;
 
-extern cl_context clgp_context;
-extern cl_command_queue clgp_queue;
-
 extern cl_kernel clgp_gauss9x9_rows_kernel;
 extern cl_kernel clgp_gauss9x9_cols_kernel;
 
 
 int
 clgpGauss9x9(
+        cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
-        int width,
-        int height)
+        size_t width,
+        size_t height)
 {
     int err = 0;
 
@@ -38,7 +36,7 @@ clgpGauss9x9(
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
-                clgp_queue, 
+                command_queue, 
                 clgp_gauss9x9_rows_kernel, 
                 2, 
                 NULL,
@@ -49,7 +47,7 @@ clgpGauss9x9(
                 NULL);
 
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(clgp_queue);
+    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: Could not run the gauss9x9_rows kernel\n");
         printf("%d\n", clgp_clerr);
@@ -63,7 +61,7 @@ clgpGauss9x9(
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
-                clgp_queue, 
+                command_queue, 
                 clgp_gauss9x9_cols_kernel, 
                 2, 
                 NULL,
@@ -74,7 +72,7 @@ clgpGauss9x9(
                 NULL);
 
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(clgp_queue);
+    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: Could not run the gauss9x9_cols kernel\n");
         err = CLGP_CL_ERROR;
