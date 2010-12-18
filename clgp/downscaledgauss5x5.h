@@ -8,7 +8,7 @@ extern "C" {
 #include <CL/cl.h>
 
 int
-clgp_downscaledgauss5x5_program(
+clgpDownscaledGauss5x5(
         cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,

@@ -16,7 +16,7 @@ extern cl_int clgp_clerr;
 /* Global variables for the library */
 /* Ressources for the downscaled gaussian 5x5 filtering */
 extern const char clgp_downscaledgauss5x5_kernel_src[];
-cl_program clgp_downscaledgauss5x5_program_program;
+cl_program clgp_downscaledgauss5x5_program;
 cl_kernel clgp_downscaledgauss5x5_kernel;
 /* Ressources for the gaussian 9x9 filtering */
 extern const char clgp_gauss9x9_kernel_src[];
@@ -77,7 +77,7 @@ clgpInit(cl_context context, cl_command_queue command_queue)
     /* Build the programs, find the kernels... */
     /* Downscaled 5x5 gaussian blur */
     source = (char *)clgp_downscaledgauss5x5_kernel_src;
-    clgp_downscaledgauss5x5_program_program =
+    clgp_downscaledgauss5x5_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -91,11 +91,11 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgp_downscaledgauss5x5_program_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(clgp_downscaledgauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetProgramBuildInfo(
-                clgp_downscaledgauss5x5_program_program,
+                clgp_downscaledgauss5x5_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
@@ -111,7 +111,7 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         goto end;
     }
     clgp_downscaledgauss5x5_kernel = 
-        clCreateKernel(clgp_downscaledgauss5x5_program_program, "downscaledgauss5x5", &clgp_clerr);
+        clCreateKernel(clgp_downscaledgauss5x5_program, "downscaledgauss5x5", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
         err = CLGP_CL_ERROR;
@@ -201,8 +201,8 @@ clgpRelease(cl_context context, cl_command_queue command_queue)
     if (clgp_downscaledgauss5x5_kernel != 0) {
         clReleaseKernel(clgp_downscaledgauss5x5_kernel);
     }
-    if (clgp_downscaledgauss5x5_program_program != 0) {
-        clReleaseProgram(clgp_downscaledgauss5x5_program_program);
+    if (clgp_downscaledgauss5x5_program != 0) {
+        clReleaseProgram(clgp_downscaledgauss5x5_program);
     }
     if (clgp_gauss9x9_rows_kernel != 0) {
         clReleaseKernel(clgp_gauss9x9_rows_kernel);
@@ -287,7 +287,7 @@ clgpBuildPyramid(
     for (level = 2; level < maxlevel; level++) {
         /* First half octave : downscale + 5x5 blur */
         err = 
-            clgp_downscaledgauss5x5_program(
+            clgpDownscaledGauss5x5(
                     command_queue,
                     pyramid_image[level],
                     pyramid_image[level-1],
