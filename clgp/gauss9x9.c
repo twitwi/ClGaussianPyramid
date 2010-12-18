@@ -24,6 +24,20 @@ clgpGauss9x9(
     size_t local_work_size[2];
     size_t global_work_size[2];
 
+#ifdef DEBUG /* Supposely already done by higher-level functions */
+    cl_image_format input_format;
+    clGetImageInfo(
+            input_image,
+            CL_IMAGE_FORMAT,
+            sizeof(cl_image_format),
+            &input_format,
+            NULL);
+    if (input_format.image_channel_data_type != CL_UNSIGNED_INT8) {
+        fprintf(stderr, "clgp: wrong format\n");
+        goto end;
+    }
+#endif
+
     local_work_size[0] = (width >= 16) ? 16 : 8;
     local_work_size[1] = (height >= 16) ? 16 : 8;
     global_work_size[0] = 
