@@ -11,7 +11,7 @@ extern cl_kernel clgp_downscaledgauss5x5_kernel;
 
 
 int
-clgp_downscaled5x5_program(
+clgpDownscaledGauss5x5(
         cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
