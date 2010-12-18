@@ -9,10 +9,11 @@ extern "C" {
 
 int
 clgpGauss9x9(
+        cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
-        int width,
-        int height);
+        size_t width,
+        size_t height);
 
 #ifdef __cplusplus
 }

@@ -7,18 +7,16 @@
 
 extern cl_int clgp_clerr;
 
-extern cl_context clgp_context;
-extern cl_command_queue clgp_queue;
-
 extern cl_kernel clgp_downscaledgauss5x5_kernel;
 
 
 int
-clgpDownscaledGauss5x5(
+clgp_downscaledgauss5x5_program(
+        cl_command_queue command_queue,
         cl_mem output_image, 
         cl_mem input_image,
-        int width,
-        int height)
+        size_t width,
+        size_t height)
 {
     int err = 0;
 
@@ -34,11 +32,11 @@ clgpDownscaledGauss5x5(
 
     clSetKernelArg(clgp_downscaledgauss5x5_kernel, 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(clgp_downscaledgauss5x5_kernel, 1, sizeof(cl_mem), &input_image);
-    clFinish(clgp_queue);
+    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
-                clgp_queue, 
+                command_queue, 
                 clgp_downscaledgauss5x5_kernel, 
                 2, 
                 NULL,
@@ -49,7 +47,7 @@ clgpDownscaledGauss5x5(
                 NULL);
 
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(clgp_queue);
+    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
         err = CLGP_CL_ERROR;

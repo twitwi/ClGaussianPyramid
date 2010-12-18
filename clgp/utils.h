@@ -9,21 +9,12 @@ extern "C" {
 
 /* Retrieve the cl_device_id of the first GPU on the system */
 int
-clgpFirstDevice(cl_device_id *id);
+clgpFirstGPU(cl_device_id *id);
 
 /* Retrieve the cl_device_id of the more powerful (in terms of flops) GPU on
  * the system */
 int
-clgpMaxflopsDevice(cl_device_id *id);
-
-/* Create a 2D image object, simplified version (for GPUs only) */
-cl_mem
-clgpCreateImage2D (
-        cl_mem_flags flags, 
-        const cl_image_format *image_format, 
-        size_t image_width, 
-        size_t image_height, 
-        cl_int *errcode_ret);
+clgpMaxflopsGPU(cl_device_id *id);
 
 #ifdef __cplusplus
 }
