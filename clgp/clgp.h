@@ -15,18 +15,19 @@ clgpInit(cl_context context, cl_command_queue command_queue);
 void
 clgpRelease(cl_context context, cl_command_queue command_queue);
 
-/* Create the classic half octave pyramid from input and output the 
- * levels in an array of user-allocated climages (whom sizes must be large 
- * enough to store the level). */
+/* Returns the maximum possible level for an image of size width x height in 
+ * the classic pyramid */
 int
-clgpBuildPyramid(
+clgpMaxlevel(size_t width, size_t height);
+
+/* Create the half-octave gaussian pyramid from input and store its levels in
+ * the pyramid_image array images (whom sizes must be large enough to store 
+ * the corresponding level). */
+int
+clgpBuildPyramidHalfOctave(
         cl_command_queue command_queue,
         cl_mem pyramid_image[],
         cl_mem input_image);
-
-/* Returns the maximum possible level for an image of size width x height */
-int
-clgpMaxlevel(int width, int height);
 
 #ifdef __cplusplus
 }
