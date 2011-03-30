@@ -22,31 +22,31 @@ downscaledgauss5x5(
 
     float4 c = 0.f;
 
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.5f, y_in_input-3.5f))) * mask[0][0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input-3.5f))) * mask[1][0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input-3.5f))) * mask[2][0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input-3.5f))) * mask[3][0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input-3.5f))) * mask[4][0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.5f, y_in_input-1.5f))) * mask[0][1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input-1.5f))) * mask[1][1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input-1.5f))) * mask[2][1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input-1.5f))) * mask[3][1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input-1.5f))) * mask[4][1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.5f, y_in_input+0.5f))) * mask[0][2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+0.5f))) * mask[1][2];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input-1.5f))) * mask[0][0];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input-1.5f))) * mask[1][0];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input-1.5f))) * mask[2][0];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input-1.5f))) * mask[3][0];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input-1.5f))) * mask[4][0];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input-0.5f))) * mask[0][1];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input-0.5f))) * mask[1][1];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input-0.5f))) * mask[2][1];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input-0.5f))) * mask[3][1];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input-0.5f))) * mask[4][1];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+0.5f))) * mask[0][2];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input+0.5f))) * mask[1][2];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input+0.5f))) * mask[2][2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+0.5f))) * mask[3][2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input+0.5f))) * mask[4][2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.5f, y_in_input+2.5f))) * mask[0][3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+2.5f))) * mask[1][3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input+2.5f))) * mask[2][3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+2.5f))) * mask[3][3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input+2.5f))) * mask[4][3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.5f, y_in_input+4.5f))) * mask[0][4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+4.5f))) * mask[1][4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input+4.5f))) * mask[2][4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+4.5f))) * mask[3][4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.5f, y_in_input+4.5f))) * mask[4][4];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input+0.5f))) * mask[3][2];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+0.5f))) * mask[4][2];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+1.5f))) * mask[0][3];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input+1.5f))) * mask[1][3];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input+1.5f))) * mask[2][3];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input+1.5f))) * mask[3][3];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+1.5f))) * mask[4][3];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input+2.5f))) * mask[0][4];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input+2.5f))) * mask[1][4];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input+2.5f))) * mask[2][4];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input+2.5f))) * mask[3][4];
+    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+2.5f))) * mask[4][4];
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normally not necessary */
 

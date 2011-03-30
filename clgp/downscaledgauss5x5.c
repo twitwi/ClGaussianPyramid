@@ -37,8 +37,8 @@ clgpDownscaledGauss5x5(
     }
 #endif
 
-    local_work_size[0] = (width >= 32) ? 16 : 8;
-    local_work_size[1] = (height >= 32) ? 16 : 8;
+    local_work_size[0] = (width >= 32) ? 16 : width>>1;
+    local_work_size[1] = (height >= 32) ? 16 : height>>1;
     global_work_size[0] = 
         ((width/2-1) / local_work_size[0] + 1)*local_work_size[0];
     global_work_size[1] = 

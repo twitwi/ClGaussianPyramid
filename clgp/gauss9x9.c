@@ -38,8 +38,8 @@ clgpGauss9x9(
     }
 #endif
 
-    local_work_size[0] = (width >= 16) ? 16 : 8;
-    local_work_size[1] = (height >= 16) ? 16 : 8;
+    local_work_size[0] = (width >= 16) ? 16 : width;
+    local_work_size[1] = (height >= 16) ? 16 : height;
     global_work_size[0] = 
         ((width-1) / local_work_size[0] + 1)*local_work_size[0];
     global_work_size[1] = 

@@ -194,9 +194,6 @@ end:
 void
 clgpRelease(cl_context context, cl_command_queue command_queue)
 {
-    /* Wait for unfinished jobs */
-    clFinish(command_queue);
-
     /* Free our program and kernels */
     if (clgp_downscaledgauss5x5_kernel != 0) {
         clReleaseKernel(clgp_downscaledgauss5x5_kernel);
@@ -225,14 +222,14 @@ clgpRelease(cl_context context, cl_command_queue command_queue)
 int
 clgpMaxlevel(size_t width, size_t height)
 {
-    /* 16x16 is the pratical min size for a double 5x5 filtering */
-    return 2*((int)log2f((float)((width > height) ? width : height)/16.f) + 1);
+    /* Go until the last reduction possible */
+    return (int)log2f((float)((width > height) ? width : height));
 }
 
-/* Build an array of images that are the different layers of the classic 
+/* Build an array of images that are the different layers of the half-octave
  * gaussian pyramid */
 int
-clgpBuildPyramid(
+clgpBuildPyramidHalfOctave(
         cl_command_queue command_queue,
         cl_mem pyramid_image[],
         cl_mem input_image)
@@ -247,11 +244,11 @@ clgpBuildPyramid(
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
-    maxlevel = clgpMaxlevel(width, height);
+    maxlevel = clgpMaxlevel(width, height)*2;
 
     clGetImageInfo(
-            input_image,
-            CL_IMAGE_FORMAT,
+            input_image, 
+            CL_IMAGE_FORMAT, 
             sizeof(cl_image_format),
             &input_format,
             NULL);
@@ -285,7 +282,7 @@ clgpBuildPyramid(
     }
     /* Now go through the other octaves until we can't reduce */
     for (level = 2; level < maxlevel; level++) {
-        /* First half octave : downscale + 5x5 blur */
+        /* First half octave : 5x5 blur + downscale */
         err = 
             clgpDownscaledGauss5x5(
                     command_queue,
