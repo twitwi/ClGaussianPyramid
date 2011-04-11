@@ -1,0 +1,20 @@
+//-nocpp
+-library clgp
+-package com.heeere.clgp
+
+// Comment this line to produce a JAR :
+//-nocomp -noJar
+//-noJar
+
+-jar CLGP.jar
+-o out
+
+-v
+-preferJavac
+
+-I../clgp
+-I/home/twilight/app/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc
+
+../clgp/clgp.h
+../clgp/utils.h
+../build/clgp/libclgp.so
