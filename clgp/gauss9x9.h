@@ -10,6 +10,7 @@ extern "C" {
 int
 clgpGauss9x9(
         cl_command_queue command_queue,
+        cl_kernel *kernels,
         cl_mem output_image, 
         cl_mem input_image,
         size_t width,

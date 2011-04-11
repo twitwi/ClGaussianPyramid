@@ -7,13 +7,14 @@
 
 extern cl_int clgp_clerr;
 
-extern cl_kernel clgp_gauss9x9_rows_kernel;
-extern cl_kernel clgp_gauss9x9_cols_kernel;
+#define GAUSS9X9_ROWS 1
+#define GAUSS9X9_COLS 2
 
 
 int
 clgpGauss9x9(
         cl_command_queue command_queue,
+        cl_kernel *kernels,
         cl_mem output_image, 
         cl_mem input_image,
         size_t width,
@@ -45,13 +46,13 @@ clgpGauss9x9(
     global_work_size[1] = 
         ((height-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(clgp_gauss9x9_rows_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_gauss9x9_rows_kernel, 1, sizeof(cl_mem), &input_image);
+    clSetKernelArg(kernels[GAUSS9X9_ROWS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[GAUSS9X9_ROWS], 1, sizeof(cl_mem), &input_image);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                clgp_gauss9x9_rows_kernel, 
+                kernels[GAUSS9X9_ROWS], 
                 2, 
                 NULL,
                 &global_work_size[0], 
@@ -70,13 +71,13 @@ clgpGauss9x9(
     }
 #endif
 
-    clSetKernelArg(clgp_gauss9x9_cols_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_gauss9x9_cols_kernel, 1, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[GAUSS9X9_COLS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[GAUSS9X9_COLS], 1, sizeof(cl_mem), &output_image);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                clgp_gauss9x9_cols_kernel, 
+                kernels[GAUSS9X9_COLS], 
                 2, 
                 NULL,
                 &global_work_size[0], 

@@ -1,5 +1,7 @@
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include <CL/cl.h>
 
@@ -14,33 +16,35 @@
 extern cl_int clgp_clerr;
 
 /* Global variables for the library */
-/* Ressources for the downscaled gaussian 5x5 filtering */
-extern const char clgp_downscaledgauss5x5_kernel_src[];
-cl_program clgp_downscaledgauss5x5_program;
-cl_kernel clgp_downscaledgauss5x5_kernel;
-/* Ressources for the gaussian 9x9 filtering */
-extern const char clgp_gauss9x9_kernel_src[];
-cl_program clgp_gauss9x9_program;
-cl_kernel clgp_gauss9x9_rows_kernel;
-cl_kernel clgp_gauss9x9_cols_kernel;
+extern const char clgp_downscaledgauss5x5_src[];
+extern const char clgp_gauss9x9_src[];
 
-void clgpRelease(cl_context context, cl_command_queue command_queue);
+#define DOWNSCALEDGAUSS5X5 0
+#define GAUSS9X9_ROWS 1
+#define GAUSS9X9_COLS 2
 
-/* Create the command queue for clgp operation, build kernels, must be called
- * before any other function */
+void 
+clgpRelease(cl_context context, cl_kernel *kernels);
+
+/* Register clgp in opencl context, must be called before everyelse function */
 int
-clgpInit(cl_context context, cl_command_queue command_queue)
+clgpInit(cl_context context, cl_kernel **kernels)
 {
     int err = 0;
 
     cl_device_id device = 0;
     cl_bool has_image = CL_FALSE;
 
+    cl_program downscaledgauss5x5_program = NULL;
+    cl_program gauss9x9_program = NULL;
+
     char *source = NULL;
 
 #ifdef DEBUG
     char build_log[20000];
 #endif
+
+    *kernels = NULL;
 
     /* Check if device support images */
     clgp_clerr = 
@@ -74,10 +78,14 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         goto end;
     }
 
+    /* Allocate kernels array */
+    *kernels = (cl_kernel *)malloc(8*sizeof(cl_kernel));
+    memset(*kernels, 0, 8*sizeof(cl_kernel));
+
     /* Build the programs, find the kernels... */
     /* Downscaled 5x5 gaussian blur */
-    source = (char *)clgp_downscaledgauss5x5_kernel_src;
-    clgp_downscaledgauss5x5_program =
+    source = (char *)clgp_downscaledgauss5x5_src;
+    downscaledgauss5x5_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -86,40 +94,40 @@ clgpInit(cl_context context, cl_command_queue command_queue)
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr,
-                "clgp: Could not create the clgp_downscaledgauss5x5_program program\n");
+                "clgp: Could not create the downscaledgauss5x5_program program\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgp_downscaledgauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(downscaledgauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetProgramBuildInfo(
-                clgp_downscaledgauss5x5_program,
+                downscaledgauss5x5_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgp_downscaledgauss5x5_program program\n%s\n", build_log);
+                "clgp: Could not build the downscaledgauss5x5_program program\n%s\n", build_log);
 #else
         fprintf(stderr,
-                "clgp: Could not build the clgp_downscaledgauss5x5_program program\n");
+                "clgp: Could not build the downscaledgauss5x5_program program\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_downscaledgauss5x5_kernel = 
-        clCreateKernel(clgp_downscaledgauss5x5_program, "downscaledgauss5x5", &clgp_clerr);
+    (*kernels)[DOWNSCALEDGAUSS5X5] = 
+        clCreateKernel(downscaledgauss5x5_program, "downscaledgauss5x5", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
     /* 9x9 gaussian blur */
-    source = (char *)clgp_gauss9x9_kernel_src;
-    clgp_gauss9x9_program =
+    source = (char *)clgp_gauss9x9_src;
+    gauss9x9_program =
         clCreateProgramWithSource(
                 context,
                 1,
@@ -133,11 +141,11 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(clgp_gauss9x9_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(gauss9x9_program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetProgramBuildInfo(
-                clgp_gauss9x9_program,
+                gauss9x9_program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
@@ -152,15 +160,15 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_gauss9x9_rows_kernel = 
-        clCreateKernel(clgp_gauss9x9_program, "gauss9x9_rows", &clgp_clerr);
+    (*kernels)[GAUSS9X9_ROWS] = 
+        clCreateKernel(gauss9x9_program, "gauss9x9_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: gauss9x9_rows kernel not found\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_gauss9x9_cols_kernel = 
-        clCreateKernel(clgp_gauss9x9_program, "gauss9x9_cols", &clgp_clerr);
+    (*kernels)[GAUSS9X9_COLS] = 
+        clCreateKernel(gauss9x9_program, "gauss9x9_cols", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
         fprintf(stderr, "clgp: gauss9x9_cols kernel not found\n");
         err = CLGP_CL_ERROR;
@@ -175,55 +183,61 @@ clgpInit(cl_context context, cl_command_queue command_queue)
         goto end;
     }
 
-    /* Mark the command queue as used by our library */
-    clgp_clerr = clRetainCommandQueue(command_queue);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not retain command queue\n");
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-
 end:
     if (err != 0) {
-        clgpRelease(context, command_queue);
+        clgpRelease(context, *kernels);
     }
     return err;
 }
 
 /* Release the ressources created by the library */
 void
-clgpRelease(cl_context context, cl_command_queue command_queue)
+clgpRelease(cl_context context, cl_kernel *kernels)
 {
+    cl_program downscaledgauss5x5_program = NULL;
+    cl_program gauss9x9_program = NULL;
+
+    /* Retrieve program references from kernels */
+    clGetKernelInfo(
+            kernels[DOWNSCALEDGAUSS5X5],
+            CL_KERNEL_PROGRAM,
+            sizeof(cl_program),
+            &downscaledgauss5x5_program,
+            NULL);
+    clGetKernelInfo(
+            kernels[GAUSS9X9_COLS],
+            CL_KERNEL_PROGRAM,
+            sizeof(cl_program),
+            &gauss9x9_program,
+            NULL);
     /* Free our program and kernels */
-    if (clgp_downscaledgauss5x5_kernel != 0) {
-        clReleaseKernel(clgp_downscaledgauss5x5_kernel);
+    if (kernels[DOWNSCALEDGAUSS5X5] != NULL) {
+        clReleaseKernel(kernels[DOWNSCALEDGAUSS5X5]);
     }
-    if (clgp_downscaledgauss5x5_program != 0) {
-        clReleaseProgram(clgp_downscaledgauss5x5_program);
+    if (downscaledgauss5x5_program != NULL) {
+        clReleaseProgram(downscaledgauss5x5_program);
     }
-    if (clgp_gauss9x9_rows_kernel != 0) {
-        clReleaseKernel(clgp_gauss9x9_rows_kernel);
+    if (kernels[GAUSS9X9_ROWS] != NULL) {
+        clReleaseKernel(kernels[GAUSS9X9_ROWS]);
     }
-    if (clgp_gauss9x9_cols_kernel != 0) {
-        clReleaseKernel(clgp_gauss9x9_cols_kernel);
+    if (kernels[GAUSS9X9_COLS] != NULL) {
+        clReleaseKernel(kernels[GAUSS9X9_COLS]);
     }
-    if (clgp_gauss9x9_program != 0) {
-        clReleaseProgram(clgp_gauss9x9_program);
+    if (gauss9x9_program != NULL) {
+        clReleaseProgram(gauss9x9_program);
     }
+    free(kernels);
 
     /* Release the context from *our* library */
     clReleaseContext(context);
-
-    /* Release the command queue from *our* library */
-    clReleaseCommandQueue(command_queue);
 }
 
 /* Util function to get the max level for an image */
 int
-clgpMaxlevel(size_t width, size_t height)
+clgpMaxlevelHalfOctave(size_t width, size_t height)
 {
     /* Go until the last reduction possible */
-    return (int)log2f((float)((width > height) ? width : height));
+    return (int)2*log2f((float)((width > height) ? width : height));
 }
 
 /* Build an array of images that are the different layers of the half-octave
@@ -231,20 +245,20 @@ clgpMaxlevel(size_t width, size_t height)
 int
 clgpBuildPyramidHalfOctave(
         cl_command_queue command_queue,
+        cl_kernel *kernels,
         cl_mem pyramid_image[],
-        cl_mem input_image)
+        cl_mem input_image,
+        int maxlevel)
 {
     int err = 0;
 
     size_t width = 0;
     size_t height = 0;
     cl_image_format input_format;
-    int maxlevel = 0;
     int level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
-    maxlevel = clgpMaxlevel(width, height)*2;
 
     clGetImageInfo(
             input_image, 
@@ -262,6 +276,7 @@ clgpBuildPyramidHalfOctave(
     err = 
         clgpGauss9x9(
                 command_queue,
+                kernels,
                 pyramid_image[0], 
                 input_image,
                 width,
@@ -273,6 +288,7 @@ clgpBuildPyramidHalfOctave(
     err = 
         clgpGauss9x9(
                 command_queue,
+                kernels,
                 pyramid_image[1], 
                 pyramid_image[0],
                 width,
@@ -286,6 +302,7 @@ clgpBuildPyramidHalfOctave(
         err = 
             clgpDownscaledGauss5x5(
                     command_queue,
+                    kernels,
                     pyramid_image[level],
                     pyramid_image[level-1],
                     width>>((level-1)>>1),
@@ -300,6 +317,7 @@ clgpBuildPyramidHalfOctave(
         err = 
             clgpGauss9x9(
                     command_queue,
+                    kernels,
                     pyramid_image[level], 
                     pyramid_image[level-1],
                     width>>(level>>1),

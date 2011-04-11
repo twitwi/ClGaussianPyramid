@@ -7,12 +7,13 @@
 
 extern cl_int clgp_clerr;
 
-extern cl_kernel clgp_downscaledgauss5x5_kernel;
+#define DOWNSCALEDGAUSS5X5 0
 
 
 int
 clgpDownscaledGauss5x5(
         cl_command_queue command_queue,
+        cl_kernel *kernels,
         cl_mem output_image, 
         cl_mem input_image,
         size_t width,
@@ -44,14 +45,14 @@ clgpDownscaledGauss5x5(
     global_work_size[1] = 
         ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(clgp_downscaledgauss5x5_kernel, 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(clgp_downscaledgauss5x5_kernel, 1, sizeof(cl_mem), &input_image);
+    clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 1, sizeof(cl_mem), &input_image);
     clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                clgp_downscaledgauss5x5_kernel, 
+                kernels[DOWNSCALEDGAUSS5X5], 
                 2, 
                 NULL,
                 &global_work_size[0], 
