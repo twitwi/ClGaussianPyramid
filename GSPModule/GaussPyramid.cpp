@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <clgp.h>
-#include <utils.h>
+#include <clgp/clgp.h>
+#include <clgp/utils.h>
 #include <cv.h>
 
 #include "PyramidLayoutUtils.h"
@@ -30,7 +30,7 @@ void GaussPyramid::initModule() {
     gettimeofday(&start, NULL);
 
     /* OpenCL init, using our utils functions */
-    clgpMaxflopsDevice(&device);
+    clgpMaxflopsGPU(&device);
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -47,7 +47,7 @@ void GaussPyramid::initModule() {
     }
 
     /* Initialize the clgp library */
-    if (clgpInit(context, queue) != 0) {
+    if (clgpInit(context, &clgpkernels) != 0) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
@@ -61,7 +61,7 @@ void GaussPyramid::stopModule() {
     struct timeval start;
     gettimeofday(&start, NULL);
     /* Release the clgp library */
-    clgpRelease();
+    clgpRelease(context, clgpkernels);
     /* Release device ressources */
     clReleaseContext(context);
     clReleaseCommandQueue(queue);
@@ -137,25 +137,31 @@ void GaussPyramid::inputRGBA(char* dataRGBA, int w, int h) {
 
     /* Create buffers on device */
     input_climage =
-        clgpCreateImage2D(
+        clCreateImage2D(
+                context,
                 CL_MEM_READ_ONLY,
                 &imageformat,
                 input_width,
                 input_height,
+                0,
+                NULL,
                 &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not allocate input_climage\n");
         exit(1);
     }
 
-    maxlevel = clgpMaxlevel(input_width, input_height);
+    maxlevel = clgpMaxlevelHalfOctave(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
-            clgpCreateImage2D(
-                    CL_MEM_READ_WRITE,
+            clCreateImage2D(
+                    context,
+                    CL_MEM_READ_ONLY,
                     &imageformat,
                     input_width >> (level>>1),
                     input_height >> (level>>1),
+                    0,
+                    NULL,
                     &err);
         if (err != CL_SUCCESS) {
             fprintf(stderr, "Could not allocate pyramid_climage[%d]\n", level);
@@ -190,11 +196,12 @@ void GaussPyramid::inputRGBA(char* dataRGBA, int w, int h) {
 
 
     /* At last, call our pyramid function */
-    clgpBuildPyramid(
+    clgpBuildPyramidHalfOctave(
+            queue,
+            clgpkernels,
             pyramid_climage, 
-            input_climage, 
-            input_width, 
-            input_height);
+            input_climage,
+            maxlevel);
     clFinish(queue);
     printf(" * running pyramid: %f ms\n", timeFromAndUpdate(step));
 
