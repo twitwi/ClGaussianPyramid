@@ -16,7 +16,7 @@
 # define OPENCL_FORMAT CL_RGBA
 #else /* Grayscale pyramid */
 # define MAGICK_FORMAT "I"
-# define OPENCL_FORMAT CL_R
+# define OPENCL_FORMAT CL_INTENSITY
 #endif
 
 /* Get the x origin of the level in the pyramid image */
@@ -34,9 +34,10 @@ main(int argc, char *argv[])
 {
     cl_int err = 0;
 
-    cl_device_id device;
-    cl_context context = 0;
-    cl_command_queue queue = 0;
+    cl_device_id device = NULL;
+    cl_context context = NULL;
+    cl_command_queue queue = NULL;
+    cl_kernel *clgpkernels = NULL;
 
     MagickWand *input_wand = NULL, *pyramid_wand;
     unsigned char *input_data = NULL, *pyramid_data;
@@ -76,7 +77,7 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the clgp library */
-    if (clgpInit(context, queue) != 0) {
+    if (clgpInit(context, &clgpkernels) != 0) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
@@ -128,7 +129,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    maxlevel = clgpMaxlevel(input_width, input_height)*2;
+    maxlevel = clgpMaxlevelHalfOctave(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
             clCreateImage2D(
@@ -178,8 +179,10 @@ main(int argc, char *argv[])
     gettimeofday(&start, NULL);
     clgpBuildPyramidHalfOctave(
             queue,
+            clgpkernels,
             pyramid_climage, 
-            input_climage);
+            input_climage,
+            maxlevel);
     clFinish(queue);
     gettimeofday(&stop, NULL);
     compute_time = 
@@ -218,7 +221,7 @@ main(int argc, char *argv[])
 
 
     /* Release the clgp library */
-    clgpRelease(context, queue);
+    clgpRelease(context, clgpkernels);
 
 
     /* Release device ressources */
