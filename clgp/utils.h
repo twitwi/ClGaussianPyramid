@@ -16,6 +16,10 @@ clgpFirstGPU(cl_device_id *id);
 int
 clgpMaxflopsGPU(cl_device_id *id);
 
+/* Retrieve the cl_device_id of the first CPU on the system */
+int
+clgpFirstCPU(cl_device_id *id);
+
 #ifdef __cplusplus
 }
 #endif

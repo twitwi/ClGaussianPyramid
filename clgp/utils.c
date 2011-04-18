@@ -8,8 +8,8 @@ extern cl_int clgp_clerr;
 
 extern cl_context clgp_context; 
 
-int
-clgpFirstGPU(cl_device_id *id)
+static int
+clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
 {
     int err = 0;
 
@@ -38,7 +38,7 @@ clgpFirstGPU(cl_device_id *id)
         clgp_clerr =
             clGetDeviceIDs(
                     platforms[p],
-                    CL_DEVICE_TYPE_GPU,
+                    device_type,
                     16,
                     devices,
                     &n_devs);
@@ -56,6 +56,12 @@ clgpFirstGPU(cl_device_id *id)
 
 end:
     return err;
+}
+
+int
+clgpFirstGPU(cl_device_id *id)
+{
+    return clgpFirstDevice(id, CL_DEVICE_TYPE_GPU);
 }
 
 int
@@ -144,5 +150,11 @@ clgpMaxflopsGPU(cl_device_id *id)
 
 end:
     return err;
+}
+
+int
+clgpFirstCPU(cl_device_id *id)
+{
+    return clgpFirstDevice(id, CL_DEVICE_TYPE_CPU);
 }
 
