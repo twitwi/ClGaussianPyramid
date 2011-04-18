@@ -18,6 +18,7 @@ class GaussPyramid {
     } cache;
     cl_context context;
     cl_command_queue queue;
+    cl_kernel *clgpkernels;
 
 public:
     Framework _framework;
