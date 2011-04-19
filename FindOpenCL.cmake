@@ -40,7 +40,9 @@ IF(OPENCL_LIBRARIES)
 ENDIF(OPENCL_LIBRARIES)
 
 FIND_PATH(OPENCL_INCLUDE_DIR CL/cl.h 
-    PATHS ${OPENCL_ROOT} /usr/local/cuda/include
+    PATHS 
+        /usr/local/cuda/include
+        /System/Library/Frameworks/OpenCL.framework/Headers
     PATH_SUFFIXES nvidia)
 
 FIND_LIBRARY(OPENCL_LIBRARIES NAMES OpenCL PATH_SUFFIXES nvidia nvidia-current)
@@ -57,10 +59,7 @@ IF(OPENCL_FOUND)
    ENDIF(NOT OpenCL_FIND_QUIETLY)
 ELSE(OPENCL_FOUND)
    IF(OpenCL_FIND_REQUIRED)
-     IF(NOT OPENCL_INCLUDE_DIR)
-      MESSAGE(FATAL_ERROR "Could NOT find OpenCL (headers)")
-    ENDIF(NOT OPENCL_INCLUDE_DIR)
-    MESSAGE(FATAL_ERROR "Could NOT find OpenCL (libraries)")
+     MESSAGE(FATAL_ERROR "Could NOT find OpenCL")
    ENDIF(OpenCL_FIND_REQUIRED)
 ENDIF(OPENCL_FOUND)
 
