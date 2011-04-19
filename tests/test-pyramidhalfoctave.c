@@ -65,6 +65,10 @@ main(int argc, char *argv[])
 
     /* OpenCL init, using our utils functions */
     clgpFirstGPU(&device);
+    if (device == NULL) {
+        fprintf(stderr, "No device available\n");
+        exit(1);
+    }
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
