@@ -20,6 +20,8 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
     cl_uint n_devs = 0;
 
     int p = 0;
+    
+    *id = NULL;
 
     /* Enumerate platforms, we take the first available */
     clgp_clerr =
@@ -48,11 +50,10 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
             goto end;
         }
         if (n_devs > 0) {
+            *id = devices[0];
             break;
         }
     }
-
-    *id = devices[0];
 
 end:
     return err;
