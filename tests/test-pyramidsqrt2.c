@@ -62,7 +62,11 @@ main(int argc, char *argv[])
     MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
-    clgpMaxflopsGPU(&device);
+    clgpFirstGPU(&device);
+    if (device == NULL) {
+        fprintf(stderr, "No device available\n");
+        exit(1);
+    }
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
