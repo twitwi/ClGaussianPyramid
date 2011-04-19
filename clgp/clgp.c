@@ -3,7 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <CL/cl.h>
+#ifndef __APPLE__
+# include <CL/opencl.h>
+#else
+# include <OpenCL/opencl.h>
+#endif
 
 #include "downscaledgauss5x5.h"
 #include "error.h"

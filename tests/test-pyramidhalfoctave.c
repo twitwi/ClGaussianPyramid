@@ -4,7 +4,11 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include <CL/cl.h>
+#ifndef __APPLE__
+# include <CL/opencl.h>
+#else
+# include <OpenCL/opencl.h>
+#endif
 
 #include <clgp.h>
 #include <utils.h>
