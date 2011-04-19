@@ -11,6 +11,8 @@
 
 #include <wand/MagickWand.h>
 
+#define BUILD_ITERATION_NB 100
+
 #if 1 /* RGBA pyramid */
 # define MAGICK_FORMAT "RGBA"
 # define OPENCL_FORMAT CL_RGBA
@@ -55,12 +57,18 @@ main(int argc, char *argv[])
     struct timeval start, stop;
     double compute_time = 0., total_time = 0.;
 
+    int i = 0;
+
 
     /* ImageMagick init */
     MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
     clgpFirstGPU(&device);
+    if (device == NULL) {
+        fprintf(stderr, "No device available\n");
+        exit(1);
+    }
 
     /* Create a context on this device */
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &err);
@@ -177,16 +185,19 @@ main(int argc, char *argv[])
 
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
-    clgpBuildPyramidHalfOctave(
-            queue,
-            clgpkernels,
-            pyramid_climage, 
-            input_climage,
-            maxlevel);
+    for (i = 0; i < BUILD_ITERATION_NB; i++) {
+        clgpBuildPyramidHalfOctave(
+                queue,
+                clgpkernels,
+                pyramid_climage, 
+                input_climage,
+                maxlevel);
+    }
     clFinish(queue);
     gettimeofday(&stop, NULL);
     compute_time = 
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
+    compute_time /= BUILD_ITERATION_NB;
     total_time += compute_time;
 
 
