@@ -3,7 +3,11 @@
 #define _GAUSSPYRAMID_GSP_H_
 
 #include "framework.h"
-#include <CL/cl.h>
+#ifndef __APPLE__
+# include <CL/opencl.h>
+#else
+# include <OpenCL/opencl.h>
+#endif
 #include <cxcore.h>
 
 class GaussPyramid {
