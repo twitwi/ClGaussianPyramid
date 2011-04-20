@@ -311,7 +311,7 @@ int
 clgpMaxlevel(size_t width, size_t height)
 {
     /* Go until the last reduction possible */
-    return (int)log2f((float)((width > height) ? width : height));
+    return (int)log2f((float)((width > height) ? width : height)) + 1;
 }
 
 /* Build an array of images that are the different layers of the classic 
