@@ -141,7 +141,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    maxlevel = clgpMaxlevel(input_width, input_height);
+    maxlevel = clgpMaxlevel(input_width, input_height) - 4;
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
             clCreateImage2D(
