@@ -50,7 +50,13 @@ downsampledgauss5x5_cols(
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
-    write_imageui(output_image, (int2)(x_in_output, y_in_output), convert_uint4(c));
+    if (x_in_output < get_image_width(output_image)
+            && y_in_output < get_image_height(output_image)) {
+        write_imageui(
+                output_image, 
+                (int2)(x_in_output, y_in_output), 
+                convert_uint4(c));
+    }
 }
 
 __kernel void
@@ -105,5 +111,11 @@ downsampledgauss5x5_rows(
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
-    write_imageui(output_image, (int2)(x_in_output, y_in_output), convert_uint4(c));
+    if (x_in_output < get_image_width(output_image)
+            && y_in_output < get_image_height(output_image)) {
+        write_imageui(
+                output_image, 
+                (int2)(x_in_output, y_in_output), 
+                convert_uint4(c));
+    }
 }
