@@ -4,10 +4,10 @@ uncomment the GSPModule in root/CMakeList.txt
 rebuild
 
 ln -s GSPModule/libgspclgp.so
-cp $GSP/lib{GTKModule,ImageSource,ImageViewer}.so .
+cp $GSP/GSPModule/build/lib{GTKModule,ImageSource,ImageViewer}.so .
 
-GO="java -Djava.library.path=.:/usr/lib -cp  $HOME/projects/GSP/GSPFramework/target/dependency/*:$HOME/projects/GSP/GSPFramework/target/*:$HOME/projects/GSP/GSPBaseutils/target/* fr.prima.gsp.Launcher"
+GO="java -Djava.library.path=.:/usr/lib -cp  $GSP/GSPFramework/target/dependency/*:$GSP/GSPFramework/target/*:$GSP/GSPBaseutils/target/* fr.prima.gsp.Launcher"
 
 $GO ../GSPModule/pipeline.xml
 
-$GO ../GSPModule/pipeline.xml load.url=video:/home/twilight/Films/Koh-Lanta-03-12-2010.mp4
+$GO ../GSPModule/pipeline.xml load.url=video:/home/twilight/Films/Video/Zombieland.avi
