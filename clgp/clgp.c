@@ -202,18 +202,28 @@ clgpRelease(cl_context context, cl_kernel *kernels)
     cl_program gauss9x9_program = NULL;
 
     /* Retrieve program references from kernels */
-    clGetKernelInfo(
-            kernels[DOWNSCALEDGAUSS5X5],
-            CL_KERNEL_PROGRAM,
-            sizeof(cl_program),
-            &downscaledgauss5x5_program,
-            NULL);
-    clGetKernelInfo(
-            kernels[GAUSS9X9_COLS],
-            CL_KERNEL_PROGRAM,
-            sizeof(cl_program),
-            &gauss9x9_program,
-            NULL);
+    clgp_clerr =
+        clGetKernelInfo(
+                kernels[DOWNSCALEDGAUSS5X5],
+                CL_KERNEL_PROGRAM,
+                sizeof(cl_program),
+                &downscaledgauss5x5_program,
+                NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not access downscaledgauss5x5 program\n");
+        return;
+    }
+    clgp_clerr =
+        clGetKernelInfo(
+                kernels[GAUSS9X9_COLS],
+                CL_KERNEL_PROGRAM,
+                sizeof(cl_program),
+                &gauss9x9_program,
+                NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+        fprintf(stderr, "clgp: could not access gauss9x9 program\n");
+        return;
+    }
     /* Free our program and kernels */
     if (kernels[DOWNSCALEDGAUSS5X5] != NULL) {
         clReleaseKernel(kernels[DOWNSCALEDGAUSS5X5]);
