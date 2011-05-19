@@ -189,7 +189,7 @@ main(int argc, char *argv[])
     err =
         clGetDeviceIDs(
                 platform,
-                CL_DEVICE_TYPE_GPU,
+                CL_DEVICE_TYPE_ALL,
                 1,
                 devices,
                 &n_devs);
