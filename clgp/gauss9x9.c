@@ -68,8 +68,7 @@ clgpGauss9x9(
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
     clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the gauss9x9_rows kernel\n");
-        printf("%d\n", clgp_clerr);
+        fprintf(stderr, "clgp: gauss9x9_rows kernel failure\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -93,7 +92,7 @@ clgpGauss9x9(
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
     clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the gauss9x9_cols kernel\n");
+        fprintf(stderr, "clgp: gauss9x9_cols kernel failure\n");
         err = CLGP_CL_ERROR;
         goto end;
     }

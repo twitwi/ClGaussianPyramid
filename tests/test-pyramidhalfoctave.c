@@ -177,7 +177,6 @@ main(int argc, char *argv[])
                 0,
                 NULL,
                 NULL);
-    clFinish(queue);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not copy input data on device (%d)\n", err);
         exit(1);
@@ -223,12 +222,11 @@ main(int argc, char *argv[])
                     0,
                     NULL,
                     NULL);
-    }
-    clFinish(queue);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, 
-                "Could not copy pyramid data on host (%d)\n", err);
-        exit(1);
+        if (err != CL_SUCCESS) {
+            fprintf(stderr, 
+                    "Could not copy pyramid data on host (%d)\n", err);
+            exit(1);
+        }
     }
     gettimeofday(&stop, NULL);
     total_time += 

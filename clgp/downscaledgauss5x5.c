@@ -68,7 +68,7 @@ clgpDownscaledGauss5x5(
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
     clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
+        fprintf(stderr, "clgp: downscaled5x5 kernel failure\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
