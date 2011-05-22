@@ -34,7 +34,9 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
                 platforms,
                 &n_platforms);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not check for platforms\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: platform get error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -49,7 +51,9 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
                     devices,
                     &n_devs);
         if (err != CL_SUCCESS) {
-            fprintf(stderr, "clgp: Could not check for devices\n");
+#ifdef DEBUG
+            fprintf(stderr, "clgp: device get error\n");
+#endif
             err = CLGP_CL_ERROR;
             goto end;
         }
@@ -95,7 +99,9 @@ clgpMaxflopsGPU(cl_device_id *id)
                 platforms,
                 &n_platforms);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not check for platforms\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: platform get error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -112,7 +118,9 @@ clgpMaxflopsGPU(cl_device_id *id)
                     devices,
                     &n_devs);
         if (err != CL_SUCCESS) {
-            fprintf(stderr, "clgp: Could not check for devices\n");
+#ifdef DEBUG
+            fprintf(stderr, "clgp: device get error\n");
+#endif
             err = CLGP_CL_ERROR;
             goto end;
         }
@@ -128,7 +136,10 @@ clgpMaxflopsGPU(cl_device_id *id)
                         &d_clock_freq,
                         NULL);
             if (clgp_clerr != CL_SUCCESS) {
-                fprintf(stderr, "clgp: Could not get device info\n");
+#ifdef DEBUG
+                fprintf(stderr, 
+                        "clgp: device info (CL_DEVICE_MAX_CLOCK_FREQUENCY) error\n");
+#endif
                 err = CLGP_CL_ERROR;
                 goto end;
             }
@@ -140,7 +151,10 @@ clgpMaxflopsGPU(cl_device_id *id)
                         &d_compute_unit_nb,
                         NULL);
             if (clgp_clerr != CL_SUCCESS) {
-                fprintf(stderr, "clgp: Could not get device info\n");
+#ifdef DEBUG
+                fprintf(stderr, 
+                        "clgp: device info (CL_DEVICE_MAX_COMPUTE_UNITS) error\n");
+#endif
                 err = CLGP_CL_ERROR;
                 goto end;
             }

@@ -13,7 +13,7 @@ extern "C" {
 
 /* Initialize the clgp library, must be called before any other function */
 int
-clgpInit(cl_context context, cl_kernel **kernels);
+clgpInit(cl_context context, cl_kernel **kernelsptr);
 
 /* Release ressources allocated by the clgp library */
 void
