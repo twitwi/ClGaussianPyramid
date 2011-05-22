@@ -36,7 +36,7 @@ clgpRelease(cl_context context, cl_kernel *kernels);
 
 /* Register clgp in opencl context, must be called before everyelse function */
 int
-clgpInit(cl_context context, cl_kernel **kernels)
+clgpInit(cl_context context, cl_kernel **kernelsptr)
 {
     int err = 0;
 
@@ -47,13 +47,13 @@ clgpInit(cl_context context, cl_kernel **kernels)
     cl_program downscaledgauss5x5_program = NULL;
     cl_program gauss9x9_program = NULL;
 
+    cl_kernel *kernels = NULL;
+
     char *source = NULL;
 
 #ifdef DEBUG
     char build_log[20000];
 #endif
-
-    *kernels = NULL;
 
     /* Check if device support images */
     clgp_clerr = 
@@ -64,7 +64,9 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 &device,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not access context's device\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: no device associated\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -77,19 +79,27 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 &has_image,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not check device image support\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: cannot check device image support\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
     if (has_image == CL_FALSE) {
-        fprintf(stderr, "clgp: device do not have image support\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: no image support\n");
+#endif
         err = CLGP_NO_IMAGE_SUPPORT;
         goto end;
     }
 
     /* Allocate kernels array */
-    *kernels = (cl_kernel *)malloc(8*sizeof(cl_kernel));
-    memset(*kernels, 0, 8*sizeof(cl_kernel));
+    kernels = (cl_kernel *)malloc(8*sizeof(cl_kernel));
+    if (kernels == NULL) {
+        err = CLGP_ENOMEM;
+        goto end;
+    }
+    memset(kernels, 0, 8*sizeof(cl_kernel));
 
     /* Build the programs, find the kernels... */
     /* Downsampled 5x5 gaussian blur */
@@ -151,8 +161,10 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 NULL,
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr,
-                "clgp: Could not create the downscaledgauss5x5_program program\n");
+                "clgp: downscaledgauss5x5 program creation error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -168,18 +180,21 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the downscaledgauss5x5_program program\n%s\n", build_log);
-#else
-        fprintf(stderr,
-                "clgp: Could not build the downscaledgauss5x5_program program\n");
+                "clgp: downscaledgauss5x5 program build error\n%s\n", 
+                build_log);
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    (*kernels)[DOWNSCALEDGAUSS5X5] = 
-        clCreateKernel(downscaledgauss5x5_program, "downscaledgauss5x5", &clgp_clerr);
+    kernels[DOWNSCALEDGAUSS5X5] = 
+        clCreateKernel(
+                downscaledgauss5x5_program, 
+                "downscaledgauss5x5", 
+                &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -193,8 +208,10 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 NULL,
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr,
-                "clgp: Could not create the clgpGauss9x9 program\n");
+                "clgp: clgpGauss9x9 program creation error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -210,25 +227,26 @@ clgpInit(cl_context context, cl_kernel **kernels)
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgpGauss9x9 program\n%s\n", build_log);
-#else
-        fprintf(stderr,
-                "clgp: Could not build the clgpGauss9x9 program\n");
+                "clgp: clgpGauss9x9 program build error\n%s\n", build_log);
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    (*kernels)[GAUSS9X9_ROWS] = 
+    kernels[GAUSS9X9_ROWS] = 
         clCreateKernel(gauss9x9_program, "gauss9x9_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_rows kernel not found\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    (*kernels)[GAUSS9X9_COLS] = 
+    kernels[GAUSS9X9_COLS] = 
         clCreateKernel(gauss9x9_program, "gauss9x9_cols", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_cols kernel not found\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -236,15 +254,20 @@ clgpInit(cl_context context, cl_kernel **kernels)
     /* Mark the context as used by our library */
     clgp_clerr = clRetainContext(context);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not retain context\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: context retaining error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
     if (err != 0) {
-        clgpRelease(context, *kernels);
+        clgpRelease(context, kernels);
     }
+
+    *kernelsptr = kernels;
+
     return err;
 }
 
@@ -276,7 +299,9 @@ clgpRelease(cl_context context, cl_kernel *kernels)
                 &downscaledgauss5x5_program,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not access downscaledgauss5x5 program\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: downscaledgauss5x5 program error\n");
+#endif
         return;
     }
     clgp_clerr =
@@ -287,7 +312,9 @@ clgpRelease(cl_context context, cl_kernel *kernels)
                 &gauss9x9_program,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not access gauss9x9 program\n");
+#ifdef DEBUG
+        fprintf(stderr, "clgp: gauss9x9 program error\n");
+#endif
         return;
     }
     /* Free our program and kernels */
@@ -434,7 +461,9 @@ clgpBuildPyramidHalfOctave(
             &input_format,
             NULL);
     if (input_format.image_channel_data_type != CL_UNSIGNED_INT8) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: wrong format\n");
+#endif
         goto end;
     }
 

@@ -22,6 +22,11 @@ downscaledgauss5x5(
 
     float4 c = 0.f;
 
+    if (x_in_output >= get_image_width(output_image)
+            && y_in_output >= get_image_height(output_image)) {
+        return;
+    }
+
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.5f, y_in_input-1.5f))) * mask[0][0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-0.5f, y_in_input-1.5f))) * mask[1][0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.5f, y_in_input-1.5f))) * mask[2][0];
@@ -48,12 +53,9 @@ downscaledgauss5x5(
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.5f, y_in_input+2.5f))) * mask[3][4];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.5f, y_in_input+2.5f))) * mask[4][4];
 
-    if (x_in_output < get_image_width(output_image)
-            && y_in_output < get_image_height(output_image)) {
-        write_imageui(
-                output_image, 
-                (int2)(x_in_output, y_in_output), 
-                convert_uint4(c));
-    }
+    write_imageui(
+            output_image, 
+            (int2)(x_in_output, y_in_output), 
+            convert_uint4(c));
 }
 

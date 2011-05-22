@@ -26,6 +26,11 @@ gauss9x9_rows(
 
     float4 c = 0.f;
 
+    if (x_in_output >= get_image_width(output_image)
+            && y_in_output >= get_image_height(output_image)) {
+        return;
+    }
+
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-4.f, y_in_input))) * mask[0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.f, y_in_input))) * mask[1];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-2.f, y_in_input))) * mask[2];
@@ -38,13 +43,10 @@ gauss9x9_rows(
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normally not necessary */
 
-    if (x_in_output < get_image_width(output_image)
-            && y_in_output < get_image_height(output_image)) {
-        write_imageui(
-                output_image, 
-                (int2)(x_in_output, y_in_output), 
-                convert_uint4(c));
-    }
+    write_imageui(
+            output_image, 
+            (int2)(x_in_output, y_in_output), 
+            convert_uint4(c));
 }
 
 __kernel void
@@ -75,6 +77,11 @@ gauss9x9_cols(
 
     float4 c = 0.f;
 
+    if (x_in_output >= get_image_width(output_image)
+            && y_in_output >= get_image_height(output_image)) {
+        return;
+    }
+
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-4.f))) * mask[0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-3.f))) * mask[1];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-2.f))) * mask[2];
@@ -87,12 +94,9 @@ gauss9x9_cols(
 
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    if (x_in_output < get_image_width(output_image)
-            && y_in_output < get_image_height(output_image)) {
-        write_imageui(
-                output_image, 
-                (int2)(x_in_output, y_in_output), 
-                convert_uint4(c));
-    }
+    write_imageui(
+            output_image, 
+            (int2)(x_in_output, y_in_output), 
+            convert_uint4(c));
 }
 
