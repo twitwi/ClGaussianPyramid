@@ -22,6 +22,11 @@ downsampledgauss5x5_cols(
 
     float4 c = 0.f;
 
+    if (x_in_output >= get_image_width(output_image)
+            || y_in_output >= get_image_height(output_image)) {
+        return;
+    }
+
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-2.0f, y_in_input-2.0f))) * mask[0][0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.0f, y_in_input-2.0f))) * mask[1][0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.0f, y_in_input-2.0f))) * mask[2][0];
@@ -50,13 +55,10 @@ downsampledgauss5x5_cols(
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
-    if (x_in_output < get_image_width(output_image)
-            && y_in_output < get_image_height(output_image)) {
-        write_imageui(
-                output_image, 
-                (int2)(x_in_output, y_in_output), 
-                convert_uint4(c));
-    }
+    write_imageui(
+            output_image, 
+            (int2)(x_in_output, y_in_output), 
+            convert_uint4(c));
 }
 
 __kernel void
@@ -82,6 +84,11 @@ downsampledgauss5x5_rows(
     float y_in_input = (float)(2 * get_global_id(1));
 
     float4 c = 0.f;
+
+    if (x_in_output >= get_image_width(output_image)
+            || y_in_output >= get_image_height(output_image)) {
+        return;
+    }
 
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-2.0f, y_in_input-4.0f))) * mask[0][0];
     c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.0f, y_in_input-3.0f))) * mask[0][1];
@@ -111,11 +118,9 @@ downsampledgauss5x5_rows(
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
-    if (x_in_output < get_image_width(output_image)
-            && y_in_output < get_image_height(output_image)) {
-        write_imageui(
-                output_image, 
-                (int2)(x_in_output, y_in_output), 
-                convert_uint4(c));
-    }
+    write_imageui(
+            output_image, 
+            (int2)(x_in_output, y_in_output), 
+            convert_uint4(c));
 }
+
