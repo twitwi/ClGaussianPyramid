@@ -50,8 +50,6 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     char build_log[20000];
 #endif
 
-    *kernels = NULL;
-
     /* Check if device support images */
     clgp_clerr = 
         clGetContextInfo(
