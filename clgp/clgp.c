@@ -112,8 +112,10 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
                 NULL,
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr,
-                "clgp: Could not create the clgpDownsampledGauss5x5 program\n");
+                "clgp: downsampledgauss5x5 program creation error\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
@@ -129,25 +131,27 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: Could not build the clgpDownsampledGauss5x5 program\n%s\n", build_log);
-#else
-        fprintf(stderr,
-                "clgp: Could not build the clgpDownsampledGauss5x5 program\n");
+                "clgp: downsampledgauss5x5 program build error\n%s\n", 
+                build_log);
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    (*kernels)[DOWNSAMPLEDGAUSS5X5_COLS] = 
+    kernels[DOWNSAMPLEDGAUSS5X5_COLS] = 
         clCreateKernel(downsampledgauss5x5_program, "downsampledgauss5x5_cols", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_cols kernel not found\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-    (*kernels)[DOWNSAMPLEDGAUSS5X5_ROWS] = 
+    kernels[DOWNSAMPLEDGAUSS5X5_ROWS] = 
         clCreateKernel(downsampledgauss5x5_program, "downsampledgauss5x5_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_rows kernel not found\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
