@@ -78,7 +78,7 @@ gauss9x9_cols(
     float4 c = 0.f;
 
     if (x_in_output >= get_image_width(output_image)
-            && y_in_output >= get_image_height(output_image)) {
+            || y_in_output >= get_image_height(output_image)) {
         return;
     }
 
