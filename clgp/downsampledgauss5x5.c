@@ -52,7 +52,6 @@ clgpDownsampledGauss5x5_cols(
 
     clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 1, sizeof(cl_mem), &input_image);
-    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
@@ -102,7 +101,6 @@ clgpDownsampledGauss5x5_rows(
 
     clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 1, sizeof(cl_mem), &input_image);
-    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
