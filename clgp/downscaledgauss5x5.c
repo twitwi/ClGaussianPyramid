@@ -51,7 +51,6 @@ clgpDownscaledGauss5x5(
 
     clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 1, sizeof(cl_mem), &input_image);
-    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
