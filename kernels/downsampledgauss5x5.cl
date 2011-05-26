@@ -12,7 +12,7 @@ downsampledgauss5x5_cols(
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
     int x_in_output = get_global_id(0);
     int y_in_output = get_global_id(1);
@@ -75,7 +75,7 @@ downsampledgauss5x5_rows(
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
     int x_in_output = get_global_id(0);
     int y_in_output = get_global_id(1);
