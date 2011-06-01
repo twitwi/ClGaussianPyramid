@@ -17,36 +17,30 @@ gauss9x9_rows(
 
     const sampler_t sampler = 
         CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
-
-    int x_in_output = get_global_id(0);
-    int y_in_output = get_global_id(1);
-
-    float x_in_input = (float)get_global_id(0);
-    float y_in_input = (float)get_global_id(1);
+    
+    int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
+    float2 incoord = (float2)((float)get_global_id(0), (float)get_global_id(1));
 
     float4 c = 0.f;
 
-    if (x_in_output >= get_image_width(output_image)
-            || y_in_output >= get_image_height(output_image)) {
+    if (outcoord.x >= get_image_width(output_image)
+            || outcoord.y >= get_image_height(output_image)) {
         return;
     }
 
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-4.f, y_in_input))) * mask[0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-3.f, y_in_input))) * mask[1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-2.f, y_in_input))) * mask[2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input-1.f, y_in_input))) * mask[3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+0.f, y_in_input))) * mask[4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+1.f, y_in_input))) * mask[5];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+2.f, y_in_input))) * mask[6];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+3.f, y_in_input))) * mask[7];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input+4.f, y_in_input))) * mask[8];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-4.f, 0.f))) * mask[0];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-3.f, 0.f))) * mask[1];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, 0.f))) * mask[2];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, 0.f))) * mask[3];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, 0.f))) * mask[4];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, 0.f))) * mask[5];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, 0.f))) * mask[6];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+3.f, 0.f))) * mask[7];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+4.f, 0.f))) * mask[8];
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normally not necessary */
 
-    write_imageui(
-            output_image, 
-            (int2)(x_in_output, y_in_output), 
-            convert_uint4(c));
+    write_imageui(output_image, outcoord, convert_uint4(c));
 }
 
 __kernel void
@@ -69,34 +63,28 @@ gauss9x9_cols(
     const sampler_t sampler = 
         CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
-    int x_in_output = get_global_id(0);
-    int y_in_output = get_global_id(1);
-
-    float x_in_input = (float)get_global_id(0);
-    float y_in_input = (float)get_global_id(1);
+    int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
+    float2 incoord = (float2)((float)get_global_id(0), (float)get_global_id(1));
 
     float4 c = 0.f;
 
-    if (x_in_output >= get_image_width(output_image)
-            || y_in_output >= get_image_height(output_image)) {
+    if (outcoord.x >= get_image_width(output_image)
+            || outcoord.y >= get_image_height(output_image)) {
         return;
     }
 
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-4.f))) * mask[0];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-3.f))) * mask[1];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-2.f))) * mask[2];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input-1.f))) * mask[3];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input+0.f))) * mask[4];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input+1.f))) * mask[5];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input+2.f))) * mask[6];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input+3.f))) * mask[7];
-    c += convert_float4(read_imageui(input_image, sampler, (float2)(x_in_input, y_in_input+4.f))) * mask[8];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, -4.f))) * mask[0];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, -3.f))) * mask[1];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, -2.f))) * mask[2];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, -1.f))) * mask[3];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, +0.f))) * mask[4];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, +1.f))) * mask[5];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, +2.f))) * mask[6];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, +3.f))) * mask[7];
+    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(0.f, +4.f))) * mask[8];
 
     barrier(CLK_LOCAL_MEM_FENCE);
 
-    write_imageui(
-            output_image, 
-            (int2)(x_in_output, y_in_output), 
-            convert_uint4(c));
+    write_imageui(output_image, outcoord, convert_uint4(c));
 }
 
