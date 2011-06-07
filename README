@@ -1,16 +1,36 @@
 ClGaussianPyramid
 =================
-Experiments on Gaussian Pyramid implemented using OpenCL
+Experiments on Gaussian Pyramid implemented using OpenCL.
 
-Authors
--------
-Rem, Mazhe
+This library implements ideas and algorithms detailed in the following 
+publications:
+* J.L. Crowley, "A Representation for Visual Information", CMU-RI-TR-82-07, 
+  Robotics Institute, Carnegie Mellon University, November, 1981. 
+  (US 8-1/2 by 11)
+* J. L. Crowley, O. Riff, "Fast Computation of Characteristic Scale using a 
+  Half Octave Pyramid", Scale Space 03, 4th International Conference on 
+  Scale-Space theories in Computer Vision, 10-12 June 2003, Isle of Skye, 
+  Scotland, UK
+* B.Schiele and J. L. Crowley, "Recognition without Correspondence using 
+  Multidimensional Receptive Field Histograms", International Journal of 
+  Computer Vision, 36(1), pp 31-50, Jan. 2000
+* J. L. Crowley and R. M. Stern, "Fast Computation of the Difference of 
+  Low-Pass Transform", IEEE Transactions on PAMI, PAMI 6 (2), pp 234-239, March 
+  1984.
+* J. L. Crowley and A. C. Parker, "A Representation for Shape Based on Peaks 
+  and Ridges in the Difference of Low Pass Transform", IEEE Transactions on 
+  PAMI, PAMI 6 (2), pp 156-170, March 1984.
+
 
 Requisites
 ----------
-OpenCL, ImageMagick (for test programs), OpenCV (for GSP module)
+* OpenCL 
+* CMake
+* ImageMagick (for test programs)
+* OpenCV (for GSP module)
 
-This code has been tested under GNU/Linux (Fedora 14), MacOS X (10.6)
+This code has been tested under GNU/Linux (Fedora 14,15), MacOS X (10.6) with
+the NVIDIA, Intel and AMD implementations.
 
 
 Build instructions
