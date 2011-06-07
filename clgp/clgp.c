@@ -43,13 +43,14 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     cl_device_id device = 0;
     cl_bool has_image = CL_FALSE;
 
-    cl_program downsampledgauss5x5_program = NULL;
-    cl_program downscaledgauss5x5_program = NULL;
-    cl_program gauss9x9_program = NULL;
-
+    cl_program program = NULL;
     cl_kernel *kernels = NULL;
 
-    char *source = NULL;
+    const char *sources[3] = {
+        (const char *)clgp_downsampledgauss5x5_src, 
+        (const char *)clgp_downscaledgauss5x5_src, 
+        (const char *)clgp_gauss9x9_src
+    };
 
 #ifdef DEBUG
     char build_log[20000];
@@ -101,44 +102,43 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     }
     memset(kernels, 0, 8*sizeof(cl_kernel));
 
-    /* Build the programs, find the kernels... */
-    /* Downsampled 5x5 gaussian blur */
-    source = (char *)clgp_downsampledgauss5x5_src;
-    downsampledgauss5x5_program =
+    /* Build the programs... */
+    program =
         clCreateProgramWithSource(
                 context,
-                1,
-                (char const **)&source,
+                3,
+                (const char **)sources,
                 NULL,
                 &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr,
-                "clgp: downsampledgauss5x5 program creation error\n");
+                "clgp: opencl program creation error\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
     clgp_clerr =
-        clBuildProgram(downsampledgauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
+        clBuildProgram(program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         clGetProgramBuildInfo(
-                downsampledgauss5x5_program,
+                program,
                 device,
                 CL_PROGRAM_BUILD_LOG,
                 sizeof(build_log),
                 build_log,
                 NULL);
         fprintf(stderr, 
-                "clgp: downsampledgauss5x5 program build error\n%s\n", 
+                "clgp: opencl program build error\n%s\n", 
                 build_log);
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
+    /* Find the kernels... */
     kernels[DOWNSAMPLEDGAUSS5X5_COLS] = 
-        clCreateKernel(downsampledgauss5x5_program, "downsampledgauss5x5_cols", &clgp_clerr);
+        clCreateKernel(program, "downsampledgauss5x5_cols", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_cols kernel not found\n");
@@ -147,7 +147,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
         goto end;
     }
     kernels[DOWNSAMPLEDGAUSS5X5_ROWS] = 
-        clCreateKernel(downsampledgauss5x5_program, "downsampledgauss5x5_rows", &clgp_clerr);
+        clCreateKernel(program, "downsampledgauss5x5_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_rows kernel not found\n");
@@ -155,46 +155,8 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
         err = CLGP_CL_ERROR;
         goto end;
     }
-    /* Downscaled 5x5 gaussian blur */
-    source = (char *)clgp_downscaledgauss5x5_src;
-    downscaledgauss5x5_program =
-        clCreateProgramWithSource(
-                context,
-                1,
-                (char const **)&source,
-                NULL,
-                &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        fprintf(stderr,
-                "clgp: downscaledgauss5x5 program creation error\n");
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    clgp_clerr =
-        clBuildProgram(downscaledgauss5x5_program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        clGetProgramBuildInfo(
-                downscaledgauss5x5_program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, 
-                "clgp: downscaledgauss5x5 program build error\n%s\n", 
-                build_log);
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
     kernels[DOWNSCALEDGAUSS5X5] = 
-        clCreateKernel(
-                downscaledgauss5x5_program, 
-                "downscaledgauss5x5", 
-                &clgp_clerr);
+        clCreateKernel(program, "downscaledgauss5x5", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
@@ -202,42 +164,8 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
         err = CLGP_CL_ERROR;
         goto end;
     }
-    /* 9x9 gaussian blur */
-    source = (char *)clgp_gauss9x9_src;
-    gauss9x9_program =
-        clCreateProgramWithSource(
-                context,
-                1,
-                (char const **)&source,
-                NULL,
-                &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        fprintf(stderr,
-                "clgp: clgpGauss9x9 program creation error\n");
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    clgp_clerr =
-        clBuildProgram(gauss9x9_program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        clGetProgramBuildInfo(
-                gauss9x9_program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, 
-                "clgp: clgpGauss9x9 program build error\n%s\n", build_log);
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
     kernels[GAUSS9X9_ROWS] = 
-        clCreateKernel(gauss9x9_program, "gauss9x9_rows", &clgp_clerr);
+        clCreateKernel(program, "gauss9x9_rows", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_rows kernel not found\n");
@@ -246,7 +174,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
         goto end;
     }
     kernels[GAUSS9X9_COLS] = 
-        clCreateKernel(gauss9x9_program, "gauss9x9_cols", &clgp_clerr);
+        clCreateKernel(program, "gauss9x9_cols", &clgp_clerr);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_cols kernel not found\n");
@@ -279,45 +207,19 @@ end:
 void
 clgpRelease(cl_context context, cl_kernel *kernels)
 {
-    cl_program downsampledgauss5x5_program = NULL;
-    cl_program downscaledgauss5x5_program = NULL;
-    cl_program gauss9x9_program = NULL;
+    cl_program program = NULL;
 
-    /* Retrieve program references from kernels */
+    /* Retrieve program reference from kernels */
     clgp_clerr =
         clGetKernelInfo(
                 kernels[DOWNSAMPLEDGAUSS5X5_COLS],
                 CL_KERNEL_PROGRAM,
                 sizeof(cl_program),
-                &downsampledgauss5x5_program,
-                NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: could not access downsampledgauss5x5 program\n");
-        return;
-    }
-    clgp_clerr =
-        clGetKernelInfo(
-                kernels[DOWNSCALEDGAUSS5X5],
-                CL_KERNEL_PROGRAM,
-                sizeof(cl_program),
-                &downscaledgauss5x5_program,
+                &program,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        fprintf(stderr, "clgp: downscaledgauss5x5 program error\n");
-#endif
-        return;
-    }
-    clgp_clerr =
-        clGetKernelInfo(
-                kernels[GAUSS9X9_COLS],
-                CL_KERNEL_PROGRAM,
-                sizeof(cl_program),
-                &gauss9x9_program,
-                NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG
-        fprintf(stderr, "clgp: gauss9x9 program error\n");
+        fprintf(stderr, "clgp: could not access opencl program\n");
 #endif
         return;
     }
@@ -328,14 +230,8 @@ clgpRelease(cl_context context, cl_kernel *kernels)
     if (kernels[DOWNSAMPLEDGAUSS5X5_ROWS] != NULL) {
         clReleaseKernel(kernels[DOWNSAMPLEDGAUSS5X5_ROWS]);
     }
-    if (downsampledgauss5x5_program != NULL) {
-        clReleaseProgram(downsampledgauss5x5_program);
-    }
     if (kernels[DOWNSCALEDGAUSS5X5] != NULL) {
         clReleaseKernel(kernels[DOWNSCALEDGAUSS5X5]);
-    }
-    if (downscaledgauss5x5_program != NULL) {
-        clReleaseProgram(downscaledgauss5x5_program);
     }
     if (kernels[GAUSS9X9_ROWS] != NULL) {
         clReleaseKernel(kernels[GAUSS9X9_ROWS]);
@@ -343,8 +239,8 @@ clgpRelease(cl_context context, cl_kernel *kernels)
     if (kernels[GAUSS9X9_COLS] != NULL) {
         clReleaseKernel(kernels[GAUSS9X9_COLS]);
     }
-    if (gauss9x9_program != NULL) {
-        clReleaseProgram(gauss9x9_program);
+    if (program != NULL) {
+        clReleaseProgram(program);
     }
     free(kernels);
 
