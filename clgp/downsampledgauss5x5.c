@@ -16,7 +16,7 @@ extern cl_int clgp_clerr;
 
 
 int
-clgpDownsampledGauss5x5_cols(
+clgpEnqueueDownsampledGauss5x5_cols(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
@@ -79,7 +79,7 @@ end:
 }
 
 int
-clgpDownsampledGauss5x5_rows(
+clgpEnqueueDownsampledGauss5x5_rows(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 

@@ -28,7 +28,7 @@ clgpMaxlevel(size_t width, size_t height);
  * the pyramid_image array images (whom sizes must be large enough to store 
  * the corresponding level). */
 int
-clgpBuildPyramid(
+clgpEnqueuePyramid(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],
@@ -44,7 +44,7 @@ clgpMaxlevelHalfOctave(size_t width, size_t height);
  * the pyramid_image array images (whom sizes must be large enough to store 
  * the corresponding level). */
 int
-clgpBuildPyramidHalfOctave(
+clgpEnqueuePyramidHalfOctave(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],
@@ -55,7 +55,7 @@ clgpBuildPyramidHalfOctave(
  * store its levels in the pyramid_image array images (whom sizes must be large 
  * enough to store the corresponding level). */
 int
-clgpBuildPyramidSqrt2(
+clgpEnqueuePyramidSqrt2(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],

@@ -196,7 +196,7 @@ void GaussPyramid::inputRGBA(char* dataRGBA, int w, int h) {
 
 
     /* At last, call our pyramid function */
-    clgpBuildPyramidHalfOctave(
+    clgpEnqueuePyramidHalfOctave(
             queue,
             clgpkernels,
             pyramid_climage, 

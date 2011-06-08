@@ -259,7 +259,7 @@ clgpMaxlevel(size_t width, size_t height)
 /* Build an array of images that are the different layers of the classic 
  * gaussian pyramid */
 int
-clgpBuildPyramid(
+clgpEnqueuePyramid(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],
@@ -310,7 +310,7 @@ clgpBuildPyramid(
     for (level = 1; level < maxlevel; level++) {
         /* 5x5 blur + downscale */
         err = 
-            clgpDownscaledGauss5x5(
+            clgpEnqueueDownscaledGauss5x5(
                     command_queue,
                     kernels,
                     pyramid_image[level],
@@ -337,7 +337,7 @@ clgpMaxlevelHalfOctave(size_t width, size_t height)
 /* Build an array of images that are the different layers of the half-octave
  * gaussian pyramid */
 int
-clgpBuildPyramidHalfOctave(
+clgpEnqueuePyramidHalfOctave(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],
@@ -370,7 +370,7 @@ clgpBuildPyramidHalfOctave(
     /* First iteration manualy */
     /* First half octave */
     err = 
-        clgpGauss9x9(
+        clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
                 pyramid_image[0], 
@@ -382,7 +382,7 @@ clgpBuildPyramidHalfOctave(
     }
     /* Second half-octave */
     err = 
-        clgpGauss9x9(
+        clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
                 pyramid_image[1], 
@@ -396,7 +396,7 @@ clgpBuildPyramidHalfOctave(
     for (level = 2; level < maxlevel; level++) {
         /* First half octave : 5x5 blur + downscale */
         err = 
-            clgpDownscaledGauss5x5(
+            clgpEnqueueDownscaledGauss5x5(
                     command_queue,
                     kernels,
                     pyramid_image[level],
@@ -411,7 +411,7 @@ clgpBuildPyramidHalfOctave(
 
         /* Second half octave : 9x9 blur */
         err = 
-            clgpGauss9x9(
+            clgpEnqueueGauss9x9(
                     command_queue,
                     kernels,
                     pyramid_image[level], 
@@ -430,7 +430,7 @@ end:
 /* Build an array of images that are the different layers of the half-octave 
  * gaussian pyramid with sqrt2 layout */
 int
-clgpBuildPyramidSqrt2(
+clgpEnqueuePyramidSqrt2(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem pyramid_image[],
@@ -461,7 +461,7 @@ clgpBuildPyramidSqrt2(
     /* First iteration manualy */
     /* First half octave */
     err = 
-        clgpGauss9x9(
+        clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
                 pyramid_image[0], 
@@ -473,7 +473,7 @@ clgpBuildPyramidSqrt2(
     }
     /* Second half octave */
     err =
-        clgpDownsampledGauss5x5_cols(
+        clgpEnqueueDownsampledGauss5x5_cols(
                 command_queue,
                 kernels,
                 pyramid_image[1], 
@@ -488,7 +488,7 @@ clgpBuildPyramidSqrt2(
         if (level & 0x1) {
             /* Odd level : downsampled 5x5 blur on rows */
             err =
-                clgpDownsampledGauss5x5_cols(
+                clgpEnqueueDownsampledGauss5x5_cols(
                         command_queue,
                         kernels,
                         pyramid_image[level], 
@@ -502,7 +502,7 @@ clgpBuildPyramidSqrt2(
         else {
             /* Even level: downsampled 5x5 blur on cols */
             err =
-                clgpDownsampledGauss5x5_rows(
+                clgpEnqueueDownsampledGauss5x5_rows(
                         command_queue,
                         kernels,
                         pyramid_image[level], 

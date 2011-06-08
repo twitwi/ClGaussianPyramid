@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 int
-clgpDownsampledGauss5x5_cols(
+clgpEnqueueDownsampledGauss5x5_cols(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
@@ -21,7 +21,7 @@ clgpDownsampledGauss5x5_cols(
         size_t height);
 
 int
-clgpDownsampledGauss5x5_rows(
+clgpEnqueueDownsampledGauss5x5_rows(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 

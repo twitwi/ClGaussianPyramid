@@ -189,7 +189,7 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     for (i = 0; i < BUILD_ITERATION_NB; i++) {
-        clgpBuildPyramidHalfOctave(
+        clgpEnqueuePyramidHalfOctave(
                 queue,
                 clgpkernels,
                 pyramid_climage, 

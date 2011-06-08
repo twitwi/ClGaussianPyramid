@@ -192,7 +192,7 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     for (i = 0; i < BUILD_ITERATION_NB; i++) {
-        clgpBuildPyramidSqrt2(
+        clgpEnqueuePyramidSqrt2(
                 queue,
                 clgpkernels,
                 pyramid_climage, 
