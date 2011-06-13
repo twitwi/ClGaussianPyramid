@@ -1,2 +1,5 @@
 * Recreate the java version from scratch as an exercice (and benchmark) when 
   the C version will be ok and used as a reference for comparison (it is now)
+* Rewrite the GSP module in C: the problem is more OpenCV than C++, they do 
+  reach boost-levels of borkeness in their C++ API (do not compile with 
+  g++ 4.6, clang++, opencv itself do not compile with icc(!)).
