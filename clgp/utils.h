@@ -24,6 +24,12 @@ clgpMaxflopsGPU(cl_device_id *id);
 int
 clgpFirstCPU(cl_device_id *id);
 
+/* Retrieve the cl_device_id of the first CPU found in vendor's platform,
+ * refer to the vendor's documentation to find their vendor strings.
+ * Note: platform vendor != device vendor */
+int
+clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor);
+
 #ifdef __cplusplus
 }
 #endif

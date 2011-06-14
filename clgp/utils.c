@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #ifndef __APPLE__
 # include <CL/opencl.h>
@@ -175,5 +176,83 @@ int
 clgpFirstCPU(cl_device_id *id)
 {
     return clgpFirstDevice(id, CL_DEVICE_TYPE_CPU);
+}
+
+int
+clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
+{
+    int err = 0;
+
+    cl_platform_id platforms[8];
+    cl_uint n_platforms = 0;
+    char platform_vendor[1024];
+
+    cl_device_id devices[16];
+    cl_uint n_devs = 0;
+
+    size_t vendorlen = 0;
+
+    int p = 0;
+    
+    *id = NULL;
+
+    vendorlen = strnlen(vendor, 1024);
+
+    /* Enumerate platforms, we take the first with the right vendor */
+    clgp_clerr =
+        clGetPlatformIDs(
+                8,
+                platforms,
+                &n_platforms);
+    if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
+        fprintf(stderr, "clgp: platform get error\n");
+#endif
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+
+    /* Enumerate devices */
+    for (p = 0; p < n_platforms; p++) {
+        clgp_clerr =
+            clGetPlatformInfo(
+                    platforms[p],
+                    CL_PLATFORM_VENDOR,
+                    1024,
+                    platform_vendor,
+                    NULL);
+        if (err != CL_SUCCESS) {
+#ifdef DEBUG
+            fprintf(stderr, "clgp: platform get vendor error\n");
+#endif
+            err = CLGP_CL_ERROR;
+            goto end;
+        }
+        if (strncmp(platform_vendor, vendor, vendorlen) != 0) {
+            continue;
+        }
+
+        clgp_clerr =
+            clGetDeviceIDs(
+                    platforms[p],
+                    CL_DEVICE_TYPE_CPU,
+                    16,
+                    devices,
+                    &n_devs);
+        if (err != CL_SUCCESS) {
+#ifdef DEBUG
+            fprintf(stderr, "clgp: device get error\n");
+#endif
+            err = CLGP_CL_ERROR;
+            goto end;
+        }
+        if (n_devs > 0) {
+            *id = devices[0];
+            break;
+        }
+    }
+
+end:
+    return err;
 }
 
