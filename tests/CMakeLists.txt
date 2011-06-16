@@ -1,3 +1,10 @@
+# Check tests-only system dependencies
+INCLUDE(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(getopt_long HAVE_GETOPT_LONG)
+IF(HAVE_GETOPT_LONG)
+    ADD_DEFINITIONS(-DHAVE_GETOPT_LONG)
+ENDIF(HAVE_GETOPT_LONG)
+
 SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR}/clgp)
 INCLUDE_DIRECTORIES(${ImageMagick_INCLUDE_DIRS})

@@ -5,6 +5,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#ifdef HAVE_GETOPT_LONG
+#include <getopt.h>
+#endif
+
 #ifndef __APPLE__
 # include <CL/opencl.h>
 #else
@@ -16,7 +20,17 @@
 
 #include <wand/MagickWand.h>
 
-#define BUILD_ITERATION_NB 100
+#define BUILD_ITERATION_NB 10
+
+#ifdef HAVE_GETOPT_LONG
+static struct option longopts[] = {
+    { "colormap", required_argument, 0, 'c' },
+    { "devicetype", required_argument, 0, 'd' },
+    { "help", no_argument, 0, 'h' },
+    { "pyramidtype", required_argument, 0, 'p' },
+    { 0, 0, 0, 0 }
+};
+#endif
 
 /* Abstraction to allow the use of any pyramid type in this program: you don't
  * have to do this normaly! */
@@ -164,9 +178,10 @@ usage(void)
 {
     fprintf(stderr, 
             "Usage: test-pyramid [OPTIONS] IMAGE_PATH\n"
-                " -c CHANNEL_ORDER          rgba, intensity\n"
-                " -p PYRAMID_TYPE           pyramid, halfoctave, sqrt2\n"
-                " -h                        display help\n");
+                " -c, --colormap=CHANNEL_ORDER     rgba, intensity\n"
+                " -d, --devicetype=DEVICE_TYPE     cpu, gpu\n"
+                " -p, --pyramidtype=PYRAMID_TYPE   pyramid, halfoctave, sqrt2\n"
+                " -h                               display help\n");
 }
 
 int
@@ -175,6 +190,7 @@ main(int argc, char *argv[])
     int opterr = 0;
     cl_int err = 0;
 
+    int devicetype = 0;
     cl_device_id device = NULL;
     cl_context context = NULL;
     cl_command_queue queue = NULL;
@@ -182,7 +198,7 @@ main(int argc, char *argv[])
 
     const struct pyramid_implementation *impl = &pyramid;
 
-    MagickWand *input_wand = NULL, *pyramid_wand;
+    MagickWand *input_wand = NULL, *pyramid_wand = NULL;
     const char *magickpixelmap = "RGBA";
     unsigned char *input_data = NULL, *pyramid_data;
     unsigned int input_width = 0, pyramid_width = 0;
@@ -203,7 +219,11 @@ main(int argc, char *argv[])
 
     
     /* Parse command line arguments */
-    while ((i = getopt(argc, argv, ":c:hp:")) != -1) {
+#ifdef HAVE_GETOPT_LONG
+    while ((i = getopt_long(argc, argv, ":c:d:hp:", longopts, NULL)) != -1) {
+#else
+    while ((i = getopt(argc, argv, ":c:d:hp:")) != -1) {
+#endif
         switch(i) {
             case 'c':
                 if (strncmp(optarg, "rgba", 5) == 0) {
@@ -219,18 +239,30 @@ main(int argc, char *argv[])
                     opterr++;
                 }
                 break;
+            case 'd':
+                if (strncmp(optarg, "gpu", 4) == 0) {
+                    devicetype = 0;
+                }
+                else if (strncmp(optarg, "cpu", 4) == 0) {
+                    devicetype = 1;
+                }
+                else {
+                    fprintf(stderr, "-d: invalid device type\n");
+                    opterr++;
+                }
+                break;
             case 'h':
                 usage();
                 exit(0);
                 break;
             case 'p':
-                if (strcmp(optarg, "pyramid") == 0) {
+                if (strncmp(optarg, "pyramid", 8) == 0) {
                     impl = &pyramid;
                 }
-                else if (strcmp(optarg, "halfoctave") == 0) {
+                else if (strncmp(optarg, "halfoctave", 11) == 0) {
                     impl = &pyramidHalfOctave;
                 }
-                else if (strcmp(optarg, "sqrt2") == 0) {
+                else if (strncmp(optarg, "sqrt2", 6) == 0) {
                     impl = &pyramidSqrt2;
                 }
                 else {
@@ -258,7 +290,12 @@ main(int argc, char *argv[])
     MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
-    clgpFirstGPU(&device);
+    if (devicetype == 0) {
+        clgpFirstGPU(&device);
+    }
+    else if (devicetype == 1) {
+        clgpFirstCPU(&device);
+    }
     if (device == NULL) {
         fprintf(stderr, "No device available\n");
         exit(1);
