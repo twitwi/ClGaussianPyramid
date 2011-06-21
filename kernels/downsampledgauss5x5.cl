@@ -4,15 +4,15 @@ downsampledgauss5x5_cols(
         __read_only image2d_t input_image)
 {
     const float mask[5][5] = {
-        3.90625e-03f, 1.56250e-02f, 2.34375e-02f, 1.56250e-02f, 3.90625e-03f, 
-        1.56250e-02f, 6.25000e-02f, 9.37500e-02f, 6.25000e-02f, 1.56250e-02f, 
-        2.34375e-02f, 9.37500e-02f, 1.40625e-01f, 9.37500e-02f, 2.34375e-02f, 
-        1.56250e-02f, 6.25000e-02f, 9.37500e-02f, 6.25000e-02f, 1.56250e-02f, 
-        3.90625e-03f, 1.56250e-02f, 2.34375e-02f, 1.56250e-02f, 3.90625e-03f,
+        01.f/256.f, 04.f/256.f, 06.f/256.f, 04.f/256.f, 01.f/256.f,
+        04.f/256.f, 16.f/256.f, 24.f/256.f, 16.f/256.f, 04.f/256.f,
+        06.f/256.f, 24.f/256.f, 36.f/256.f, 24.f/256.f, 06.f/256.f,
+        04.f/256.f, 16.f/256.f, 24.f/256.f, 16.f/256.f, 04.f/256.f,
+        01.f/256.f, 04.f/256.f, 06.f/256.f, 04.f/256.f, 01.f/256.f,
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
     int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
 
@@ -64,15 +64,15 @@ downsampledgauss5x5_rows(
         __read_only image2d_t input_image)
 {
     const float mask[5][5] = {
-        3.90625e-03f, 1.56250e-02f, 2.34375e-02f, 1.56250e-02f, 3.90625e-03f, 
-        1.56250e-02f, 6.25000e-02f, 9.37500e-02f, 6.25000e-02f, 1.56250e-02f, 
-        2.34375e-02f, 9.37500e-02f, 1.40625e-01f, 9.37500e-02f, 2.34375e-02f, 
-        1.56250e-02f, 6.25000e-02f, 9.37500e-02f, 6.25000e-02f, 1.56250e-02f, 
-        3.90625e-03f, 1.56250e-02f, 2.34375e-02f, 1.56250e-02f, 3.90625e-03f,
+        01.f/256.f, 04.f/256.f, 06.f/256.f, 04.f/256.f, 01.f/256.f,
+        04.f/256.f, 16.f/256.f, 24.f/256.f, 16.f/256.f, 04.f/256.f,
+        06.f/256.f, 24.f/256.f, 36.f/256.f, 24.f/256.f, 06.f/256.f,
+        04.f/256.f, 16.f/256.f, 24.f/256.f, 16.f/256.f, 04.f/256.f,
+        01.f/256.f, 04.f/256.f, 06.f/256.f, 04.f/256.f, 01.f/256.f,
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
     int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
 

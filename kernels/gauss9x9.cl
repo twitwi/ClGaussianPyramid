@@ -4,19 +4,19 @@ gauss9x9_rows(
         __read_only image2d_t input_image)
 {
     const float mask[9] = { 
-        3.906250e-03f,
-        3.125000e-02f,
-        1.093750e-01f,
-        2.187500e-01f,
-        2.734375e-01f,
-        2.187500e-01f,
-        1.093750e-01f,
-        3.125000e-02f,
-        3.906250e-03f
+        01.f/256.f,
+        08.f/256.f,
+        28.f/256.f,
+        56.f/256.f,
+        70.f/256.f,
+        56.f/256.f,
+        28.f/256.f,
+        08.f/256.f,
+        01.f/256.f,
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
     
     int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
     float2 incoord = (float2)((float)get_global_id(0), (float)get_global_id(1));
@@ -49,19 +49,19 @@ gauss9x9_cols(
         __read_only image2d_t input_image)
 {
     const float mask[9] = {
-        3.906250e-03f,
-        3.125000e-02f,
-        1.093750e-01f,
-        2.187500e-01f,
-        2.734375e-01f,
-        2.187500e-01f,
-        1.093750e-01f,
-        3.125000e-02f,
-        3.906250e-03f
+        01.f/256.f,
+        08.f/256.f,
+        28.f/256.f,
+        56.f/256.f,
+        70.f/256.f,
+        56.f/256.f,
+        28.f/256.f,
+        08.f/256.f,
+        01.f/256.f,
     };
 
     const sampler_t sampler = 
-        CLK_FILTER_LINEAR|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
+        CLK_FILTER_NEAREST|CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE;
 
     int2 outcoord = (int2)(get_global_id(0), get_global_id(1));
     float2 incoord = (float2)((float)get_global_id(0), (float)get_global_id(1));
