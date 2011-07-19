@@ -5,7 +5,7 @@ SET(clgp_CL_SRCS downsampledgauss5x5.cl downscaledgauss5x5.cl gauss9x9.cl)
 FOREACH(CL_SRC ${clgp_CL_SRCS})
   # Check CL_SRC syntax a first time at compilation time, then build a C source
   # file that will contains a string with the program source from CL_SRC
-  STRING(REGEX REPLACE ".cl" "" PROGRAM_NAME ${CL_SRC})
+  GET_FILENAME_COMPONENT(PROGRAM_NAME ${CL_SRC} NAME_WE)
   ADD_CUSTOM_COMMAND(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${CL_SRC}.c
       COMMAND clc ${CMAKE_CURRENT_SOURCE_DIR}/${CL_SRC} 
