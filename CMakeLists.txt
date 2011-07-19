@@ -1,6 +1,15 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(ClGaussianPyramid C)
 
+IF(NOT CMAKE_C_FLAGS)
+  SET(CMAKE_C_FLAGS 
+      "-Wall -Wextra"
+      CACHE 
+      STRING 
+      "Flags used by the compiler during all build types."
+      FORCE)
+ENDIF(NOT CMAKE_C_FLAGS)
+
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 FIND_PACKAGE(ImageMagick COMPONENTS MagickWand REQUIRED)
 FIND_PACKAGE(OpenCL REQUIRED)

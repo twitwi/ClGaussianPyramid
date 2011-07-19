@@ -24,7 +24,7 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
     cl_device_id devices[16];
     cl_uint n_devs = 0;
 
-    int p = 0;
+    unsigned int p = 0;
     
     *id = NULL;
 
@@ -87,11 +87,11 @@ clgpMaxflopsGPU(cl_device_id *id)
 
     unsigned int maxflops = 0;
 
-    int d = 0;
+    unsigned int d = 0;
     cl_uint d_clock_freq = 0, d_compute_unit_nb = 0;
     unsigned int d_flops = 0;
 
-    int p = 0;
+    unsigned int p = 0;
 
     /* Enumerate platforms, we take the first available */
     clgp_clerr =
@@ -192,7 +192,7 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
 
     size_t vendorlen = 0;
 
-    int p = 0;
+    unsigned int p = 0;
     
     *id = NULL;
 
