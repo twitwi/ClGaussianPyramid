@@ -35,15 +35,20 @@ the NVIDIA, Intel and AMD implementations.
 
 Build instructions
 ------------------
+if some of your headers or libraries are in an uncommon place, you can use
+the CMAKE_INCLUDE_PATH and CMAKE_LIBRARY_PATH environment variables, for example
+if you are using the headers from NVidia's SDK :
+$ export CMAKE_INCLUDE_PATH=[...]/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc
+or
+$ setenv CMAKE_INCLUDE_PATH=[...]/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc
+(you can specify multiples paths with the semicolumn (:) separator)
+
 clgp:
 $ mkdir build 
 $ cd build 
 $ cmake .. 
 $ make 
 $ ./test/test-pyramid ../media/lena512color.png
-
-you might need to tell to cmake where to find opencv includes, e.g.:
-$ cmake -D OPENCL_ROOT=/.../NVIDIA_GPU_Computing_SDK/OpenCL/common/inc ..
 
 JavaImplementation:
 $ cd JavaImplementation 

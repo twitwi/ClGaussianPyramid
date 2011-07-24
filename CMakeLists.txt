@@ -1,5 +1,5 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 PROJECT(ClGaussianPyramid C)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE RelWithDebInfo 
@@ -8,7 +8,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 IF(NOT CMAKE_C_FLAGS)
-  SET(CMAKE_C_FLAGS "-Wall -Wextra"
+  SET(CMAKE_C_FLAGS "-Wall -Wextra -Wshadow"
       CACHE STRING
       "Flags used by the compiler during all build types."
       FORCE)
