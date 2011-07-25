@@ -71,9 +71,9 @@ clgpEnqueueDownscaledGauss5x5(
         err = CLGP_CL_ERROR;
         goto end;
     }
-#endif
 
 end:
+#endif
     return err;
 }
 

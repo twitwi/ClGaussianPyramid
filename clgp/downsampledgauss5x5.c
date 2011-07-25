@@ -72,9 +72,9 @@ clgpEnqueueDownsampledGauss5x5_cols(
         err = CLGP_CL_ERROR;
         goto end;
     }
-#endif
 
 end:
+#endif
     return err;
 }
 
@@ -121,9 +121,9 @@ clgpEnqueueDownsampledGauss5x5_rows(
         err = CLGP_CL_ERROR;
         goto end;
     }
-#endif
 
 end:
+#endif
     return err;
 }
 
