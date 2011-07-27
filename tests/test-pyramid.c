@@ -462,7 +462,7 @@ main(int argc, char *argv[])
 
 
     /* Release the clgp library */
-    clgpRelease(context, clgpkernels);
+    clgpRelease(clgpkernels);
 
 
     /* Release device ressources */

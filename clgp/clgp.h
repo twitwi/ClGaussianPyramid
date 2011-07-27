@@ -17,7 +17,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr);
 
 /* Release ressources allocated by the clgp library */
 void
-clgpRelease(cl_context context, cl_kernel *kernels);
+clgpRelease(cl_kernel *kernels);
 
 /* Returns the maximum possible level for an image of size width x height in 
  * the classic pyramid */

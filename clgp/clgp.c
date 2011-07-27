@@ -32,7 +32,7 @@ extern const char clgp_gauss9x9_src[];
 #define DOWNSAMPLEDGAUSS5X5_COLS 4
 
 void 
-clgpRelease(cl_context context, cl_kernel *kernels);
+clgpRelease(cl_kernel *kernels);
 
 /* Register clgp in opencl context, must be called before everyelse function */
 int
@@ -195,7 +195,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
 
 end:
     if (err != 0) {
-        clgpRelease(context, kernels);
+        clgpRelease(kernels);
     }
 
     *kernelsptr = kernels;
@@ -205,9 +205,25 @@ end:
 
 /* Release the ressources created by the library */
 void
-clgpRelease(cl_context context, cl_kernel *kernels)
+clgpRelease(cl_kernel *kernels)
 {
+    cl_context context = NULL;
     cl_program program = NULL;
+
+    /* Retrieve contexte reference from kernels */
+    clgp_clerr =
+        clGetKernelInfo(
+                kernels[DOWNSAMPLEDGAUSS5X5_COLS],
+                CL_KERNEL_CONTEXT,
+                sizeof(cl_context),
+                &context,
+                NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
+        fprintf(stderr, "clgp: could not access opencl context\n");
+#endif
+        return;
+    }
 
     /* Retrieve program reference from kernels */
     clgp_clerr =

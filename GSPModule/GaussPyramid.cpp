@@ -61,7 +61,7 @@ void GaussPyramid::stopModule() {
     struct timeval start;
     gettimeofday(&start, NULL);
     /* Release the clgp library */
-    clgpRelease(context, clgpkernels);
+    clgpRelease(clgpkernels);
     /* Release device ressources */
     clReleaseContext(context);
     clReleaseCommandQueue(queue);
