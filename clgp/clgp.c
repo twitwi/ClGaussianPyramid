@@ -95,7 +95,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     }
 
     /* Allocate kernels array */
-    kernels = (cl_kernel *)malloc(8*sizeof(cl_kernel));
+    kernels = malloc(8*sizeof(cl_kernel));
     if (kernels == NULL) {
         err = CLGP_ENOMEM;
         goto end;

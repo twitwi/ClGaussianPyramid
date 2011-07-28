@@ -331,7 +331,7 @@ main(int argc, char *argv[])
     input_height = MagickGetImageHeight(input_wand);
     input_nbchannels = strlen(magickpixelmap);
     input_data = 
-        (unsigned char *)malloc(input_width*input_height*input_nbchannels*sizeof(char));
+        malloc(input_width*input_height*input_nbchannels*sizeof(char));
     MagickExportImagePixels(
             input_wand,
             0,
@@ -348,7 +348,7 @@ main(int argc, char *argv[])
     pyramid_height = input_height;
     pyramid_nbchannels = input_nbchannels;
     pyramid_data = 
-        (unsigned char *)malloc(pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
+        malloc(pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
     memset(pyramid_data, 0, pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
 
     /* Create buffers on device */
