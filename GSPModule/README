@@ -1,0 +1,14 @@
+ClGaussianPydamid GSP module
+============================
+This is a very basic module for the GSP framework (see more at <url>). While
+not fully integrated, it allows using the clgp library in GSP pipelines. You
+will need the GSP framework and utilities, as well as the Base modules.
+
+Running pipelines
+-----------------
+GO="LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GSP/GSPModules/build:../build java -Djava.library.path=.:/usr/lib -cp  $GSP/GSPFramework/target/dependency/*:$GSP/GSPFramework/target/*:$GSP/GSPBaseutils/target/* fr.prima.gsp.Launcher"
+
+$GO ../GSPModule/pipeline.xml
+
+$GO ../GSPModule/pipeline.xml load.url=video:/home/twilight/Films/Video/Zombieland.avi
+

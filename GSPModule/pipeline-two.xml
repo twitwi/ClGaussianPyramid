@@ -9,18 +9,18 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
 
     <m id="for" type="base:For" warmup="3000" period="1"/>
     <m id="load" type="c:ImageSource.ImageSource" gray="false" url="images:../media/lena512color.png"/>
-    <m id="py" type="c:gspclgp.GaussPyramid"/>
+    <m id="pyramid" type="c:gspclgp.GaussPyramid"/>
     <m id="GTK" type="c:GTKModule.GTKModule"/>
     <m id="view1" type="c:ImageViewer.ImageViewer" name="test view 1"/>
     <m id="view2" type="c:ImageViewer.ImageViewer" name="test view 2"/>
 
-    <m id="sel1" type="c:gspclgp.PyramidLevelSelector" level="2"/>
-    <m id="sel2" type="c:gspclgp.PyramidLevelSelector" level="4"/>
-    <f id="toipl" type="c:gspclgp.RGBToIPL"/>
-    <f id="torgb" type="c:gspclgp.IPLToRGB"/>
+    <m id="sel1" type="c:gspclgp.LevelSelector" level="2"/>
+    <m id="sel2" type="c:gspclgp.LevelSelector" level="4"/>
+    <f id="toipl" type="c:gspclgp.RgbToIpl"/>
+    <f id="torgb" type="c:gspclgp.IplToRgb"/>
 
-    <c chain="for - load - #py#outputRGB-toipl-sel1-view1"/>
-    <c chain="              py#outputRGB-toipl-sel2-view2"/>
+    <c chain="for - load - #pyramid#outputRGB-toipl-sel1-view1"/>
+    <c chain="              pyramid#outputRGB-toipl-sel2-view2"/>
     <!--c chain="for - skip#load"/-->
 
 </pipeline>

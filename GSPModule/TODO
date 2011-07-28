@@ -1,0 +1,7 @@
+* Cleaning, cleaning, cleaning
+* Provide all pyramids through the module
+* Find how to manage types mangling (for struct like IplImage)
+* This is a good place to think about OpenCL connectors in the GSP
+* This is also a good place to think about C module macros
+* When a file hierarchy is decided for the GSP, add a install target
+

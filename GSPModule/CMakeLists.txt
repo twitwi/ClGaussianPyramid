@@ -7,16 +7,12 @@ INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
 SET(gspclgp_SRCS
-    GaussPyramid.cpp
-    PyramidLevelSelector.cpp
-    RGBToIPL.cpp
-    IPLToRGB.cpp)
+    gausspyramid.c
+    ipltorgb.c
+    levelselector.c
+    rgbtoipl.c)
 SET(gspclgp_HEADERS
     framework.h
-    GaussPyramid.h
-    IPLToRGB.h
-    PyramidLayoutUtils.h
-    PyramidLevelSelector.h
-    RGBToIPL.h)
+    layoututils.h)
 ADD_LIBRARY(gspclgp SHARED ${gspclgp_SRCS} ${gspclgp_HEADERS})
 TARGET_LINK_LIBRARIES(gspclgp clgp ${OPENCL_LIBRARIES})

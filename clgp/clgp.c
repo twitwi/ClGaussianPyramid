@@ -210,7 +210,7 @@ clgpRelease(cl_kernel *kernels)
     cl_context context = NULL;
     cl_program program = NULL;
 
-    /* Retrieve contexte reference from kernels */
+    /* Retrieve context reference from kernels */
     clgp_clerr =
         clGetKernelInfo(
                 kernels[DOWNSAMPLEDGAUSS5X5_COLS],
