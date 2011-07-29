@@ -218,6 +218,7 @@ main(int argc, char *argv[])
 
     
     /* Parse command line arguments */
+    opterr = 0;
 #ifdef HAVE_GETOPT_LONG
     while ((i = getopt_long(argc, argv, ":c:d:hp:", longopts, NULL)) != -1) {
 #else
