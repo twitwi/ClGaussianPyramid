@@ -36,7 +36,7 @@ clgpEnqueueDownscaledGauss5x5(
             sizeof(cl_image_format),
             &input_format,
             NULL);
-    if (input_format.image_channel_data_type != CL_UNSIGNED_INT8) {
+    if (input_format.image_channel_data_type != CL_UNORM_INT8) {
         fprintf(stderr, "clgp: wrong format\n");
         goto end;
     }

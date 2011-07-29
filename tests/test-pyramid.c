@@ -205,7 +205,7 @@ main(int argc, char *argv[])
     unsigned int input_height = 0, pyramid_height = 0;
     unsigned int input_nbchannels = 0, pyramid_nbchannels = 0;
 
-    cl_image_format imageformat = {CL_RGBA, CL_UNSIGNED_INT8};
+    cl_image_format imageformat = {CL_RGBA, CL_UNORM_INT8};
     cl_mem input_climage, pyramid_climage[32];
     int maxlevel = 0, level = 0;
     

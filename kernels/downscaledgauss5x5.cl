@@ -24,32 +24,32 @@ downscaledgauss5x5(
         return;
     }
 
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, -2.f))) * mask[0][0];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, -2.f))) * mask[1][0];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, -2.f))) * mask[2][0];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, -2.f))) * mask[3][0];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, -2.f))) * mask[4][0];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, -1.f))) * mask[0][1];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, -1.f))) * mask[1][1];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, -1.f))) * mask[2][1];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, -1.f))) * mask[3][1];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, -1.f))) * mask[4][1];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, +0.f))) * mask[0][2];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, +0.f))) * mask[1][2];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, +0.f))) * mask[2][2];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, +0.f))) * mask[3][2];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, +0.f))) * mask[4][2];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, +1.f))) * mask[0][3];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, +1.f))) * mask[1][3];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, +1.f))) * mask[2][3];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, +1.f))) * mask[3][3];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, +1.f))) * mask[4][3];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-2.f, +2.f))) * mask[0][4];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(-1.f, +2.f))) * mask[1][4];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+0.f, +2.f))) * mask[2][4];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+1.f, +2.f))) * mask[3][4];
-    c += convert_float4(read_imageui(input_image, sampler, incoord+(float2)(+2.f, +2.f))) * mask[4][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.f, -2.f)) * mask[0][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.f, -2.f)) * mask[1][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.f, -2.f)) * mask[2][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.f, -2.f)) * mask[3][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.f, -2.f)) * mask[4][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.f, -1.f)) * mask[0][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.f, -1.f)) * mask[1][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.f, -1.f)) * mask[2][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.f, -1.f)) * mask[3][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.f, -1.f)) * mask[4][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.f, +0.f)) * mask[0][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.f, +0.f)) * mask[1][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.f, +0.f)) * mask[2][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.f, +0.f)) * mask[3][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.f, +0.f)) * mask[4][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.f, +1.f)) * mask[0][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.f, +1.f)) * mask[1][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.f, +1.f)) * mask[2][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.f, +1.f)) * mask[3][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.f, +1.f)) * mask[4][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.f, +2.f)) * mask[0][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.f, +2.f)) * mask[1][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.f, +2.f)) * mask[2][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.f, +2.f)) * mask[3][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.f, +2.f)) * mask[4][4];
 
-    write_imageui(output_image, outcoord, convert_uint4(c));
+    write_imagef(output_image, outcoord, c);
 }
 
