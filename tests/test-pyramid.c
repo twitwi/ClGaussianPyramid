@@ -187,7 +187,6 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    int opterr = 0;
     cl_int err = 0;
 
     int devicetype = 0;
