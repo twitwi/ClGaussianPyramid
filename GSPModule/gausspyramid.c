@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <math.h>
+#include <string.h>
 
 #ifndef __APPLE__
 # include <CL/opencl.h>
@@ -8,8 +10,6 @@
 
 #include <clgp/clgp.h>
 #include <clgp/utils.h>
-
-#include <cv.h>
 
 #include "layoututils.h"
 
@@ -44,19 +44,22 @@ GaussPyramid__v__init(struct gausspyramid_module *module)
     cl_int clerr = 0;
     cl_device_id device = NULL;
     cl_context context = NULL;
-    int err = 0;
+    cl_image_format *imageformats = NULL;
+    unsigned int numimageformats = 0;
+    unsigned int f = 0;
+    int clgperr = 0;
 
     clgpMaxflopsGPU(&device);
     assert(device != NULL);
 
     context = clCreateContext(NULL, 1, &device, NULL, NULL, &clerr);
-    assert(err == CL_SUCCESS);
+    assert(clerr == CL_SUCCESS);
 
     module->command_queue = clCreateCommandQueue(context, device, 0, &clerr);
-    assert(err == CL_SUCCESS);
+    assert(clerr == CL_SUCCESS);
 
-    err = clgpInit(context, &module->clgpkernels);
-    assert(err == 0);
+    clgperr = clgpInit(context, &module->clgpkernels);
+    assert(clgperr == 0);
 
     clReleaseContext(context);
 }
@@ -72,65 +75,64 @@ GaussPyramid__v__stop(struct gausspyramid_module *module)
 static void
 outputboth(
         struct gausspyramid_module *module, 
-        const unsigned char *rgbadata, 
+        const unsigned char *rgba, 
         int width,
         int height)
 {
     void *output_rgba[] = {
         "outputRGBA",
-        "char *", NULL,
+        "char*", NULL,
         "int", NULL,
         "int", NULL,
         NULL };
     void *output_rgb[] = {
         "outputRGB",
-        "char *", NULL,
+        "char*", NULL,
         "int", NULL,
         "int", NULL,
         NULL };
-    int pyramid_width = 3*width, pyramid_height = height;
-    unsigned char *rgbdata = NULL;
+    unsigned char *rgb = NULL;
+    size_t x = 0, y  = 0;
 
-    int x = 0, y  = 0;
-
-    output_rgba[2] = &rgbadata;
-    output_rgba[4] = &pyramid_width;
-    output_rgba[6] = &pyramid_height;
+    output_rgba[2] = &rgba;
+    output_rgba[4] = &width;
+    output_rgba[6] = &height;
     module->framework("emit", output_rgba);
 
-    rgbdata = malloc(pyramid_width*height*3*sizeof(unsigned char));
-    assert(rgbdata != NULL);
-    for(y = 0; y < height; y++) {
-        for(x = 0; x < 3*width; x++) {
-            rgbdata[y*3*3*width + x*3 + 0] = rgbadata[y*3*width*4 + x*4 + 0];
-            rgbdata[y*3*3*width + x*3 + 1] = rgbadata[y*3*width*4 + x*4 + 1];
-            rgbdata[y*3*3*width + x*3 + 2] = rgbadata[y*3*width*4 + x*4 + 2];
+    rgb = malloc(width*height*3*sizeof(unsigned char));
+    assert(rgb != NULL);
+    for(y = 0; y < (size_t)height; y++) {
+        for(x = 0; x < (size_t)width; x++) {
+            rgb[y*width*3 + x*3 + 0] = rgba[y*width*4 + x*4 + 0];
+            rgb[y*width*3 + x*3 + 1] = rgba[y*width*4 + x*4 + 1];
+            rgb[y*width*3 + x*3 + 2] = rgba[y*width*4 + x*4 + 2];
         }
     }
 
-    output_rgb[2] = &rgbdata;
-    output_rgb[4] = &pyramid_width;
-    output_rgb[6] = &pyramid_height;
+    output_rgb[2] = &rgb;
+    output_rgb[4] = &width;
+    output_rgb[6] = &height;
     module->framework("emit", output_rgb);
 
-    free(rgbdata);
+    free(rgb);
 }
 
 void
-GaussPyramid__v__event__v__inputRgba(
+GaussPyramid__v__event__v__inputRGBA(
         struct gausspyramid_module *module,
-        unsigned char *data,
-        int width,
-        int height)
+        unsigned char *input_rgba,
+        int input_width,
+        int input_height)
 {
     cl_int clerr = 0;
     int clgperr = 0;
 
     cl_context context = NULL;
     cl_mem input_climage, pyramid_climage[32];
+    size_t pyramid_width = input_width*3, pyramid_height = input_height;
     int maxlevel = 0, level = 0;
 
-    unsigned char *outdata = NULL;
+    unsigned char *pyramid_rgba = NULL;
 
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
@@ -149,30 +151,30 @@ GaussPyramid__v__event__v__inputRgba(
                 context,
                 CL_MEM_READ_ONLY,
                 &clgpimageformat,
-                width,
-                height,
+                input_width,
+                input_height,
                 0,
                 NULL,
                 &clerr);
     assert(clerr == CL_SUCCESS);
 
-    maxlevel = clgpMaxlevelHalfOctave(width, height);
+    maxlevel = clgpMaxlevelHalfOctave(input_width, input_height) - 4;
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
                     &clgpimageformat,
-                    width >> (level>>1),
-                    height >> (level>>1),
+                    input_width >> (level>>1),
+                    input_height >> (level>>1),
                     0,
                     NULL,
                     &clerr);
         assert(clerr == CL_SUCCESS);
     }
 
-    region[0] = width;
-    region[1] = height;
+    region[0] = input_width;
+    region[1] = input_height;
     clerr =
         clEnqueueWriteImage(
                 module->command_queue,
@@ -182,7 +184,7 @@ GaussPyramid__v__event__v__inputRgba(
                 region,
                 0,
                 0,
-                data,
+                input_rgba,
                 0,
                 NULL,
                 NULL);
@@ -197,10 +199,10 @@ GaussPyramid__v__event__v__inputRgba(
             maxlevel);
     assert(clgperr == 0);
 
-    outdata = malloc(3*width*height*4*sizeof(unsigned char));
+    pyramid_rgba = malloc(pyramid_width*pyramid_height*4*sizeof(unsigned char));
     for (level = 0; level < maxlevel; level++) {
-        region[0] = width >> (level>>1);
-        region[1] = height >> (level>>1);
+        region[0] = input_width >> (level>>1);
+        region[1] = input_height >> (level>>1);
         clerr =
             clEnqueueReadImage(
                     module->command_queue,
@@ -208,9 +210,9 @@ GaussPyramid__v__event__v__inputRgba(
                     CL_TRUE,
                     origin,
                     region,
-                    3*width*4*sizeof(unsigned char),
+                    pyramid_width*4*sizeof(unsigned char),
                     0,
-                    (void *)((unsigned char *)((char *)outdata + LEVEL_ORIGIN_Y(level, width, height)*3*width*4) + LEVEL_ORIGIN_X(level, width, height)*4),
+                    (void *)((unsigned char *)((char *)pyramid_rgba + LEVEL_ORIGIN_Y(level, input_width, input_height)*pyramid_width*4) + LEVEL_ORIGIN_X(level, input_width, input_height)*4),
                     0,
                     NULL,
                     NULL);
@@ -222,51 +224,33 @@ GaussPyramid__v__event__v__inputRgba(
         clReleaseMemObject(pyramid_climage[level]);
     }
 
-    outputboth(module, outdata, width, height);
-    free(outdata);
-}
-
-void
-GaussPyramid__v__event__v__inputRgb(
-        struct gausspyramid_module *module,
-        unsigned char *data,
-        int width,
-        int height)
-{
-    unsigned char *data_rgba = NULL;
-
-    int x = 0, y = 0;
-
-    data_rgba = malloc(width*height*4*sizeof(unsigned char));
-    assert(data_rgba != NULL);
-
-    for (y = 0; y < height; y++) {
-        for (x = 0; x < width; x++) {
-            data_rgba[y*width*4 + x*4 + 0] = data[y*width + x*3 + 0];
-            data_rgba[y*width*4 + x*4 + 1] = data[y*width + x*3 + 1];
-            data_rgba[y*width*4 + x*4 + 2] = data[y*width + x*3 + 2];
-            data_rgba[y*width*4 + x*4 + 3] = 255;
-        }
-    }
-
-    GaussPyramid__v__event__v__inputRgba(module, data_rgba, width, height);
-    free(data_rgba);
+    outputboth(module, pyramid_rgba, pyramid_width, pyramid_height);
+    free(pyramid_rgba);
 }
 
 void
 GaussPyramid__v__event__v__input(
         struct gausspyramid_module *module,
-        IplImage *image)
+        unsigned char *rgb,
+        int width,
+        int height)
 {
-    IplImage *rgba = NULL;
+    unsigned char *rgba = NULL;
+    size_t x = 0, y = 0;
 
-    rgba = cvCreateImage(cvSize(image->width, image->height), IPL_DEPTH_8U, 4);
+    rgba = malloc(width*height*4*sizeof(unsigned char));
     assert(rgba != NULL);
-    cvCvtColor(image, rgba, CV_RGB2RGBA);
-    GaussPyramid__v__event__v__inputRgba(
-            module, 
-            (unsigned char *)rgba->imageData, 
-            image->width, 
-            image->height);
-    cvReleaseImage(&rgba);
+
+    for (y = 0; y < (size_t)height; y++) {
+        for (x = 0; x < (size_t)width; x++) {
+            rgba[y*width*4 + x*4 + 0] = rgb[y*width*3 + x*3 + 0];
+            rgba[y*width*4 + x*4 + 1] = rgb[y*width*3 + x*3 + 1];
+            rgba[y*width*4 + x*4 + 2] = rgb[y*width*3 + x*3 + 2];
+            rgba[y*width*4 + x*4 + 3] = 255;
+        }
+    }
+
+    GaussPyramid__v__event__v__inputRGBA(module, rgba, width, height);
+    free(rgba);
 }
+

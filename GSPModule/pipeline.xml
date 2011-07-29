@@ -8,17 +8,17 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
        what="sel.level : int(2) ; for.period: int(1)"/>
 
     <m id="for" type="base:For" warmup="3000" period="1"/>
-    <m id="load" type="c:ImageSource.ImageSource" gray="false" url="images:../media/lena512color.png"/>
+    <m id="load" type="c:ImageSource.ImageSource" gray="false" 
+            url="images:../media/lena512color.png"/>
     <m id="pyramid" type="c:gspclgp.GaussPyramid"/>
+    <m id="sel" type="c:gspclgp.LevelSelector" level="2"/>
     <m id="view" type="c:ImageViewer.ImageViewer" name="test view"/>
     <m id="GTK" type="c:GTKModule.GTKModule"/>
 
-    <m id="sel" type="c:gspclgp.LevelSelector" level="2"/>
     <f id="toipl" type="c:gspclgp.RgbToIpl"/>
     <f id="torgb" type="c:gspclgp.IplToRgb"/>
 
-    <c chain="for - load - #pyramid#outputRGB - toipl -sel-view"/>
+    <c chain="for - load - torgb - #pyramid#outputRGB - toipl - sel - view"/>
     <!--c chain="for - skip#load"/-->
-
 </pipeline>
 

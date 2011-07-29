@@ -12,13 +12,13 @@ struct rgbtoipl_module {
 struct rgbtoipl_module *
 RgbToIpl__v__create(Framework f)
 {
-    struct rgbtoipl_module *res = NULL;
+    struct rgbtoipl_module *module = NULL;
 
-    res = malloc(sizeof(struct rgbtoipl_module));
-    assert(res != NULL);
-    res->framework = f;
+    module = malloc(sizeof(struct rgbtoipl_module));
+    assert(module != NULL);
+    module->framework = f;
 
-    return res;
+    return module;
 }
 
 /*
@@ -37,7 +37,7 @@ RgbToIpl__v__stop(struct rgbtoipl_module *module)
 void 
 RgbToIpl__v__event__v__input(
         struct rgbtoipl_module *module, 
-        unsigned char *data, 
+        const unsigned char *rgb, 
         int width, 
         int height)
 {
@@ -45,17 +45,27 @@ RgbToIpl__v__event__v__input(
         "output", 
         "P9_IplImage", NULL, 
         NULL };
-    IplImage *outimage = NULL;
+    IplImage *image = NULL;
+    size_t x = 0, y = 0;
 
-    outimage = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
-    assert(outimage != NULL);
+    /* Send an BGR IplImage, it must be what everybody expect */
+    image = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
+    assert(image != NULL);
 
-    outimage->imageData = (char *)data;
-    outimage->widthStep = 3 * width;
+    for (y = 0; y < (size_t)height; y++) {
+        for (x = 0; x < (size_t)width; x++) {
+            image->imageData[y*image->widthStep + x*3 + 0] =
+                (char)rgb[y*width*3 + x*3 + 2];
+            image->imageData[y*image->widthStep + x*3 + 1] =
+                (char)rgb[y*width*3 + x*3 + 1];
+            image->imageData[y*image->widthStep + x*3 + 2] =
+                (char)rgb[y*width*3 + x*3 + 0];
+        }
+    }
 
-    output[2] = &outimage;
+    output[2] = &image;
     module->framework("emit", output);
 
-    cvReleaseImageHeader(&outimage);
+    cvReleaseImage(&image);
 }
 

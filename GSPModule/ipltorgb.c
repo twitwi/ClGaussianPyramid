@@ -12,13 +12,13 @@ struct ipltorgb_module {
 struct ipltorgb_module *
 IplToRgb__v__create(Framework f)
 {
-    struct ipltorgb_module *res = NULL;
+    struct ipltorgb_module *module = NULL;
 
-    res = malloc(sizeof(struct ipltorgb_module));
-    assert(res != NULL);
-    res->framework = f;
+    module = malloc(sizeof(struct ipltorgb_module));
+    assert(module != NULL);
+    module->framework = f;
 
-    return res;
+    return module;
 }
 
 /*
@@ -37,43 +37,45 @@ IplToRgb__v__stop(struct ipltorgb_module *module)
 void 
 IplToRgb__v__event__v__input(
         struct ipltorgb_module *module, 
-        IplImage *image)
+        const IplImage *image)
 {
     void *output[] = { 
         "output", 
-        "unsigned char *", NULL, 
+        "char*", NULL, 
         "int", NULL, 
         "int", NULL, 
         NULL };
-    unsigned char *outdata = NULL, *tmpdata = NULL;
-    int r = 0;
+    unsigned char *rgb = NULL;
+    size_t x = 0, y = 0;
 
     /* Fixme: With OpenCV not storing any color format, we're begging for 
      *        color conversion bugs... the best we can do is to check
-     *        the number of channel/depth and pray it is RGB (and not BGR for
-     *        example...)
+     *        the number of channel/depth and pray it is BGR (the default 
+     *        format used by cvLoadImage and as such, the ImageSource module).
      */
     assert(image->nChannels == 3);
-    assert(image->depth == (int)IPL_DEPTH_8U || image->depth == (int)IPL_DEPTH_8S);
+    assert(image->depth == (int)IPL_DEPTH_8U 
+            || image->depth == (int)IPL_DEPTH_8S);
 
-    if (image->widthStep == image->width * 3) {
-        outdata = (unsigned char *)image->imageData;
-    }
-    else {
-        outdata = tmpdata = 
-            malloc(image->width * image->height * 3 * sizeof(unsigned char));
-        for (r = 0; r < image->height; r++) {
-            memcpy(outdata + r*image->width*3,
-                    image->imageData + r*image->widthStep,
-                    image->width*3*sizeof(unsigned char));
+    rgb = malloc(image->width * image->height * 3 * sizeof(unsigned char));
+    assert(rgb != NULL);
+
+    for (y = 0; y < (size_t)image->height; y++) {
+        for (x = 0; x < (size_t)image->width; x++) {
+            rgb[y*image->width*3 + x*3 + 0] = 
+                (unsigned char)image->imageData[y*image->widthStep + x*3 + 2];
+            rgb[y*image->width*3 + x*3 + 1] = 
+                (unsigned char)image->imageData[y*image->widthStep + x*3 + 1];
+            rgb[y*image->width*3 + x*3 + 2] = 
+                (unsigned char)image->imageData[y*image->widthStep + x*3 + 0];
         }
     }
 
-    output[2] = &outdata;
-    output[4] = &image->width;
-    output[6] = &image->height;
+    output[2] = &rgb;
+    output[4] = (void *)&image->width;
+    output[6] = (void *)&image->height;
     module->framework("emit", output);
 
-    free(tmpdata);
+    free(rgb);
 }
 
