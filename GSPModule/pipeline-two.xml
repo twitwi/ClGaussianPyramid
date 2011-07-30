@@ -17,11 +17,11 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
     <m id="view2" type="c:ImageViewer.ImageViewer" name="test view 2"/>
     <m id="GTK" type="c:GTKModule.GTKModule"/>
 
-    <f id="toipl" type="c:gspclgp.RgbToIpl"/>
-    <f id="torgb" type="c:gspclgp.IplToRgb"/>
+    <f id="toipl" type="c:gspclgp.BGRToIpl"/>
+    <f id="tobgr" type="c:gspclgp.IplToBGR"/>
 
-    <c chain="for - load - #pyramid#outputRGB - toipl - sel1 - view1"/>
-    <c chain="              pyramid#outputRGB - toipl - sel2 - view2"/>
+    <c chain="for - load - tobgr - #pyramid#outputBGR - toipl - sel1 - view1"/>
+    <c chain="                      pyramid#outputBGR - toipl - sel2 - view2"/>
     <!--c chain="for - skip#load"/-->
 </pipeline>
 

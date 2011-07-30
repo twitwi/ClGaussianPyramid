@@ -7,10 +7,10 @@ INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR})
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
 SET(gspclgp_SRCS
+    bgrtoipl.c
     gausspyramid.c
-    ipltorgb.c
-    levelselector.c
-    rgbtoipl.c)
+    ipltobgr.c
+    levelselector.c)
 SET(gspclgp_HEADERS
     framework.h
     layoututils.h)

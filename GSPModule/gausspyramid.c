@@ -13,8 +13,6 @@
 
 #include "layoututils.h"
 
-const cl_image_format clgpimageformat = {CL_RGBA, CL_UNORM_INT8};
-
 //#include "framework.h"
 typedef void (*Framework) (const char* command, ...);
 
@@ -44,9 +42,6 @@ GaussPyramid__v__init(struct gausspyramid_module *module)
     cl_int clerr = 0;
     cl_device_id device = NULL;
     cl_context context = NULL;
-    cl_image_format *imageformats = NULL;
-    unsigned int numimageformats = 0;
-    unsigned int f = 0;
     int clgperr = 0;
 
     clgpMaxflopsGPU(&device);
@@ -75,64 +70,66 @@ GaussPyramid__v__stop(struct gausspyramid_module *module)
 static void
 outputboth(
         struct gausspyramid_module *module, 
-        const unsigned char *rgba, 
+        const unsigned char *bgra, 
         int width,
         int height)
 {
-    void *output_rgba[] = {
-        "outputRGBA",
+    void *output_bgra[] = {
+        "outputBGRA",
         "char*", NULL,
         "int", NULL,
         "int", NULL,
         NULL };
-    void *output_rgb[] = {
-        "outputRGB",
+    void *output_bgr[] = {
+        "outputBGR",
         "char*", NULL,
         "int", NULL,
         "int", NULL,
         NULL };
-    unsigned char *rgb = NULL;
+    unsigned char *bgr = NULL;
     size_t x = 0, y  = 0;
 
-    output_rgba[2] = &rgba;
-    output_rgba[4] = &width;
-    output_rgba[6] = &height;
-    module->framework("emit", output_rgba);
+    output_bgra[2] = &bgra;
+    output_bgra[4] = &width;
+    output_bgra[6] = &height;
+    module->framework("emit", output_bgra);
 
-    rgb = malloc(width*height*3*sizeof(unsigned char));
-    assert(rgb != NULL);
+    bgr = malloc(width*height*3*sizeof(unsigned char));
+    assert(bgr != NULL);
     for(y = 0; y < (size_t)height; y++) {
         for(x = 0; x < (size_t)width; x++) {
-            rgb[y*width*3 + x*3 + 0] = rgba[y*width*4 + x*4 + 0];
-            rgb[y*width*3 + x*3 + 1] = rgba[y*width*4 + x*4 + 1];
-            rgb[y*width*3 + x*3 + 2] = rgba[y*width*4 + x*4 + 2];
+            bgr[y*width*3 + x*3 + 0] = bgra[y*width*4 + x*4 + 0];
+            bgr[y*width*3 + x*3 + 1] = bgra[y*width*4 + x*4 + 1];
+            bgr[y*width*3 + x*3 + 2] = bgra[y*width*4 + x*4 + 2];
         }
     }
 
-    output_rgb[2] = &rgb;
-    output_rgb[4] = &width;
-    output_rgb[6] = &height;
-    module->framework("emit", output_rgb);
+    output_bgr[2] = &bgr;
+    output_bgr[4] = &width;
+    output_bgr[6] = &height;
+    module->framework("emit", output_bgr);
 
-    free(rgb);
+    free(bgr);
 }
 
 void
-GaussPyramid__v__event__v__inputRGBA(
+GaussPyramid__v__event__v__inputBGRA(
         struct gausspyramid_module *module,
-        unsigned char *input_rgba,
+        unsigned char *input_bgra,
         int input_width,
         int input_height)
 {
     cl_int clerr = 0;
     int clgperr = 0;
 
+    const cl_image_format clgpimageformat = {CL_BGRA, CL_UNORM_INT8};
+
     cl_context context = NULL;
     cl_mem input_climage, pyramid_climage[32];
     size_t pyramid_width = input_width*3, pyramid_height = input_height;
     int maxlevel = 0, level = 0;
 
-    unsigned char *pyramid_rgba = NULL;
+    unsigned char *pyramid_bgra = NULL;
 
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
@@ -184,7 +181,7 @@ GaussPyramid__v__event__v__inputRGBA(
                 region,
                 0,
                 0,
-                input_rgba,
+                input_bgra,
                 0,
                 NULL,
                 NULL);
@@ -199,7 +196,7 @@ GaussPyramid__v__event__v__inputRGBA(
             maxlevel);
     assert(clgperr == 0);
 
-    pyramid_rgba = malloc(pyramid_width*pyramid_height*4*sizeof(unsigned char));
+    pyramid_bgra = malloc(pyramid_width*pyramid_height*4*sizeof(unsigned char));
     for (level = 0; level < maxlevel; level++) {
         region[0] = input_width >> (level>>1);
         region[1] = input_height >> (level>>1);
@@ -212,7 +209,7 @@ GaussPyramid__v__event__v__inputRGBA(
                     region,
                     pyramid_width*4*sizeof(unsigned char),
                     0,
-                    (void *)((unsigned char *)((char *)pyramid_rgba + LEVEL_ORIGIN_Y(level, input_width, input_height)*pyramid_width*4) + LEVEL_ORIGIN_X(level, input_width, input_height)*4),
+                    (void *)((unsigned char *)((char *)pyramid_bgra + LEVEL_ORIGIN_Y(level, input_width, input_height)*pyramid_width*4) + LEVEL_ORIGIN_X(level, input_width, input_height)*4),
                     0,
                     NULL,
                     NULL);
@@ -224,33 +221,33 @@ GaussPyramid__v__event__v__inputRGBA(
         clReleaseMemObject(pyramid_climage[level]);
     }
 
-    outputboth(module, pyramid_rgba, pyramid_width, pyramid_height);
-    free(pyramid_rgba);
+    outputboth(module, pyramid_bgra, pyramid_width, pyramid_height);
+    free(pyramid_bgra);
 }
 
 void
 GaussPyramid__v__event__v__input(
         struct gausspyramid_module *module,
-        unsigned char *rgb,
+        unsigned char *bgr,
         int width,
         int height)
 {
-    unsigned char *rgba = NULL;
+    unsigned char *bgra = NULL;
     size_t x = 0, y = 0;
 
-    rgba = malloc(width*height*4*sizeof(unsigned char));
-    assert(rgba != NULL);
+    bgra = malloc(width*height*4*sizeof(unsigned char));
+    assert(bgra != NULL);
 
     for (y = 0; y < (size_t)height; y++) {
         for (x = 0; x < (size_t)width; x++) {
-            rgba[y*width*4 + x*4 + 0] = rgb[y*width*3 + x*3 + 0];
-            rgba[y*width*4 + x*4 + 1] = rgb[y*width*3 + x*3 + 1];
-            rgba[y*width*4 + x*4 + 2] = rgb[y*width*3 + x*3 + 2];
-            rgba[y*width*4 + x*4 + 3] = 255;
+            bgra[y*width*4 + x*4 + 0] = bgr[y*width*3 + x*3 + 0];
+            bgra[y*width*4 + x*4 + 1] = bgr[y*width*3 + x*3 + 1];
+            bgra[y*width*4 + x*4 + 2] = bgr[y*width*3 + x*3 + 2];
+            bgra[y*width*4 + x*4 + 3] = 255;
         }
     }
 
-    GaussPyramid__v__event__v__inputRGBA(module, rgba, width, height);
-    free(rgba);
+    GaussPyramid__v__event__v__inputBGRA(module, bgra, width, height);
+    free(bgra);
 }
 
