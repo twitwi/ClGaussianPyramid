@@ -13,7 +13,7 @@
 
 #include "layoututils.h"
 
-const cl_image_format clgpimageformat = {CL_RGBA, CL_UNSIGNED_INT8};
+const cl_image_format clgpimageformat = {CL_RGBA, CL_UNORM_INT8};
 
 //#include "framework.h"
 typedef void (*Framework) (const char* command, ...);
