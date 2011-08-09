@@ -37,7 +37,7 @@ BGRToIpl__v__stop(struct bgrtoipl_module *module)
 void 
 BGRToIpl__v__event__v__input(
         struct bgrtoipl_module *module, 
-        const unsigned char *rgb, 
+        const unsigned char *bgr, 
         int width, 
         int height)
 {
@@ -51,7 +51,7 @@ BGRToIpl__v__event__v__input(
     ipl = cvCreateImageHeader(cvSize(width, height), IPL_DEPTH_8U, 3);
     assert(ipl != NULL);
 
-    ipl->imageData = rgb;
+    ipl->imageData = (char *)bgr;
     ipl->widthStep = width*3*sizeof(unsigned char);
 
     output[2] = &ipl;
