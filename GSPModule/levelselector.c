@@ -1,9 +1,5 @@
 #include <assert.h>
-#include <stdio.h>
-
-#include <cv.h>
-
-#include "layoututils.h"
+#include <stdlib.h>
 
 //#include "framework.h"
 typedef void (*Framework) (const char* command, ...);
@@ -16,21 +12,21 @@ struct levelselector_module {
 struct levelselector_module *
 LevelSelector__v__create(Framework f)
 {
-    struct levelselector_module *res = NULL;
+    struct levelselector_module *module = NULL;
     void *levelparam[] = {
         "param",
         "level", "int",
         NULL
     };
 
-    res = malloc(sizeof(struct levelselector_module));
-    assert(res != NULL);
-    res->framework = f;
-    res->level = 1;
+    module = malloc(sizeof(struct levelselector_module));
+    assert(module != NULL);
+    module->framework = f;
+    module->level = 0;
 
-    res->framework("param", levelparam);
+    module->framework("param", levelparam);
 
-    return res;
+    return module;
 }
 
 /*
@@ -55,37 +51,30 @@ LevelSelector__v__set__v__level(struct levelselector_module *module, int level)
 void 
 LevelSelector__v__event__v__input(
         struct levelselector_module *module, 
-        IplImage *image)
+        unsigned char **pyramid_bgr,
+        int width,
+        int height,
+        int maxlevel)
 {
     void *output[] = { 
         "output", 
-        "P9_IplImage", NULL, 
+        "char*", NULL, 
+        "int", NULL,
+        "int", NULL,
         NULL };
-    size_t level_origin_x = 0, level_origin_y = 0;
-    size_t outwidth = (image->width/3) >> (module->level >> 1); 
-    size_t outheight = image->height >> (module->level >> 1);
-    IplImage *outimage = NULL;
+    int level_width = 0;
+    int level_height = 0;
 
-    outimage = 
-        cvCreateImage(cvSize(outwidth, outheight), IPL_DEPTH_8U, 3);
-    assert(outimage != NULL);
+    if (module->level >= maxlevel) {
+        module->level = maxlevel - 1;
+    }
 
-    level_origin_x = 
-        LEVEL_ORIGIN_X(module->level, image->width/3, image->height);
-    level_origin_y = 
-        LEVEL_ORIGIN_Y(module->level, image->width/3, image->height);
-    cvSetImageROI(
-            image, 
-            cvRect(level_origin_x, 
-                    level_origin_y, 
-                    outimage->width, 
-                    outimage->height));
-    cvCopy(image, outimage, NULL);
-    cvResetImageROI(image);
+    level_width = width >> (module->level >> 1);
+    level_height = height >> (module->level >> 1);
 
-    output[2] = &outimage;
+    output[2] = &pyramid_bgr[module->level];
+    output[4] = &level_width;
+    output[6] = &level_height;
     module->framework("emit", output);
-
-    cvReleaseImageHeader(&outimage);
 }
 

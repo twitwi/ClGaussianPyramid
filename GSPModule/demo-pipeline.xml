@@ -5,23 +5,21 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
     <namespace base="fr.prima.gspbaseutils"/>
 
     <m id="dgui" type="base:DebugGUI"
-       what="sel1.level : int(2) ; sel2.level : int(4) ; for.period:int(50)"/>
+       what="sel.level : int(1) ; for.period: int(1)"/>
 
     <m id="for" type="base:For" warmup="300" period="1"/>
     <m id="load" type="c:ImageSource.ImageSource" gray="false" 
             url="images:../media/lena512color.png"/>
     <m id="pyramid" type="c:gspclgp.GaussPyramid"/>
-    <m id="sel1" type="c:gspclgp.LevelSelector" level="2"/>
-    <m id="view1" type="c:GTKModule.GTKModule" name="test view 1"/>
-    <m id="sel2" type="c:gspclgp.LevelSelector" level="4"/>
-    <m id="view2" type="c:GTKModule.GTKModule" name="test view 2"/>
-    <m id="GTK" type="c:GTKModule.GTKModule"/>
+    <m id="sel" type="c:gspclgp.LevelSelector" level="1"/>
+    <m id="view1" type="c:GTKModule.GTKModule" name="Input"/>
+    <m id="view2" type="c:GTKModule.GTKModule" name="Gaussian Pyramid"/>
 
     <f id="toipl" type="c:gspclgp.BGRToIpl"/>
     <f id="tobgr" type="c:gspclgp.IplToBGR"/>
 
-    <c chain="for - load - tobgr - #pyramid#outputBGR - toipl - sel1 - view1"/>
-    <c chain="                      pyramid#outputBGR - toipl - sel2 - view2"/>
+    <c chain="for - load - view1"/>
+    <c chain="      load - tobgr - #pyramid#outputBGR - sel - toipl - view2"/>
     <!--c chain="for - skip#load"/-->
 </pipeline>
 

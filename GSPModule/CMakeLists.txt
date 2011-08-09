@@ -12,7 +12,6 @@ SET(gspclgp_SRCS
     ipltobgr.c
     levelselector.c)
 SET(gspclgp_HEADERS
-    framework.h
-    layoututils.h)
+    framework.h)
 ADD_LIBRARY(gspclgp SHARED ${gspclgp_SRCS} ${gspclgp_HEADERS})
 TARGET_LINK_LIBRARIES(gspclgp clgp ${OPENCL_LIBRARIES})
