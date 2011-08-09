@@ -21,7 +21,7 @@ clgpRelease(cl_kernel *kernels);
 
 /* Returns the maximum possible level for an image of size width x height in 
  * the classic pyramid */
-int
+size_t
 clgpMaxlevel(size_t width, size_t height);
 
 /* Create the classic gaussian pyramid from input and store its levels in
@@ -33,11 +33,11 @@ clgpEnqueuePyramid(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel);
+        size_t maxlevel);
 
 /* Returns the maximum possible level for an image of size width x height in 
  * the half-octave pyramid (ie the double of the normal pyramid) */
-int
+size_t
 clgpMaxlevelHalfOctave(size_t width, size_t height);
 
 /* Create the half-octave gaussian pyramid from input and store its levels in
@@ -49,7 +49,7 @@ clgpEnqueuePyramidHalfOctave(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel);
+        size_t maxlevel);
 
 /* Create the half-octave gaussian pyramid with its true layout from input and 
  * store its levels in the pyramid_image array images (whom sizes must be large 
@@ -60,7 +60,7 @@ clgpEnqueuePyramidSqrt2(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel);
+        size_t maxlevel);
 
 #ifdef __cplusplus
 }

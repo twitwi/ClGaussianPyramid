@@ -265,11 +265,11 @@ clgpRelease(cl_kernel *kernels)
 }
 
 /* Util function to get the max level for an image */
-int
+size_t
 clgpMaxlevel(size_t width, size_t height)
 {
     /* Go until the last reduction possible */
-    return (int)log2f((float)((width > height) ? width : height)) + 1;
+    return (size_t)log2f((float)((width > height) ? width : height)) + 1;
 }
 
 /* Build an array of images that are the different layers of the classic 
@@ -280,7 +280,7 @@ clgpEnqueuePyramid(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel)
+        size_t maxlevel)
 {
     int err = 0;
 
@@ -289,7 +289,7 @@ clgpEnqueuePyramid(
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
     cl_image_format input_format;
-    int level = 0;
+    size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
@@ -343,7 +343,7 @@ end:
 }
 
 /* Util function to get the max level for an image */
-int
+size_t
 clgpMaxlevelHalfOctave(size_t width, size_t height)
 {
     /* Go until the last reduction possible */
@@ -358,14 +358,14 @@ clgpEnqueuePyramidHalfOctave(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel)
+        size_t maxlevel)
 {
     int err = 0;
 
     size_t width = 0;
     size_t height = 0;
     cl_image_format input_format;
-    int level = 0;
+    size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
@@ -451,14 +451,14 @@ clgpEnqueuePyramidSqrt2(
         cl_kernel *kernels,
         cl_mem pyramid_image[],
         cl_mem input_image,
-        int maxlevel)
+        size_t maxlevel)
 {
     int err = 0;
 
     size_t width = 0;
     size_t height = 0;
     cl_image_format input_format;
-    int level = 0;
+    size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);

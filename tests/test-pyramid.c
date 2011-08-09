@@ -36,12 +36,12 @@ static struct option longopts[] = {
  * have to do this normaly! */
 struct pyramid_implementation {
     size_t (*layoutWidth)(size_t width);
-    size_t (*levelWidth)(size_t width, int level);
-    size_t (*levelHeight)(size_t height, int level);
-    size_t (*layoutOriginX)(int level, size_t width, size_t height);
-    size_t (*layoutOriginY)(int level, size_t width, size_t height);
-    int (*maxlevel)(size_t width, size_t height);
-    int (*enqueuePyramid)(cl_command_queue command_queue, cl_kernel *kernels, cl_mem pyramid_image[], cl_mem input_image, int maxlevel);
+    size_t (*levelWidth)(size_t width, size_t level);
+    size_t (*levelHeight)(size_t height, size_t level);
+    size_t (*layoutOriginX)(size_t level, size_t width, size_t height);
+    size_t (*layoutOriginY)(size_t level, size_t width, size_t height);
+    size_t (*maxlevel)(size_t width, size_t height);
+    int (*enqueuePyramid)(cl_command_queue command_queue, cl_kernel *kernels, cl_mem pyramid_image[], cl_mem input_image, size_t maxlevel);
 };
 
 static size_t
@@ -50,28 +50,28 @@ pyramidLayoutWidth(size_t width)
     return 2*width;
 }
 static size_t 
-pyramidLevelWidth(size_t width, int level) 
+pyramidLevelWidth(size_t width, size_t level) 
 {
     return width >> level;
 } 
 static size_t 
-pyramidLevelHeight(size_t height, int level) 
+pyramidLevelHeight(size_t height, size_t level) 
 {
     return height >> level;
 } 
 static size_t
-pyramidLayoutOriginX(int level, size_t width, size_t height)
+pyramidLayoutOriginX(size_t level, size_t width, size_t height)
 {
     return ((level == 0) \
         ? 0 \
         : (size_t)(((1.f - powf(0.5f, (float)(level))) / (1.f-0.5f)) *(float)width));
 }
 static size_t
-pyramidLayoutOriginY(int level, size_t width, size_t height)
+pyramidLayoutOriginY(size_t level, size_t width, size_t height)
 {
     return 0;
 }
-static int
+static size_t
 pyramidMaxlevel(size_t width, size_t height)
 {
     return clgpMaxlevel(width, height) - 4;
@@ -92,28 +92,28 @@ pyramidHalfOctaveLayoutWidth(size_t width)
     return 3*width;
 }
 static size_t 
-pyramidHalfOctaveLevelWidth(size_t width, int level) 
+pyramidHalfOctaveLevelWidth(size_t width, size_t level) 
 {
     return width >> (level>>1);
 } 
 static size_t 
-pyramidHalfOctaveLevelHeight(size_t height, int level) 
+pyramidHalfOctaveLevelHeight(size_t height, size_t level) 
 {
     return height >> (level>>1);
 } 
 static size_t
-pyramidHalfOctaveLayoutOriginX(int level, size_t width, size_t height)
+pyramidHalfOctaveLayoutOriginX(size_t level, size_t width, size_t height)
 {
     return ((level == 0) \
         ? 0 \
         : (size_t)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width));
 }
 static size_t
-pyramidHalfOctaveLayoutOriginY(int level, size_t width, size_t height)
+pyramidHalfOctaveLayoutOriginY(size_t level, size_t width, size_t height)
 {
     return ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))); 
 }
-static int
+static size_t
 pyramidHalfOctaveMaxlevel(size_t width, size_t height)
 {
     return clgpMaxlevelHalfOctave(width, height) - 4;
@@ -134,30 +134,30 @@ pyramidSqrt2LayoutWidth(size_t width)
     return 2*width;
 }
 static size_t
-pyramidSqrt2LevelWidth(size_t width, int level)
+pyramidSqrt2LevelWidth(size_t width, size_t level)
 {
     return width >> ((level+1)>>1);
 }
 static size_t
-pyramidSqrt2LevelHeight(size_t height, int level)
+pyramidSqrt2LevelHeight(size_t height, size_t level)
 {
     return height >> (level>>1);
 }
 static size_t
-pyramidSqrt2LayoutOriginX(int level, size_t width, size_t height)
+pyramidSqrt2LayoutOriginX(size_t level, size_t width, size_t height)
 {
     return ((level == 0) \
         ? 0 \
         : ((size_t)(( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f) )*(float)(width/2)) + width));
 }
 static size_t
-pyramidSqrt2LayoutOriginY(int level, size_t width, size_t height)
+pyramidSqrt2LayoutOriginY(size_t level, size_t width, size_t height)
 {
     return ((level <= 2) \
         ? 0 \
         : (int)(( (1.f - powf(0.5f, (float)((level-1)>>1)) ) / (1.f-0.5f) )*(float)(height/2)));
 }
-static int
+static size_t
 pyramidSqrt2Maxlevel(size_t width, size_t height)
 {
     return clgpMaxlevelHalfOctave(width, height) - 7;
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
 
     cl_image_format imageformat = {CL_RGBA, CL_UNORM_INT8};
     cl_mem input_climage, pyramid_climage[32];
-    int maxlevel = 0, level = 0;
+    size_t maxlevel = 0, level = 0;
     
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
@@ -380,7 +380,7 @@ main(int argc, char *argv[])
                     NULL,
                     &err);
         if (err != CL_SUCCESS) {
-            fprintf(stderr, "Could not allocate pyramid_climage[%d]\n", level);
+            fprintf(stderr, "Could not allocate pyramid_climage[%lu]\n", level);
             exit(1);
         }
     }
