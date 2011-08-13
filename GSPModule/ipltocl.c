@@ -49,6 +49,7 @@ IplToCl__v__init(struct ipltocl_module *module)
 
     module->command_queue = clCreateCommandQueue(context, device, 0, &clerr);
     assert(clerr == CL_SUCCESS);
+    global_command_queue = module->command_queue;
 }
 
 void
