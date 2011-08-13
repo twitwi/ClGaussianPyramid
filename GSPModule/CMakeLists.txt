@@ -9,6 +9,8 @@ INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 SET(gspclgp_SRCS
     bgrtoipl.c
     gausspyramid.c
+    globalvars.c
+    ipltocl.c
     ipltobgr.c
     levelselector.c)
 SET(gspclgp_HEADERS

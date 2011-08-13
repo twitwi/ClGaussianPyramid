@@ -16,10 +16,10 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
     <m id="view2" type="c:GTKModule.GTKModule" name="Gaussian Pyramid"/>
 
     <f id="toipl" type="c:gspclgp.BGRToIpl"/>
-    <f id="tobgr" type="c:gspclgp.IplToBGR"/>
+    <f id="tocl" type="c:gspclgp.IplToCl"/>
 
     <c chain="for - load - view1"/>
-    <c chain="      load - tobgr - #pyramid#outputBGR - sel - toipl - view2"/>
+    <c chain="      load - tocl - #pyramid#outputBGR - sel - inputRGB#view2"/>
     <!--c chain="for - skip#load"/-->
 </pipeline>
 

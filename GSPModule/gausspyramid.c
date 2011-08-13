@@ -9,10 +9,12 @@
 #endif
 
 #include <clgp/clgp.h>
-#include <clgp/utils.h>
 
-//#include "framework.h"
+/*#include "framework.h"*/
 typedef void (*Framework) (const char* command, ...);
+
+/* See globalvars.c */
+extern cl_command_queue global_command_queue;
 
 struct gausspyramid_module {
     Framework framework;
@@ -38,30 +40,28 @@ void
 GaussPyramid__v__init(struct gausspyramid_module *module)
 {
     cl_int clerr = 0;
-    cl_device_id device = NULL;
-    cl_context context = NULL;
     int clgperr = 0;
+    cl_context context = NULL;
 
-    clgpMaxflopsGPU(&device);
-    assert(device != NULL);
+    module->command_queue = global_command_queue;
 
-    context = clCreateContext(NULL, 1, &device, NULL, NULL, &clerr);
-    assert(clerr == CL_SUCCESS);
-
-    module->command_queue = clCreateCommandQueue(context, device, 0, &clerr);
+    clerr =
+        clGetCommandQueueInfo(
+                module->command_queue,
+                CL_QUEUE_CONTEXT,
+                sizeof(cl_context),
+                &context,
+                NULL);
     assert(clerr == CL_SUCCESS);
 
     clgperr = clgpInit(context, &module->clgpkernels);
     assert(clgperr == 0);
-
-    clReleaseContext(context);
 }
 
 void
 GaussPyramid__v__stop(struct gausspyramid_module *module)
 {
     clgpRelease(module->clgpkernels);
-    clReleaseCommandQueue(module->command_queue);
     free(module);
 }
 
@@ -74,7 +74,7 @@ outputboth(
         int maxlevel)
 {
     void *output_bgra[] = {
-        "outputBGRA",
+        "outputRGBA",
         "char*", NULL,
         "int", NULL,
         "int", NULL,
@@ -127,25 +127,41 @@ outputboth(
 }
 
 void
-GaussPyramid__v__event__v__inputBGRA(
+GaussPyramid__v__event__v__input(
         struct gausspyramid_module *module,
-        unsigned char *input_bgra,
-        int width,
-        int height)
+        cl_mem input_climage)
 {
     cl_int clerr = 0;
     int clgperr = 0;
 
-    const cl_image_format clgpimageformat = {CL_BGRA, CL_UNORM_INT8};
+    const cl_image_format clgpimageformat = {CL_RGBA, CL_UNORM_INT8};
 
     cl_context context = NULL;
-    cl_mem input_climage, pyramid_climage[32];
-    size_t maxlevel = 0, level = 0;
+    cl_mem pyramid_climage[32];
+    size_t width = 0, height = 0, maxlevel = 0, level = 0;
 
     unsigned char **pyramid_bgra = NULL;
 
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
+
+    clerr =
+        clGetImageInfo(
+                input_climage,
+                CL_IMAGE_WIDTH,
+                sizeof(size_t),
+                &width,
+                NULL);
+    assert(clerr == CL_SUCCESS);
+
+    clerr =
+        clGetImageInfo(
+                input_climage,
+                CL_IMAGE_HEIGHT,
+                sizeof(size_t),
+                &height,
+                NULL);
+    assert(clerr == CL_SUCCESS);
 
     clerr =
         clGetKernelInfo(
@@ -154,18 +170,6 @@ GaussPyramid__v__event__v__inputBGRA(
                 sizeof(cl_context),
                 &context,
                 NULL);
-    assert(clerr == CL_SUCCESS);
-
-    input_climage =
-        clCreateImage2D(
-                context,
-                CL_MEM_READ_ONLY,
-                &clgpimageformat,
-                width,
-                height,
-                0,
-                NULL,
-                &clerr);
     assert(clerr == CL_SUCCESS);
 
     maxlevel = clgpMaxlevelHalfOctave(width, height) - 4;
@@ -183,23 +187,6 @@ GaussPyramid__v__event__v__inputBGRA(
         assert(clerr == CL_SUCCESS);
     }
 
-    region[0] = width;
-    region[1] = height;
-    clerr =
-        clEnqueueWriteImage(
-                module->command_queue,
-                input_climage,
-                CL_TRUE,
-                origin,
-                region,
-                0,
-                0,
-                input_bgra,
-                0,
-                NULL,
-                NULL);
-    assert(clerr == CL_SUCCESS);
-
     clgperr =
         clgpEnqueuePyramidHalfOctave(
             module->command_queue,
@@ -208,7 +195,6 @@ GaussPyramid__v__event__v__inputBGRA(
             input_climage,
             maxlevel);
     assert(clgperr == 0);
-    clReleaseMemObject(input_climage);
 
     pyramid_bgra = malloc(maxlevel*sizeof(unsigned char *));
     assert(pyramid_bgra != NULL);
@@ -242,31 +228,5 @@ GaussPyramid__v__event__v__inputBGRA(
         free(pyramid_bgra[level]);
     }
     free(pyramid_bgra);
-}
-
-void
-GaussPyramid__v__event__v__input(
-        struct gausspyramid_module *module,
-        unsigned char *bgr,
-        int width,
-        int height)
-{
-    unsigned char *bgra = NULL;
-    size_t x = 0, y = 0;
-
-    bgra = malloc(width*height*4*sizeof(unsigned char));
-    assert(bgra != NULL);
-
-    for (y = 0; y < (size_t)height; y++) {
-        for (x = 0; x < (size_t)width; x++) {
-            bgra[y*width*4 + x*4 + 0] = bgr[y*width*3 + x*3 + 0];
-            bgra[y*width*4 + x*4 + 1] = bgr[y*width*3 + x*3 + 1];
-            bgra[y*width*4 + x*4 + 2] = bgr[y*width*3 + x*3 + 2];
-            bgra[y*width*4 + x*4 + 3] = 255;
-        }
-    }
-
-    GaussPyramid__v__event__v__inputBGRA(module, bgra, width, height);
-    free(bgra);
 }
 
