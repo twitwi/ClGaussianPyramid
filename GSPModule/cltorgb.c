@@ -101,8 +101,8 @@ ClToRGB__v__event__v__input(
 
     rgb = malloc(region[0]*region[1]*3*sizeof(unsigned char));
     assert(rgb != NULL);
-    for (size_t y = 0; y < region[0]; y++) {
-        for (size_t x = 0; x < region[1]; x++) {
+    for (size_t y = 0; y < region[1]; y++) {
+        for (size_t x = 0; x < region[0]; x++) {
             rgb[y*region[0]*3 + x*3 + 0] = rgba[y*region[0]*4 + x*4 + 0];
             rgb[y*region[0]*3 + x*3 + 1] = rgba[y*region[0]*4 + x*4 + 1];
             rgb[y*region[0]*3 + x*3 + 2] = rgba[y*region[0]*4 + x*4 + 2];
@@ -158,9 +158,9 @@ ClToRGB__v__event__v__inputPyramid(
                 NULL);
     assert(clerr == CL_SUCCESS);
 
-    rgba = malloc(width*height*4*sizeof(unsigned char));
+    rgba = malloc(maxlevel*sizeof(unsigned char *));
     assert(rgba != NULL);
-    rgb = malloc(width*height*3*sizeof(unsigned char));
+    rgb = malloc(maxlevel*sizeof(unsigned char *));
     assert(rgb != NULL);
     for (size_t level = 0; level < (size_t)maxlevel; level++) {
         region[0] = width >> (level>>1);
@@ -187,8 +187,8 @@ ClToRGB__v__event__v__inputPyramid(
         rgb[level] = 
             malloc(region[0]*region[1]*3*sizeof(unsigned char));
         assert(rgb[level] != NULL);
-        for (size_t y = 0; y < region[0]; y++) {
-            for (size_t x = 0; x < region[1]; x++) {
+        for (size_t y = 0; y < region[1]; y++) {
+            for (size_t x = 0; x < region[0]; x++) {
                 rgb[level][y*region[0]*3 + x*3 + 0] = rgba[level][y*region[0]*4 + x*4 + 0];
                 rgb[level][y*region[0]*3 + x*3 + 1] = rgba[level][y*region[0]*4 + x*4 + 1];
                 rgb[level][y*region[0]*3 + x*3 + 2] = rgba[level][y*region[0]*4 + x*4 + 2];
