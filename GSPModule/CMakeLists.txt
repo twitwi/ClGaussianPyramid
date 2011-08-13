@@ -13,6 +13,7 @@ LINK_DIRECTORIES(
 
 SET(gspclgp_SRCS
     bgrtoipl.c
+    cltorgb.c
     gausspyramid.c
     globalvars.c
     ipltocl.c

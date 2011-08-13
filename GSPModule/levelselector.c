@@ -6,7 +6,7 @@ typedef void (*Framework) (const char* command, ...);
 
 struct levelselector_module {
     Framework framework;
-    int level;
+    size_t level;
 };
 
 struct levelselector_module *
@@ -54,7 +54,7 @@ LevelSelector__v__event__v__input(
         unsigned char **pyramid_bgr,
         int width,
         int height,
-        int maxlevel)
+        size_t maxlevel)
 {
     void *output[] = { 
         "output", 

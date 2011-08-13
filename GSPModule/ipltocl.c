@@ -66,7 +66,7 @@ IplToCl__v__event__v__input(
 {
     void *output[] = { 
         "output", 
-        "char*", NULL, 
+        "P7_cl_mem", NULL, 
         NULL };
 
     cl_int clerr = 0;

@@ -65,84 +65,24 @@ GaussPyramid__v__stop(struct gausspyramid_module *module)
     free(module);
 }
 
-static void
-outputboth(
-        struct gausspyramid_module *module, 
-        unsigned char **pyramid_bgra, 
-        int width,
-        int height,
-        int maxlevel)
-{
-    void *output_bgra[] = {
-        "outputRGBA",
-        "char*", NULL,
-        "int", NULL,
-        "int", NULL,
-        "int", NULL,
-        NULL };
-    void *output_bgr[] = {
-        "outputBGR",
-        "char*", NULL,
-        "int", NULL,
-        "int", NULL,
-        "int", NULL,
-        NULL };
-    unsigned char **pyramid_bgr = NULL;
-    size_t x = 0, y  = 0;
-
-    output_bgra[2] = &pyramid_bgra;
-    output_bgra[4] = &width;
-    output_bgra[6] = &height;
-    output_bgra[8] = &maxlevel;
-    module->framework("emit", output_bgra);
-
-    pyramid_bgr = malloc(maxlevel*sizeof(unsigned char *));
-    assert(pyramid_bgr != NULL);
-    for (size_t level = 0; level < (size_t)maxlevel; level++) {
-        size_t level_width = width >> (level>>1);
-        size_t level_height = height >> (level>>1);
-
-        pyramid_bgr[level] = 
-            malloc(level_width*level_height*3*sizeof(unsigned char));
-        assert(pyramid_bgr != NULL);
-        for(y = 0; y < level_height; y++) {
-            for(x = 0; x < level_width; x++) {
-                pyramid_bgr[level][y*level_width*3 + x*3 + 0] = pyramid_bgra[level][y*level_width*4 + x*4 + 0];
-                pyramid_bgr[level][y*level_width*3 + x*3 + 1] = pyramid_bgra[level][y*level_width*4 + x*4 + 1];
-                pyramid_bgr[level][y*level_width*3 + x*3 + 2] = pyramid_bgra[level][y*level_width*4 + x*4 + 2];
-            }
-        }
-    }
-
-    output_bgr[2] = &pyramid_bgr;
-    output_bgr[4] = &width;
-    output_bgr[6] = &height;
-    output_bgr[8] = &maxlevel;
-    module->framework("emit", output_bgr);
-
-    for (size_t level = 0; level < (size_t)maxlevel; level++) {
-        free(pyramid_bgr[level]);
-    }
-    free(pyramid_bgr);
-}
-
 void
 GaussPyramid__v__event__v__input(
         struct gausspyramid_module *module,
         cl_mem input_climage)
 {
+    void *output[] = {
+        "output",
+        "PP7_cl_mem", NULL,
+        "int", NULL,
+        NULL };
+
     cl_int clerr = 0;
     int clgperr = 0;
 
     cl_context context = NULL;
     cl_image_format imageformat;
-    cl_mem pyramid_climage[32];
-    size_t width = 0, height = 0, maxlevel = 0, level = 0;
-
-    unsigned char **pyramid_bgra = NULL;
-
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {0, 0, 1};
+    cl_mem *pyramid_climages;
+    size_t width = 0, height = 0, maxlevel = 0;
 
     clerr =
         clGetImageInfo(
@@ -181,8 +121,9 @@ GaussPyramid__v__event__v__input(
     assert(clerr == CL_SUCCESS);
 
     maxlevel = clgpMaxlevelHalfOctave(width, height) - 4;
-    for (level = 0; level < maxlevel; level++) {
-        pyramid_climage[level] =
+    pyramid_climages = malloc(maxlevel*sizeof(cl_mem));
+    for (size_t level = 0; level < maxlevel; level++) {
+        pyramid_climages[level] =
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
@@ -199,42 +140,19 @@ GaussPyramid__v__event__v__input(
         clgpEnqueuePyramidHalfOctave(
             module->command_queue,
             module->clgpkernels,
-            pyramid_climage,
+            pyramid_climages,
             input_climage,
             maxlevel);
     assert(clgperr == 0);
 
-    pyramid_bgra = malloc(maxlevel*sizeof(unsigned char *));
-    assert(pyramid_bgra != NULL);
-    for (level = 0; level < maxlevel; level++) {
-        region[0] = width >> (level>>1);
-        region[1] = height >> (level>>1);
+    output[2] = &pyramid_climages;
+    int maxlevel_as_int = maxlevel; /* Why no size_t in GSP?? */
+    output[4] = &maxlevel_as_int;
+    module->framework("emit", output);
 
-        pyramid_bgra[level] = 
-            malloc(region[0]*region[1]*4*sizeof(unsigned char));
-        assert(pyramid_bgra[level] != NULL);
-        clerr =
-            clEnqueueReadImage(
-                    module->command_queue,
-                    pyramid_climage[level],
-                    CL_TRUE,
-                    origin,
-                    region,
-                    0,
-                    0,
-                    pyramid_bgra[level],
-                    0,
-                    NULL,
-                    NULL);
-        assert(clerr == CL_SUCCESS);
-        clReleaseMemObject(pyramid_climage[level]);
+    for (size_t level = 0; level < maxlevel; level++) {
+        clReleaseMemObject(pyramid_climages[level]);
     }
-
-    outputboth(module, pyramid_bgra, width, height, maxlevel);
-
-    for (level = 0; level < maxlevel; level++) {
-        free(pyramid_bgra[level]);
-    }
-    free(pyramid_bgra);
+    free(pyramid_climages);
 }
 
