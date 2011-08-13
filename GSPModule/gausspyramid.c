@@ -134,9 +134,8 @@ GaussPyramid__v__event__v__input(
     cl_int clerr = 0;
     int clgperr = 0;
 
-    const cl_image_format clgpimageformat = {CL_RGBA, CL_UNORM_INT8};
-
     cl_context context = NULL;
+    cl_image_format imageformat;
     cl_mem pyramid_climage[32];
     size_t width = 0, height = 0, maxlevel = 0, level = 0;
 
@@ -144,6 +143,15 @@ GaussPyramid__v__event__v__input(
 
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
+
+    clerr =
+        clGetImageInfo(
+                input_climage,
+                CL_IMAGE_FORMAT,
+                sizeof(cl_image_format),
+                &imageformat,
+                NULL);
+    assert(clerr == CL_SUCCESS);
 
     clerr =
         clGetImageInfo(
@@ -178,7 +186,7 @@ GaussPyramid__v__event__v__input(
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
-                    &clgpimageformat,
+                    &imageformat,
                     width >> (level>>1),
                     height >> (level>>1),
                     0,
