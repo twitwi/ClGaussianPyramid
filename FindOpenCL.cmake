@@ -5,8 +5,6 @@
 #  OPENCL_INCLUDE_DIR - The OPENCL include directory
 #  OPENCL_LIBRARIES - The libraries needed to use OPENCL
 #
-# You can set the OPENCL_ROOT variable if the package is not installed under
-# a standard prefix.
 
 # Copyright (c) 2010 Matthieu Volat. All rights reserved.
 #
