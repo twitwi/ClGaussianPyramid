@@ -20,7 +20,7 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
     <f id="cltorgb" type="c:gspclgp.ClToRGB"/>
 
     <c chain="for - load - view1"/>
-    <c chain="      load - tocl - pyramid - inputPyramid#cltorgb - sel - inputRGB#view2"/>
+    <c chain="      load - tocl - pyramid - inputClImage#sel - cltorgb - inputRGB#view2"/>
     <!--c chain="for - skip#load"/-->
 </pipeline>
 

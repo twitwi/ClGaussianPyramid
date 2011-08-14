@@ -1,6 +1,12 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#ifndef __APPLE__
+# include <CL/opencl.h>
+#else
+# include <OpenCL/opencl.h>
+#endif
+
 //#include "framework.h"
 typedef void (*Framework) (const char* command, ...);
 
@@ -75,6 +81,25 @@ LevelSelector__v__event__v__input(
     output[2] = &pyramid_bgr[module->level];
     output[4] = &level_width;
     output[6] = &level_height;
+    module->framework("emit", output);
+}
+
+void 
+LevelSelector__v__event__v__inputClImage(
+        struct levelselector_module *module, 
+        cl_mem *pyramid_climages,
+        size_t maxlevel)
+{
+    void *output[] = { 
+        "output", 
+        "PP7_cl_mem", NULL,
+        NULL };
+
+    if (module->level >= maxlevel) {
+        module->level = maxlevel - 1;
+    }
+
+    output[2] = &pyramid_climages[module->level];
     module->framework("emit", output);
 }
 
