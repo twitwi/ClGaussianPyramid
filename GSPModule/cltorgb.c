@@ -55,7 +55,7 @@ ClToRGB__v__event__v__input(
         "int", NULL, 
         NULL };
     size_t width = 0, height = 0;
-    unsigned char *rgba = NULL, *rgb = NULL;
+    char *rgba = NULL, *rgb = NULL;
 
     cl_int clerr = 0;
 
@@ -82,7 +82,7 @@ ClToRGB__v__event__v__input(
     region[0] = width;
     region[1] = height;
 
-    rgba = malloc(region[0]*region[1]*4*sizeof(unsigned char));
+    rgba = malloc(region[0]*region[1]*4*sizeof(char));
     assert(rgba != NULL);
     clerr =
         clEnqueueReadImage(
@@ -99,7 +99,7 @@ ClToRGB__v__event__v__input(
                 NULL);
     assert(clerr == CL_SUCCESS);
 
-    rgb = malloc(region[0]*region[1]*3*sizeof(unsigned char));
+    rgb = malloc(region[0]*region[1]*3*sizeof(char));
     assert(rgb != NULL);
     for (size_t y = 0; y < region[1]; y++) {
         for (size_t x = 0; x < region[0]; x++) {
@@ -134,7 +134,7 @@ ClToRGB__v__event__v__inputPyramid(
         "int", NULL,
         NULL };
     size_t width = 0, height = 0;
-    unsigned char **rgba = NULL, **rgb = NULL;
+    char **rgba = NULL, **rgb = NULL;
 
     cl_int clerr = 0;
 
@@ -158,16 +158,15 @@ ClToRGB__v__event__v__inputPyramid(
                 NULL);
     assert(clerr == CL_SUCCESS);
 
-    rgba = malloc(maxlevel*sizeof(unsigned char *));
+    rgba = malloc(maxlevel*sizeof(char *));
     assert(rgba != NULL);
-    rgb = malloc(maxlevel*sizeof(unsigned char *));
+    rgb = malloc(maxlevel*sizeof(char *));
     assert(rgb != NULL);
     for (size_t level = 0; level < (size_t)maxlevel; level++) {
         region[0] = width >> (level>>1);
         region[1] = height >> (level>>1);
 
-        rgba[level] = 
-            malloc(region[0]*region[1]*4*sizeof(unsigned char));
+        rgba[level] = malloc(region[0]*region[1]*4*sizeof(char));
         assert(rgba != NULL);
         clerr =
             clEnqueueReadImage(
@@ -184,8 +183,7 @@ ClToRGB__v__event__v__inputPyramid(
                     NULL);
         assert(clerr == CL_SUCCESS);
 
-        rgb[level] = 
-            malloc(region[0]*region[1]*3*sizeof(unsigned char));
+        rgb[level] = malloc(region[0]*region[1]*3*sizeof(char));
         assert(rgb[level] != NULL);
         for (size_t y = 0; y < region[1]; y++) {
             for (size_t x = 0; x < region[0]; x++) {

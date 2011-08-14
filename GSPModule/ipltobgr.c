@@ -45,7 +45,7 @@ IplToBGR__v__event__v__input(
         "int", NULL, 
         "int", NULL, 
         NULL };
-    unsigned char *tmp = NULL;
+    char *tmp = NULL;
     size_t r = 0;
 
     /* Fixme: With OpenCV not storing any color format, we're begging for 
@@ -57,13 +57,13 @@ IplToBGR__v__event__v__input(
     assert(ipl->depth == (int)IPL_DEPTH_8U);
 
     /* Until we pass a pitch argument, we have to pass non-pitched data */
-    if (ipl->widthStep == ipl->width*3*sizeof(unsigned char)) {
-        tmp = malloc(ipl->width*ipl->height*3*sizeof(unsigned char));
+    if (ipl->widthStep == ipl->width*3*sizeof(char)) {
+        tmp = malloc(ipl->width*ipl->height*3*sizeof(char));
         assert(tmp != NULL);
         for (r = 0; r < (size_t)ipl->height; r++) {
-            memcpy(tmp + r*ipl->width*3*sizeof(unsigned char),
+            memcpy(tmp + r*ipl->width*3*sizeof(char),
                     ipl->imageData + r*ipl->widthStep,
-                    ipl->width*3*sizeof(unsigned char));
+                    ipl->width*3*sizeof(char));
         }
         output[2] = (void *)&tmp;
     }

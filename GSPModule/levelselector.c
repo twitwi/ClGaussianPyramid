@@ -51,7 +51,7 @@ LevelSelector__v__set__v__level(struct levelselector_module *module, int level)
 void 
 LevelSelector__v__event__v__input(
         struct levelselector_module *module, 
-        unsigned char **pyramid_bgr,
+        char **pyramid_bgr,
         int width,
         int height,
         size_t maxlevel)

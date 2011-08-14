@@ -199,7 +199,7 @@ main(int argc, char *argv[])
 
     MagickWand *input_wand = NULL, *pyramid_wand = NULL;
     const char *magickpixelmap = "RGBA";
-    unsigned char *input_data = NULL, *pyramid_data;
+    char *input_data = NULL, *pyramid_data;
     unsigned int input_width = 0, pyramid_width = 0;
     unsigned int input_height = 0, pyramid_height = 0;
     unsigned int input_nbchannels = 0, pyramid_nbchannels = 0;

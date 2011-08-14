@@ -37,7 +37,7 @@ BGRToIpl__v__stop(struct bgrtoipl_module *module)
 void 
 BGRToIpl__v__event__v__input(
         struct bgrtoipl_module *module, 
-        const unsigned char *bgr, 
+        const char *bgr, 
         int width, 
         int height)
 {
@@ -52,7 +52,7 @@ BGRToIpl__v__event__v__input(
     assert(ipl != NULL);
 
     ipl->imageData = (char *)bgr;
-    ipl->widthStep = width*3*sizeof(unsigned char);
+    ipl->widthStep = width*3*sizeof(char);
 
     output[2] = &ipl;
     module->framework("emit", output);
