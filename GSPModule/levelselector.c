@@ -75,7 +75,7 @@ LevelSelector__v__event__v__input(
         module->level = maxlevel - 1;
     }
 
-    level_width = width >> (module->level >> 1);
+    level_width = width >> ((module->level+1)>>1);
     level_height = height >> (module->level >> 1);
 
     output[2] = &pyramid_bgr[module->level];

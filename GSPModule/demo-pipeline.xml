@@ -11,7 +11,7 @@ java -Djava.library.path=build -cp  ../GSPFramework/target/dependency/*:../GSPFr
     <m id="load" type="c:ImageSource.ImageSource" gray="false" 
             url="images:../media/lena512color.png"/>
     <m id="pyramid" type="c:gspclgp.GaussPyramid"/>
-    <m id="sel" type="c:gspclgp.LevelSelector" level="1"/>
+    <m id="sel" type="c:gspclgp.LevelSelector" level="0"/>
     <m id="view1" type="c:GTKModule.GTKModule" name="Input"/>
     <m id="view2" type="c:GTKModule.GTKModule" name="Gaussian Pyramid"/>
 

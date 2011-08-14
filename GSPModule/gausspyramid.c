@@ -120,7 +120,7 @@ GaussPyramid__v__event__v__input(
                 NULL);
     assert(clerr == CL_SUCCESS);
 
-    maxlevel = clgpMaxlevelHalfOctave(width, height) - 4;
+    maxlevel = clgpMaxlevelHalfOctave(width, height) - 7;
     pyramid_climages = malloc(maxlevel*sizeof(cl_mem));
     for (size_t level = 0; level < maxlevel; level++) {
         pyramid_climages[level] =
@@ -128,7 +128,7 @@ GaussPyramid__v__event__v__input(
                     context,
                     CL_MEM_READ_WRITE,
                     &imageformat,
-                    width >> (level>>1),
+                    width >> ((level+1)>>1),
                     height >> (level>>1),
                     0,
                     NULL,
@@ -137,7 +137,7 @@ GaussPyramid__v__event__v__input(
     }
 
     clgperr =
-        clgpEnqueuePyramidHalfOctave(
+        clgpEnqueuePyramidSqrt2(
             module->command_queue,
             module->clgpkernels,
             pyramid_climages,

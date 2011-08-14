@@ -163,8 +163,22 @@ ClToRGB__v__event__v__inputPyramid(
     rgb = malloc(maxlevel*sizeof(char *));
     assert(rgb != NULL);
     for (size_t level = 0; level < (size_t)maxlevel; level++) {
-        region[0] = width >> (level>>1);
-        region[1] = height >> (level>>1);
+        clerr =
+            clGetImageInfo(
+                    pyramid_climages[level],
+                    CL_IMAGE_WIDTH,
+                    sizeof(size_t),
+                    &region[0],
+                    NULL);
+        assert(clerr == CL_SUCCESS);
+        clerr =
+            clGetImageInfo(
+                    pyramid_climages[level],
+                    CL_IMAGE_HEIGHT,
+                    sizeof(size_t),
+                    &region[1],
+                    NULL);
+        assert(clerr == CL_SUCCESS);
 
         rgba[level] = malloc(region[0]*region[1]*4*sizeof(char));
         assert(rgba != NULL);
