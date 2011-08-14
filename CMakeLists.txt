@@ -8,7 +8,7 @@ IF(NOT CMAKE_BUILD_TYPE)
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 IF(NOT CMAKE_C_FLAGS)
-  SET(CMAKE_C_FLAGS "-Wall -Wextra -Wshadow"
+  SET(CMAKE_C_FLAGS "-std=c99 -D_POSIX_C_SOURCE=200809L -Wall -Wextra -Wshadow"
       CACHE STRING
       "Flags used by the compiler during all build types."
       FORCE)
