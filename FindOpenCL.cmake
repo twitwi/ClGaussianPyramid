@@ -46,6 +46,7 @@ FIND_PATH(OPENCL_INCLUDE_DIR ${CL_DIR}/opencl.h
     PATHS 
         /usr/local/cuda/include
         $ENV{AMDAPPSDKROOT}/include
+        $ENV[ATISTREAMSDKROOT}/include
         /System/Library/Frameworks/OpenCL.framework/Headers
     PATH_SUFFIXES nvidia)
 
@@ -58,6 +59,7 @@ FIND_LIBRARY(OPENCL_LIBRARIES
     NAMES OpenCL 
     PATH
         $ENV{AMDAPPSDKROOT}/lib/${AMD_ARCH_LIBDIR}
+        $ENV{ATISTREAMSDKROOT}/lib/${AMD_ARCH_LIBDIR}
     PATH_SUFFIXES nvidia nvidia-current)
 
 IF(OPENCL_INCLUDE_DIR AND OPENCL_LIBRARIES)
