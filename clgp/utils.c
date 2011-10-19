@@ -11,8 +11,6 @@
 
 extern cl_int clgp_clerr;
 
-extern cl_context clgp_context; 
-
 static int
 clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
 {

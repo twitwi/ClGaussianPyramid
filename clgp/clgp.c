@@ -288,24 +288,12 @@ clgpEnqueuePyramid(
     size_t height = 0;
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
-    cl_image_format input_format;
     size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
     region[0] = width;
     region[1] = height;
-
-    clGetImageInfo(
-            input_image, 
-            CL_IMAGE_FORMAT, 
-            sizeof(cl_image_format),
-            &input_format,
-            NULL);
-    if (input_format.image_channel_data_type != CL_UNORM_INT8) {
-        fprintf(stderr, "clgp: wrong format\n");
-        goto end;
-    }
 
     /* First iteration -- just copy the image */
     err = 
@@ -364,24 +352,10 @@ clgpEnqueuePyramidHalfOctave(
 
     size_t width = 0;
     size_t height = 0;
-    cl_image_format input_format;
     size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
-
-    clGetImageInfo(
-            input_image, 
-            CL_IMAGE_FORMAT, 
-            sizeof(cl_image_format),
-            &input_format,
-            NULL);
-    if (input_format.image_channel_data_type != CL_UNORM_INT8) {
-#ifdef DEBUG
-        fprintf(stderr, "clgp: wrong format\n");
-#endif
-        goto end;
-    }
 
     /* First iteration manualy */
     /* First half octave */
@@ -457,22 +431,10 @@ clgpEnqueuePyramidSqrt2(
 
     size_t width = 0;
     size_t height = 0;
-    cl_image_format input_format;
     size_t level = 0;
 
     clGetImageInfo(input_image, CL_IMAGE_WIDTH, sizeof(size_t), &width, NULL);
     clGetImageInfo(input_image, CL_IMAGE_HEIGHT, sizeof(size_t), &height, NULL);
-
-    clGetImageInfo(
-            input_image, 
-            CL_IMAGE_FORMAT, 
-            sizeof(cl_image_format),
-            &input_format,
-            NULL);
-    if (input_format.image_channel_data_type != CL_UNORM_INT8) {
-        fprintf(stderr, "clgp: wrong format\n");
-        goto end;
-    }
 
     /* First iteration manualy */
     /* First half octave */

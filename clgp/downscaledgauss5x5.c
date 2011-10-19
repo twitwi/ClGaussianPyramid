@@ -28,20 +28,6 @@ clgpEnqueueDownscaledGauss5x5(
     size_t local_work_size[2];
     size_t global_work_size[2];
 
-#ifdef DEBUG /* Supposely already done by higher-level functions */
-    cl_image_format input_format;
-    clGetImageInfo(
-            input_image,
-            CL_IMAGE_FORMAT,
-            sizeof(cl_image_format),
-            &input_format,
-            NULL);
-    if (input_format.image_channel_data_type != CL_UNORM_INT8) {
-        fprintf(stderr, "clgp: wrong format\n");
-        goto end;
-    }
-#endif
-
     local_work_size[0] = (width >= 32) ? 16 : width>>1;
     local_work_size[1] = (height >= 32) ? 16 : height>>1;
     global_work_size[0] = 
