@@ -50,15 +50,13 @@ clgpEnqueueGauss9x9(
                 0, 
                 NULL, 
                 NULL);
-
-#ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_rows kernel failure\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
-#endif
 
     clSetKernelArg(kernels[GAUSS9X9_COLS], 0, sizeof(cl_mem), &output_image);
     clSetKernelArg(kernels[GAUSS9X9_COLS], 1, sizeof(cl_mem), &output_image);
@@ -74,17 +72,15 @@ clgpEnqueueGauss9x9(
                 0, 
                 NULL, 
                 NULL);
-
-#ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_cols kernel failure\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
-#endif
     return err;
 }
 

@@ -49,17 +49,15 @@ clgpEnqueueDownscaledGauss5x5(
                 0, 
                 NULL, 
                 NULL);
-
-#ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: downscaled5x5 kernel failure\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
-#endif
     return err;
 }
 

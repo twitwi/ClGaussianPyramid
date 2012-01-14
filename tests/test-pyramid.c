@@ -352,20 +352,24 @@ main(int argc, char *argv[])
     memset(pyramid_data, 0, pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
 
     /* Create buffers on device */
+    gettimeofday(&start, NULL);
     input_climage =
         clCreateImage2D(
                 context,
-                CL_MEM_READ_ONLY,
+                CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                 &imageformat,
                 input_width,
                 input_height,
                 0,
-                NULL,
+                input_data,
                 &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not allocate input_climage\n");
         exit(1);
     }
+    gettimeofday(&stop, NULL);
+    total_time = 
+        (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
     maxlevel = impl->maxlevel(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
@@ -384,33 +388,6 @@ main(int argc, char *argv[])
             exit(1);
         }
     }
-
-
-    /* Send input image on device */
-    gettimeofday(&start, NULL);
-    region[0] = input_width;
-    region[1] = input_height;
-    err = 
-        clEnqueueWriteImage(
-                queue,
-                input_climage,
-                CL_TRUE,
-                origin,
-                region,
-                input_width*input_nbchannels*sizeof(char),
-                0,
-                input_data,
-                0,
-                NULL,
-                NULL);
-    clFinish(queue);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, "Could not copy input data on device (%d)\n", err);
-        exit(1);
-    }
-    gettimeofday(&stop, NULL);
-    total_time = 
-        (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
 
     /* At last, call our pyramid function */

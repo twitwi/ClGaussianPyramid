@@ -50,17 +50,15 @@ clgpEnqueueDownsampledGauss5x5_cols(
                 0, 
                 NULL, 
                 NULL);
-
-#ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG 
         fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
-#endif
     return err;
 }
 
@@ -99,17 +97,15 @@ clgpEnqueueDownsampledGauss5x5_rows(
                 0, 
                 NULL, 
                 NULL);
-
-#ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
-    clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
         fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
+#endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
-#endif
     return err;
 }
 
