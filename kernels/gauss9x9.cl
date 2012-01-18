@@ -3,7 +3,7 @@ gauss9x9_rows(
         __write_only image2d_t output_image, 
         __read_only image2d_t input_image)
 {
-    const float mask[9] = { 
+    float mask[9] = { 
         01.f/256.f,
         08.f/256.f,
         28.f/256.f,
@@ -48,7 +48,7 @@ gauss9x9_cols(
         __write_only image2d_t output_image, 
         __read_only image2d_t input_image)
 {
-    const float mask[9] = {
+    float mask[9] = {
         01.f/256.f,
         08.f/256.f,
         28.f/256.f,

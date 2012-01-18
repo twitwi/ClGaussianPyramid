@@ -3,7 +3,7 @@ downscaledgauss5x5(
         __write_only image2d_t output_image, 
         __read_only image2d_t input_image)
 {
-    const float mask[5][5] = {
+    float mask[5][5] = {
         01.f/256.f, 04.f/256.f, 06.f/256.f, 04.f/256.f, 01.f/256.f,
         04.f/256.f, 16.f/256.f, 24.f/256.f, 16.f/256.f, 04.f/256.f,
         06.f/256.f, 24.f/256.f, 36.f/256.f, 24.f/256.f, 06.f/256.f,
