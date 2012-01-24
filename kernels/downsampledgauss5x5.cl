@@ -27,31 +27,31 @@ downsampledgauss5x5_cols(
         return;
     }
 
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -2.0f)) * mask[0][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -2.0f)) * mask[1][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -2.0f)) * mask[2][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -2.0f)) * mask[3][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, -2.0f)) * mask[4][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -1.0f)) * mask[0][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -1.0f)) * mask[1][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -1.0f)) * mask[2][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -1.0f)) * mask[3][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, -1.0f)) * mask[4][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +0.0f)) * mask[0][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +0.0f)) * mask[1][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -4.0f)) * mask[0][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -3.0f)) * mask[1][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, -2.0f)) * mask[2][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+3.0f, -1.0f)) * mask[3][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+4.0f, +0.0f)) * mask[4][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -3.0f)) * mask[0][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -2.0f)) * mask[1][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -1.0f)) * mask[2][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +0.0f)) * mask[3][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+3.0f, +1.0f)) * mask[4][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -2.0f)) * mask[0][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -1.0f)) * mask[1][2];
     c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +0.0f)) * mask[2][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +0.0f)) * mask[3][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +0.0f)) * mask[4][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +1.0f)) * mask[0][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +1.0f)) * mask[1][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +1.0f)) * mask[2][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +1.0f)) * mask[3][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +1.0f)) * mask[4][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +2.0f)) * mask[0][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +2.0f)) * mask[1][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +2.0f)) * mask[2][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +2.0f)) * mask[3][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +2.0f)) * mask[4][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +1.0f)) * mask[3][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +2.0f)) * mask[4][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-3.0f, -1.0f)) * mask[0][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +0.0f)) * mask[1][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +1.0f)) * mask[2][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +2.0f)) * mask[3][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +3.0f)) * mask[4][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-4.0f, +0.0f)) * mask[0][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-3.0f, +1.0f)) * mask[1][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +2.0f)) * mask[2][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +3.0f)) * mask[3][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +4.0f)) * mask[4][4];
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
@@ -87,31 +87,31 @@ downsampledgauss5x5_rows(
         return;
     }
 
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -4.0f)) * mask[0][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -4.0f)) * mask[0][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -3.0f)) * mask[1][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, -2.0f)) * mask[2][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+3.0f, -1.0f)) * mask[3][0];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+4.0f, +0.0f)) * mask[4][0];
     c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -3.0f)) * mask[0][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -2.0f)) * mask[0][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -1.0f)) * mask[0][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +0.0f)) * mask[0][5];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -3.0f)) * mask[1][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -2.0f)) * mask[1][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -1.0f)) * mask[1][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +0.0f)) * mask[1][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +1.0f)) * mask[1][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -2.0f)) * mask[2][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -1.0f)) * mask[2][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, -2.0f)) * mask[1][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, -1.0f)) * mask[2][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +0.0f)) * mask[3][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+3.0f, +1.0f)) * mask[4][1];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -2.0f)) * mask[0][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, -1.0f)) * mask[1][2];
     c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +0.0f)) * mask[2][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +1.0f)) * mask[2][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +2.0f)) * mask[2][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, -1.0f)) * mask[3][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +0.0f)) * mask[3][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +1.0f)) * mask[3][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +2.0f)) * mask[3][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +1.0f)) * mask[3][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+2.0f, +2.0f)) * mask[4][2];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-3.0f, -1.0f)) * mask[0][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +0.0f)) * mask[1][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +1.0f)) * mask[2][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +2.0f)) * mask[3][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+1.0f, +3.0f)) * mask[4][3];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-4.0f, +0.0f)) * mask[0][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-3.0f, +1.0f)) * mask[1][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +2.0f)) * mask[2][4];
     c += read_imagef(input_image, sampler, incoord+(float2)(-1.0f, +3.0f)) * mask[3][4];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +0.0f)) * mask[4][0];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +1.0f)) * mask[4][1];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +2.0f)) * mask[4][2];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +3.0f)) * mask[4][3];
-    c += read_imagef(input_image, sampler, incoord+(float2)(-2.0f, +4.0f)) * mask[4][4];
+    c += read_imagef(input_image, sampler, incoord+(float2)(+0.0f, +4.0f)) * mask[4][4];
 
     /* barrier(CLK_LOCAL_MEM_FENCE); */ /* Normaly not necessary */
 
