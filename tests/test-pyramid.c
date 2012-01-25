@@ -40,6 +40,11 @@ pyramidLayoutWidth(size_t width)
 {
     return 2*width;
 }
+static size_t
+pyramidLayoutHeight(size_t height)
+{
+	return height;
+}
 static size_t 
 pyramidLevelWidth(size_t width, size_t level) 
 {
@@ -77,6 +82,11 @@ pyramidHalfOctaveLayoutWidth(size_t width)
 {
     return 3*width;
 }
+static size_t
+pyramidHalfOctaveLayoutHeight(size_t height)
+{
+	return height;
+}
 static size_t 
 pyramidHalfOctaveLevelWidth(size_t width, size_t level) 
 {
@@ -99,7 +109,7 @@ static size_t
 pyramidHalfOctaveLayoutOriginY(size_t level, size_t width, size_t height)
 {
 	width = width;
-    return ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))); 
+    return ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1)));
 }
 static size_t
 pyramidHalfOctaveMaxlevel(size_t width, size_t height)
@@ -111,6 +121,11 @@ static size_t
 pyramidSqrt2LayoutWidth(size_t width)
 {
     return 2*width;
+}
+static size_t
+pyramidSqrt2LayoutHeight(size_t height)
+{
+	return 2*height;
 }
 static size_t
 pyramidSqrt2LevelWidth(size_t width, size_t level)
@@ -126,17 +141,15 @@ static size_t
 pyramidSqrt2LayoutOriginX(size_t level, size_t width, size_t height)
 {
 	height = height;
-    return ((level == 0) \
-        ? 0 \
-        : ((size_t)(( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f) )*(float)(width/2)) + width));
+	return (level & 0x1) ? (width >> (level>>1)) : 0;
 }
 static size_t
 pyramidSqrt2LayoutOriginY(size_t level, size_t width, size_t height)
 {
 	width = width;
-    return ((level <= 2) \
+    return ((level == 0) \
         ? 0 \
-        : (int)(( (1.f - powf(0.5f, (float)((level-1)>>1)) ) / (1.f-0.5f) )*(float)(height/2)));
+        : (size_t)(((1.f - powf(0.5f, (float)(level>>1))) / (1.f-0.5f)) *(float)height));
 }
 static size_t
 pyramidSqrt2Maxlevel(size_t width, size_t height)
@@ -168,6 +181,7 @@ main(int argc, char *argv[])
     cl_kernel *clgpkernels = NULL;
 
     size_t (*myLayoutWidth)(size_t width) = pyramidLayoutWidth;
+    size_t (*myLayoutHeight)(size_t width) = pyramidLayoutHeight;
     size_t (*myLevelWidth)(size_t width, size_t level) = pyramidLevelWidth;
     size_t (*myLevelHeight)(size_t height, size_t level) = pyramidLevelHeight;
     size_t (*myLayoutOriginX)(size_t level, size_t width, size_t height) = pyramidLayoutOriginX;
@@ -241,6 +255,7 @@ main(int argc, char *argv[])
             case 'p':
                 if (strncmp(optarg, "pyramid", 8) == 0) {
 					myLayoutWidth = pyramidLayoutWidth;
+					myLayoutHeight = pyramidLayoutHeight;
 					myLevelWidth = pyramidLevelWidth;
 					myLevelHeight = pyramidLevelHeight;
 					myLayoutOriginX = pyramidLayoutOriginX;
@@ -250,6 +265,7 @@ main(int argc, char *argv[])
                 }
                 else if (strncmp(optarg, "halfoctave", 11) == 0) {
 					myLayoutWidth = pyramidHalfOctaveLayoutWidth;
+					myLayoutHeight = pyramidHalfOctaveLayoutHeight;
 					myLevelWidth = pyramidHalfOctaveLevelWidth;
 					myLevelHeight = pyramidHalfOctaveLevelHeight;
 					myLayoutOriginX = pyramidHalfOctaveLayoutOriginX;
@@ -259,6 +275,7 @@ main(int argc, char *argv[])
                 }
                 else if (strncmp(optarg, "sqrt2", 6) == 0) {
 					myLayoutWidth = pyramidSqrt2LayoutWidth;
+					myLayoutHeight = pyramidSqrt2LayoutHeight;
 					myLevelWidth = pyramidSqrt2LevelWidth;
 					myLevelHeight = pyramidSqrt2LevelHeight;
 					myLayoutOriginX = pyramidSqrt2LayoutOriginX;
@@ -346,7 +363,7 @@ main(int argc, char *argv[])
     /* Create pyramid image */
     pyramid_wand = NewMagickWand();
     pyramid_width = myLayoutWidth(input_width);
-    pyramid_height = input_height;
+    pyramid_height = myLayoutHeight(input_height);
     pyramid_nbchannels = input_nbchannels;
     pyramid_data = 
         malloc(pyramid_width*pyramid_height*input_nbchannels*sizeof(char));
