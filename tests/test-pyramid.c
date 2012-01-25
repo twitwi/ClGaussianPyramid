@@ -32,17 +32,7 @@ static struct option longopts[] = {
 };
 #endif
 
-/* Abstraction to allow the use of any pyramid type in this program: you don't
- * have to do this normaly! */
-struct pyramid_implementation {
-    size_t (*layoutWidth)(size_t width);
-    size_t (*levelWidth)(size_t width, size_t level);
-    size_t (*levelHeight)(size_t height, size_t level);
-    size_t (*layoutOriginX)(size_t level, size_t width, size_t height);
-    size_t (*layoutOriginY)(size_t level, size_t width, size_t height);
-    size_t (*maxlevel)(size_t width, size_t height);
-    int (*enqueuePyramid)(cl_command_queue command_queue, cl_kernel *kernels, cl_mem pyramid_image[], cl_mem input_image, size_t maxlevel);
-};
+/* A few layout functions, not really error proof, this is just for testing */
 
 static size_t
 pyramidLayoutWidth(size_t width)
@@ -62,6 +52,7 @@ pyramidLevelHeight(size_t height, size_t level)
 static size_t
 pyramidLayoutOriginX(size_t level, size_t width, size_t height)
 {
+	height = height;
     return ((level == 0) \
         ? 0 \
         : (size_t)(((1.f - powf(0.5f, (float)(level))) / (1.f-0.5f)) *(float)width));
@@ -69,6 +60,9 @@ pyramidLayoutOriginX(size_t level, size_t width, size_t height)
 static size_t
 pyramidLayoutOriginY(size_t level, size_t width, size_t height)
 {
+	level = level;
+	width = width;
+	height = height;
     return 0;
 }
 static size_t
@@ -76,15 +70,6 @@ pyramidMaxlevel(size_t width, size_t height)
 {
     return clgpMaxlevel(width, height) - 4;
 }
-const struct pyramid_implementation pyramid = {
-    pyramidLayoutWidth,
-    pyramidLevelWidth,
-    pyramidLevelHeight,
-    pyramidLayoutOriginX,
-    pyramidLayoutOriginY,
-    pyramidMaxlevel,
-    clgpEnqueuePyramid,
-};
 
 static size_t
 pyramidHalfOctaveLayoutWidth(size_t width)
@@ -104,6 +89,7 @@ pyramidHalfOctaveLevelHeight(size_t height, size_t level)
 static size_t
 pyramidHalfOctaveLayoutOriginX(size_t level, size_t width, size_t height)
 {
+	height = height;
     return ((level == 0) \
         ? 0 \
         : (size_t)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width));
@@ -111,6 +97,7 @@ pyramidHalfOctaveLayoutOriginX(size_t level, size_t width, size_t height)
 static size_t
 pyramidHalfOctaveLayoutOriginY(size_t level, size_t width, size_t height)
 {
+	width = width;
     return ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))); 
 }
 static size_t
@@ -118,15 +105,6 @@ pyramidHalfOctaveMaxlevel(size_t width, size_t height)
 {
     return clgpMaxlevelHalfOctave(width, height) - 4;
 }
-const struct pyramid_implementation pyramidHalfOctave = {
-    pyramidHalfOctaveLayoutWidth,
-    pyramidHalfOctaveLevelWidth,
-    pyramidHalfOctaveLevelHeight,
-    pyramidHalfOctaveLayoutOriginX,
-    pyramidHalfOctaveLayoutOriginY,
-    pyramidHalfOctaveMaxlevel,
-    clgpEnqueuePyramidHalfOctave,
-};
 
 static size_t
 pyramidSqrt2LayoutWidth(size_t width)
@@ -146,6 +124,7 @@ pyramidSqrt2LevelHeight(size_t height, size_t level)
 static size_t
 pyramidSqrt2LayoutOriginX(size_t level, size_t width, size_t height)
 {
+	height = height;
     return ((level == 0) \
         ? 0 \
         : ((size_t)(( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f) )*(float)(width/2)) + width));
@@ -153,6 +132,7 @@ pyramidSqrt2LayoutOriginX(size_t level, size_t width, size_t height)
 static size_t
 pyramidSqrt2LayoutOriginY(size_t level, size_t width, size_t height)
 {
+	width = width;
     return ((level <= 2) \
         ? 0 \
         : (int)(( (1.f - powf(0.5f, (float)((level-1)>>1)) ) / (1.f-0.5f) )*(float)(height/2)));
@@ -162,16 +142,6 @@ pyramidSqrt2Maxlevel(size_t width, size_t height)
 {
     return clgpMaxlevelHalfOctave(width, height) - 7;
 }
-const struct pyramid_implementation pyramidSqrt2 = {
-    pyramidSqrt2LayoutWidth,
-    pyramidSqrt2LevelWidth,
-    pyramidSqrt2LevelHeight,
-    pyramidSqrt2LayoutOriginX,
-    pyramidSqrt2LayoutOriginY,
-    pyramidSqrt2Maxlevel,
-    clgpEnqueuePyramidSqrt2,
-};
-
 
 void
 usage(void)
@@ -195,7 +165,13 @@ main(int argc, char *argv[])
     cl_command_queue queue = NULL;
     cl_kernel *clgpkernels = NULL;
 
-    const struct pyramid_implementation *impl = &pyramid;
+    size_t (*myLayoutWidth)(size_t width) = pyramidLayoutWidth;
+    size_t (*myLevelWidth)(size_t width, size_t level) = pyramidLevelWidth;
+    size_t (*myLevelHeight)(size_t height, size_t level) = pyramidLevelHeight;
+    size_t (*myLayoutOriginX)(size_t level, size_t width, size_t height) = pyramidLayoutOriginX;
+    size_t (*myLayoutOriginY)(size_t level, size_t width, size_t height) = pyramidLayoutOriginY;
+    size_t (*myMaxlevel)(size_t width, size_t height) = pyramidMaxlevel;
+    int (*myEnqueuePyramid)(cl_command_queue command_queue, cl_kernel *kernels, cl_mem pyramid_image[], cl_mem input_image, size_t maxlevel) = clgpEnqueuePyramid;
 
     MagickWand *input_wand = NULL, *pyramid_wand = NULL;
     const char *magickpixelmap = "RGBA";
@@ -257,13 +233,31 @@ main(int argc, char *argv[])
                 break;
             case 'p':
                 if (strncmp(optarg, "pyramid", 8) == 0) {
-                    impl = &pyramid;
+					myLayoutWidth = pyramidLayoutWidth;
+					myLevelWidth = pyramidLevelWidth;
+					myLevelHeight = pyramidLevelHeight;
+					myLayoutOriginX = pyramidLayoutOriginX;
+					myLayoutOriginY = pyramidLayoutOriginY;
+					myMaxlevel = pyramidMaxlevel;
+					myEnqueuePyramid = clgpEnqueuePyramid;
                 }
                 else if (strncmp(optarg, "halfoctave", 11) == 0) {
-                    impl = &pyramidHalfOctave;
+					myLayoutWidth = pyramidHalfOctaveLayoutWidth;
+					myLevelWidth = pyramidHalfOctaveLevelWidth;
+					myLevelHeight = pyramidHalfOctaveLevelHeight;
+					myLayoutOriginX = pyramidHalfOctaveLayoutOriginX;
+					myLayoutOriginY = pyramidHalfOctaveLayoutOriginY;
+					myMaxlevel = pyramidHalfOctaveMaxlevel;
+					myEnqueuePyramid = clgpEnqueuePyramidHalfOctave;
                 }
                 else if (strncmp(optarg, "sqrt2", 6) == 0) {
-                    impl = &pyramidSqrt2;
+					myLayoutWidth = pyramidSqrt2LayoutWidth;
+					myLevelWidth = pyramidSqrt2LevelWidth;
+					myLevelHeight = pyramidSqrt2LevelHeight;
+					myLayoutOriginX = pyramidSqrt2LayoutOriginX;
+					myLayoutOriginY = pyramidSqrt2LayoutOriginY;
+					myMaxlevel = pyramidSqrt2Maxlevel;
+					myEnqueuePyramid = clgpEnqueuePyramidSqrt2;
                 }
                 else {
                     fprintf(stderr, "-p: invalid pyramid type\n");
@@ -344,7 +338,7 @@ main(int argc, char *argv[])
 
     /* Create pyramid image */
     pyramid_wand = NewMagickWand();
-    pyramid_width = impl->layoutWidth(input_width);
+    pyramid_width = myLayoutWidth(input_width);
     pyramid_height = input_height;
     pyramid_nbchannels = input_nbchannels;
     pyramid_data = 
@@ -371,15 +365,15 @@ main(int argc, char *argv[])
     total_time = 
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
-    maxlevel = impl->maxlevel(input_width, input_height);
+    maxlevel = myMaxlevel(input_width, input_height);
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
                     &imageformat,
-                    impl->levelWidth(input_width, level),
-                    impl->levelHeight(input_height, level),
+                    myLevelWidth(input_width, level),
+                    myLevelHeight(input_height, level),
                     0,
                     NULL,
                     &err);
@@ -393,7 +387,7 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     for (i = 0; i < BUILD_ITERATION_NB; i++) {
-        impl->enqueuePyramid(
+        myEnqueuePyramid(
                 queue,
                 clgpkernels,
                 pyramid_climage, 
@@ -411,8 +405,8 @@ main(int argc, char *argv[])
     /* Retrieve images */
     gettimeofday(&start, NULL);
     for (level = 0; level < maxlevel; level++) {
-        region[0] = impl->levelWidth(input_width, level);
-        region[1] = impl->levelHeight(input_height, level);
+        region[0] = myLevelWidth(input_width, level);
+        region[1] = myLevelHeight(input_height, level);
         err = 
             clEnqueueReadImage(
                     queue,
@@ -422,7 +416,7 @@ main(int argc, char *argv[])
                     region,
                     pyramid_width*pyramid_nbchannels*sizeof(char),
                     0,
-                    (void *)((char *)((char *)pyramid_data + impl->layoutOriginY(level, input_width, input_height)*pyramid_width*pyramid_nbchannels) + impl->layoutOriginX(level, input_width, input_height)*pyramid_nbchannels),
+                    (void *)((char *)((char *)pyramid_data + myLayoutOriginY(level, input_width, input_height)*pyramid_width*pyramid_nbchannels) + myLayoutOriginX(level, input_width, input_height)*pyramid_nbchannels),
                     0,
                     NULL,
                     NULL);
