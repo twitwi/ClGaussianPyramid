@@ -27,6 +27,7 @@ static struct option longopts[] = {
     { "colormap", required_argument, 0, 'c' },
     { "devicetype", required_argument, 0, 'd' },
     { "help", no_argument, 0, 'h' },
+    { "outfile", required_argument, 0, 'o' },
     { "pyramidtype", required_argument, 0, 'p' },
     { 0, 0, 0, 0 }
 };
@@ -150,6 +151,7 @@ usage(void)
             "Usage: test-pyramid [OPTIONS] IMAGE_PATH\n"
                 " -c, --colormap=CHANNEL_ORDER     rgba, intensity\n"
                 " -d, --devicetype=DEVICE_TYPE     cpu, gpu\n"
+                " -o, --outfilee=PATH              save output at path\n"
                 " -p, --pyramidtype=PYRAMID_TYPE   pyramid, halfoctave, sqrt2\n"
                 " -h                               display help\n");
 }
@@ -192,13 +194,15 @@ main(int argc, char *argv[])
     
     int i = 0;
 
+	char *outputpath = NULL;
+
     
     /* Parse command line arguments */
     opterr = 0;
 #ifdef HAVE_GETOPT_LONG
-    while ((i = getopt_long(argc, argv, ":c:d:hp:", longopts, NULL)) != -1) {
+    while ((i = getopt_long(argc, argv, ":c:d:ho:p:", longopts, NULL)) != -1) {
 #else
-    while ((i = getopt(argc, argv, ":c:d:hp:")) != -1) {
+    while ((i = getopt(argc, argv, ":c:d:ho:p:")) != -1) {
 #endif
         switch(i) {
             case 'c':
@@ -231,6 +235,9 @@ main(int argc, char *argv[])
                 usage();
                 exit(0);
                 break;
+			case 'o':
+				outputpath = optarg;
+				break;
             case 'p':
                 if (strncmp(optarg, "pyramid", 8) == 0) {
 					myLayoutWidth = pyramidLayoutWidth;
@@ -449,7 +456,7 @@ main(int argc, char *argv[])
     /* Show results */
     printf(" * Pyramid time: %f ms\n", compute_time);
     printf(" * Total time: %f ms\n", total_time);
-    /* Display */
+    /* Display or save */
     MagickConstituteImage(
             pyramid_wand, 
             pyramid_width, 
@@ -458,7 +465,12 @@ main(int argc, char *argv[])
             CharPixel, 
             pyramid_data);
     MagickSetImageOpacity(pyramid_wand, 1.0);
-    MagickDisplayImages(pyramid_wand, NULL);
+	if (outputpath == NULL) {
+		MagickDisplayImages(pyramid_wand, NULL);
+	}
+	else {
+		MagickWriteImage(pyramid_wand, outputpath);
+	}
 
     /* Free images and ImageMagick */
     free(input_data);
