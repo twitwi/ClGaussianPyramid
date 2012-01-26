@@ -28,7 +28,7 @@
 # include <OpenCL/opencl.h>
 #endif
 
-cl_int clgp_clerr;
+cl_int clgp_clerr = CL_SUCCESS;
 
 cl_int
 clgpClError() {
