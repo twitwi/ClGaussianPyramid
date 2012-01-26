@@ -154,7 +154,7 @@ pyramidSqrt2LayoutOriginY(size_t level, size_t width, size_t height)
 static size_t
 pyramidSqrt2Maxlevel(size_t width, size_t height)
 {
-    return clgpMaxlevelHalfOctave(width, height) - 7;
+    return clgpMaxlevelHalfOctave(width, height) - 8;
 }
 
 void
