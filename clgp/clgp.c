@@ -64,8 +64,8 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
 {
     int err = 0;
 
-    cl_device_id device = 0;
-    cl_bool has_image = CL_FALSE;
+    cl_device_id *devices = NULL; 
+	cl_uint ndevices = 0;
 
     cl_program program = NULL;
     cl_kernel *kernels = NULL;
@@ -80,43 +80,70 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     char build_log[20000];
 #endif
 
-    /* Check if device support images */
+    /* Retrieve the device list associated with the context */
+	clgp_clerr = 
+		clGetContextInfo(
+				context,
+				CL_CONTEXT_NUM_DEVICES,
+				sizeof(cl_uint),
+				&ndevices,
+				NULL);
+    if (clgp_clerr != CL_SUCCESS) {
+#ifdef DEBUG
+        fprintf(stderr, "clgp: cannot access context devices number\n");
+#endif
+        err = CLGP_CL_ERROR;
+        goto end;
+    }
+	if (ndevices == 0) {
+		/* That would be strange... */
+        goto end;
+	}
+	devices = malloc(ndevices * sizeof(cl_device_id));
+    if (devices == NULL) {
+        err = CLGP_ENOMEM;
+        goto end;
+    }
     clgp_clerr = 
         clGetContextInfo(
                 context,
                 CL_CONTEXT_DEVICES,
-                sizeof(cl_device_id),
-                &device,
+                ndevices * sizeof(cl_device_id),
+                devices,
                 NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        fprintf(stderr, "clgp: no device associated\n");
+        fprintf(stderr, "clgp: cannot access context devices list\n");
 #endif
         err = CLGP_CL_ERROR;
         goto end;
     }
 
-    clgp_clerr = 
-        clGetDeviceInfo(
-                device,
-                CL_DEVICE_IMAGE_SUPPORT,
-                sizeof(cl_bool),
-                &has_image,
-                NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+	/* Check the devices image support */
+	for (size_t d = 0; d < ndevices; d++) {
+		cl_bool has_image = CL_FALSE;
+		clgp_clerr = 
+			clGetDeviceInfo(
+					devices[d],
+					CL_DEVICE_IMAGE_SUPPORT,
+					sizeof(cl_bool),
+					&has_image,
+					NULL);
+		if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        fprintf(stderr, "clgp: cannot check device image support\n");
+			fprintf(stderr, "clgp: cannot check device image support\n");
 #endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-    if (has_image == CL_FALSE) {
+			err = CLGP_CL_ERROR;
+			goto end;
+		}
+		if (has_image == CL_FALSE) {
 #ifdef DEBUG
-        fprintf(stderr, "clgp: no image support\n");
+			fprintf(stderr, "clgp: no image support\n");
 #endif
-        err = CLGP_NO_IMAGE_SUPPORT;
-        goto end;
-    }
+			err = CLGP_NO_IMAGE_SUPPORT;
+			goto end;
+		}
+	}
 
     /* Allocate kernels array */
     kernels = malloc(8*sizeof(cl_kernel));
@@ -146,16 +173,20 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
         clBuildProgram(program, 0, NULL, CLFLAGS, NULL, NULL);
     if (clgp_clerr != CL_SUCCESS) {
 #ifdef DEBUG
-        clGetProgramBuildInfo(
-                program,
-                device,
-                CL_PROGRAM_BUILD_LOG,
-                sizeof(build_log),
-                build_log,
-                NULL);
-        fprintf(stderr, 
-                "clgp: opencl program build error\n%s\n", 
-                build_log);
+        fprintf(stderr, "clgp: opencl program build error\n");
+		for (size_t d = 0; d < ndevices; d++) {
+			clGetProgramBuildInfo(
+					program,
+					devices[d],
+					CL_PROGRAM_BUILD_LOG,
+					sizeof(build_log),
+					build_log,
+					NULL);
+			fprintf(stderr, 
+					"clgp: devices[%zu] build log:\n%s\n", 
+					d,
+					build_log);
+		}
 #endif
         err = CLGP_CL_ERROR;
         goto end;
@@ -218,6 +249,8 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     }
 
 end:
+	free(devices);
+
     if (err != 0) {
         clgpRelease(kernels);
     }
