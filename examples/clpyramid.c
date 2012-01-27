@@ -44,8 +44,6 @@
 
 #include <wand/MagickWand.h>
 
-#define BUILD_ITERATION_NB 10
-
 #ifdef HAVE_GETOPT_LONG
 static struct option longopts[] = {
     { "colormap", required_argument, 0, 'c' },
@@ -198,7 +196,7 @@ main(int argc, char *argv[])
 {
     cl_int err = 0;
 
-    int devicetype = 0;
+	cl_device_type devicetype = CL_DEVICE_TYPE_GPU;
     cl_device_id device = NULL;
     cl_context context = NULL;
     cl_command_queue queue = NULL;
@@ -215,10 +213,10 @@ main(int argc, char *argv[])
 
     MagickWand *input_wand = NULL, *pyramid_wand = NULL;
     const char *magickpixelmap = "RGBA";
-    char *input_data = NULL, *pyramid_data;
-    unsigned int input_width = 0, pyramid_width = 0;
-    unsigned int input_height = 0, pyramid_height = 0;
-    unsigned int input_nbchannels = 0, pyramid_nbchannels = 0;
+    char *input_data = NULL, *pyramid_data = NULL;
+    size_t input_width = 0, pyramid_width = 0;
+    size_t input_height = 0, pyramid_height = 0;
+    size_t input_nbchannels = 0, pyramid_nbchannels = 0;
 
     cl_image_format imageformat = {CL_RGBA, CL_UNORM_INT8};
     cl_mem input_climage, pyramid_climage[32];
@@ -259,10 +257,10 @@ main(int argc, char *argv[])
                 break;
             case 'd':
                 if (strncmp(optarg, "gpu", 4) == 0) {
-                    devicetype = 0;
+                    devicetype = CL_DEVICE_TYPE_GPU;
                 }
                 else if (strncmp(optarg, "cpu", 4) == 0) {
-                    devicetype = 1;
+                    devicetype = CL_DEVICE_TYPE_CPU;
                 }
                 else {
                     fprintf(stderr, "-d: invalid device type\n");
@@ -332,10 +330,10 @@ main(int argc, char *argv[])
     MagickWandGenesis();
 
     /* OpenCL init, using our utils functions */
-    if (devicetype == 0) {
+    if (devicetype == CL_DEVICE_TYPE_GPU) {
         clgpFirstGPU(&device);
     }
-    else if (devicetype == 1) {
+    else if (devicetype == CL_DEVICE_TYPE_CPU) {
         clgpFirstCPU(&device);
     }
     if (device == NULL) {
@@ -433,20 +431,23 @@ main(int argc, char *argv[])
 
 
     /* At last, call our pyramid function */
+    clFinish(queue);
     gettimeofday(&start, NULL);
-    for (i = 0; i < BUILD_ITERATION_NB; i++) {
-        myEnqueuePyramid(
-                queue,
-                clgpkernels,
-                pyramid_climage, 
-                input_climage,
-                maxlevel);
-    }
+	err = 
+		myEnqueuePyramid(
+				queue,
+				clgpkernels,
+				pyramid_climage, 
+				input_climage,
+				maxlevel);
     clFinish(queue);
     gettimeofday(&stop, NULL);
+	if (err != 0) {
+        fprintf(stderr, "Pyramid failed\n");
+        exit(1);
+	}
     compute_time = 
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
-    compute_time /= BUILD_ITERATION_NB;
     total_time += compute_time;
 
 
@@ -468,13 +469,13 @@ main(int argc, char *argv[])
                     0,
                     NULL,
                     NULL);
+		if (err != CL_SUCCESS) {
+			fprintf(stderr, 
+					"Could not copy pyramid data on host (%d)\n", err);
+			exit(1);
+		}
     }
     clFinish(queue);
-    if (err != CL_SUCCESS) {
-        fprintf(stderr, 
-                "Could not copy pyramid data on host (%d)\n", err);
-        exit(1);
-    }
     gettimeofday(&stop, NULL);
     total_time += 
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
@@ -490,8 +491,8 @@ main(int argc, char *argv[])
         clReleaseMemObject(pyramid_climage[level]);
     }
 
-    clReleaseContext(context);
     clReleaseCommandQueue(queue);
+    clReleaseContext(context);
 
 
     /* Show results */

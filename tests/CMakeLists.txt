@@ -1,15 +1,8 @@
-# Check tests-only system dependencies
-INCLUDE(CheckFunctionExists)
-CHECK_FUNCTION_EXISTS(getopt_long HAVE_GETOPT_LONG)
-IF(HAVE_GETOPT_LONG)
-    ADD_DEFINITIONS(-DHAVE_GETOPT_LONG)
-ENDIF(HAVE_GETOPT_LONG)
-
 SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR}/clgp)
 INCLUDE_DIRECTORIES(${ImageMagick_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-ADD_EXECUTABLE(test-pyramid test-pyramid.c)
-TARGET_LINK_LIBRARIES(test-pyramid clgp m ${ImageMagick_LIBRARIES})
+ADD_EXECUTABLE(test-impulse test-impulse.c)
+TARGET_LINK_LIBRARIES(test-impulse clgp m ${ImageMagick_LIBRARIES})
 
