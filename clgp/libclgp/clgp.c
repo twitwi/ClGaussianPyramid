@@ -35,14 +35,11 @@
 
 #include "downsampledgauss5x5.h"
 #include "downscaledgauss5x5.h"
-#include "error.h"
 #include "gauss9x9.h"
 
 #ifndef CLFLAGS
 # define CLFLAGS "-cl-mad-enable -cl-fast-relaxed-math"
 #endif
-
-extern cl_int clgp_clerr;
 
 /* Global variables for the library */
 extern const char clgp_downsampledgauss5x5_src[];
@@ -59,13 +56,13 @@ void
 clgpRelease(cl_kernel *kernels);
 
 /* Register clgp in opencl context, must be called before everyelse function */
-int
+cl_int
 clgpInit(cl_context context, cl_kernel **kernelsptr)
 {
-    int err = 0;
+    cl_int err = CL_SUCCESS;
 
     cl_device_id *devices = NULL; 
-	cl_uint ndevices = 0;
+    cl_uint ndevices = 0;
 
     cl_program program = NULL;
     cl_kernel *kernels = NULL;
@@ -81,74 +78,69 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
 #endif
 
     /* Retrieve the device list associated with the context */
-	clgp_clerr = 
-		clGetContextInfo(
-				context,
-				CL_CONTEXT_NUM_DEVICES,
-				sizeof(cl_uint),
-				&ndevices,
-				NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    err = 
+        clGetContextInfo(
+                context,
+                CL_CONTEXT_NUM_DEVICES,
+                sizeof(cl_uint),
+                &ndevices,
+                NULL);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: cannot access context devices number\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
-	if (ndevices == 0) {
-		/* That would be strange... */
+    if (ndevices == 0) {
+        /* That would be strange... */
         goto end;
-	}
-	devices = malloc(ndevices * sizeof(cl_device_id));
+    }
+    devices = malloc(ndevices * sizeof(cl_device_id));
     if (devices == NULL) {
-        err = CLGP_ENOMEM;
         goto end;
     }
-    clgp_clerr = 
+    err = 
         clGetContextInfo(
                 context,
                 CL_CONTEXT_DEVICES,
                 ndevices * sizeof(cl_device_id),
                 devices,
                 NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: cannot access context devices list\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
-	/* Check the devices image support */
-	for (size_t d = 0; d < ndevices; d++) {
-		cl_bool has_image = CL_FALSE;
-		clgp_clerr = 
-			clGetDeviceInfo(
-					devices[d],
-					CL_DEVICE_IMAGE_SUPPORT,
-					sizeof(cl_bool),
-					&has_image,
-					NULL);
-		if (clgp_clerr != CL_SUCCESS) {
+    /* Check the devices image support */
+    for (size_t d = 0; d < ndevices; d++) {
+        cl_bool has_image = CL_FALSE;
+        err = 
+            clGetDeviceInfo(
+                    devices[d],
+                    CL_DEVICE_IMAGE_SUPPORT,
+                    sizeof(cl_bool),
+                    &has_image,
+                    NULL);
+        if (err != CL_SUCCESS) {
 #ifdef DEBUG
-			fprintf(stderr, "clgp: cannot check device image support\n");
+            fprintf(stderr, "clgp: cannot check device image support\n");
 #endif
-			err = CLGP_CL_ERROR;
-			goto end;
-		}
-		if (has_image == CL_FALSE) {
+            goto end;
+        }
+        if (has_image == CL_FALSE) {
 #ifdef DEBUG
-			fprintf(stderr, "clgp: no image support\n");
+            fprintf(stderr, "clgp: no image support\n");
 #endif
-			err = CLGP_NO_IMAGE_SUPPORT;
-			goto end;
-		}
-	}
+            goto end;
+        }
+    }
 
     /* Allocate kernels array */
     kernels = malloc(8*sizeof(cl_kernel));
     if (kernels == NULL) {
-        err = CLGP_ENOMEM;
+	err = CL_OUT_OF_HOST_MEMORY;
         goto end;
     }
     memset(kernels, 0, 8*sizeof(cl_kernel));
@@ -160,98 +152,90 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
                 3,
                 (const char **)sources,
                 NULL,
-                &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+                &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr,
                 "clgp: opencl program creation error\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
-    clgp_clerr =
+    err =
         clBuildProgram(program, 0, NULL, CLFLAGS, NULL, NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: opencl program build error\n");
-		for (size_t d = 0; d < ndevices; d++) {
-			clGetProgramBuildInfo(
-					program,
-					devices[d],
-					CL_PROGRAM_BUILD_LOG,
-					sizeof(build_log),
-					build_log,
-					NULL);
-			fprintf(stderr, 
-					"clgp: devices[%zu] build log:\n%s\n", 
-					d,
-					build_log);
-		}
+        for (size_t d = 0; d < ndevices; d++) {
+            clGetProgramBuildInfo(
+                    program,
+                    devices[d],
+                    CL_PROGRAM_BUILD_LOG,
+                    sizeof(build_log),
+                    build_log,
+                    NULL);
+            fprintf(stderr, 
+                    "clgp: devices[%zu] build log:\n%s\n", 
+                    d,
+                    build_log);
+        }
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
     /* Find the kernels... */
     kernels[DOWNSAMPLEDGAUSS5X5_COLS] = 
-        clCreateKernel(program, "downsampledgauss5x5_cols", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+        clCreateKernel(program, "downsampledgauss5x5_cols", &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_cols kernel not found\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
     kernels[DOWNSAMPLEDGAUSS5X5_ROWS] = 
-        clCreateKernel(program, "downsampledgauss5x5_rows", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+        clCreateKernel(program, "downsampledgauss5x5_rows", &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downsampledgauss5x5_rows kernel not found\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
     kernels[DOWNSCALEDGAUSS5X5] = 
-        clCreateKernel(program, "downscaledgauss5x5", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+        clCreateKernel(program, "downscaledgauss5x5", &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: downscaledgauss5x5 kernel not found\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
     kernels[GAUSS9X9_ROWS] = 
-        clCreateKernel(program, "gauss9x9_rows", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+        clCreateKernel(program, "gauss9x9_rows", &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_rows kernel not found\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
     kernels[GAUSS9X9_COLS] = 
-        clCreateKernel(program, "gauss9x9_cols", &clgp_clerr);
-    if (clgp_clerr != CL_SUCCESS) {
+        clCreateKernel(program, "gauss9x9_cols", &err);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: gauss9x9_cols kernel not found\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
     /* Mark the context as used by our library */
-    clgp_clerr = clRetainContext(context);
-    if (clgp_clerr != CL_SUCCESS) {
+    err = clRetainContext(context);
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: context retaining error\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
 end:
-	free(devices);
+    free(devices);
 
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         clgpRelease(kernels);
     }
 
@@ -264,18 +248,20 @@ end:
 void
 clgpRelease(cl_kernel *kernels)
 {
+    cl_int err = CL_SUCCESS;
+
     cl_context context = NULL;
     cl_program program = NULL;
 
     /* Retrieve context reference from kernels */
-    clgp_clerr =
+    err =
         clGetKernelInfo(
                 kernels[DOWNSAMPLEDGAUSS5X5_COLS],
                 CL_KERNEL_CONTEXT,
                 sizeof(cl_context),
                 &context,
                 NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: could not access opencl context\n");
 #endif
@@ -283,14 +269,14 @@ clgpRelease(cl_kernel *kernels)
     }
 
     /* Retrieve program reference from kernels */
-    clgp_clerr =
+    err =
         clGetKernelInfo(
                 kernels[DOWNSAMPLEDGAUSS5X5_COLS],
                 CL_KERNEL_PROGRAM,
                 sizeof(cl_program),
                 &program,
                 NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: could not access opencl program\n");
 #endif
@@ -331,7 +317,7 @@ clgpMaxlevel(size_t width, size_t height)
 
 /* Build an array of images that are the different layers of the classic 
  * gaussian pyramid */
-int
+cl_int
 clgpEnqueuePyramid(
         cl_command_queue command_queue,
         cl_kernel *kernels,
@@ -339,7 +325,7 @@ clgpEnqueuePyramid(
         cl_mem input_image,
         size_t maxlevel)
 {
-    int err = 0;
+    cl_int err = CL_SUCCESS;
 
     size_t width = 0;
     size_t height = 0;
@@ -364,7 +350,7 @@ clgpEnqueuePyramid(
                 0, 
                 NULL, 
                 NULL);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         goto end;
     }
     /* Now go through the other levels until we can't reduce */
@@ -378,7 +364,7 @@ clgpEnqueuePyramid(
                     pyramid_image[level-1],
                     width>>(level-1),
                     height>>(level-1));
-        if (err != 0) {
+        if (err != CL_SUCCESS) {
             goto end;
         }
     }
@@ -397,7 +383,7 @@ clgpMaxlevelHalfOctave(size_t width, size_t height)
 
 /* Build an array of images that are the different layers of the half-octave
  * gaussian pyramid */
-int
+cl_int
 clgpEnqueuePyramidHalfOctave(
         cl_command_queue command_queue,
         cl_kernel *kernels,
@@ -405,7 +391,7 @@ clgpEnqueuePyramidHalfOctave(
         cl_mem input_image,
         size_t maxlevel)
 {
-    int err = 0;
+    cl_int err = CL_SUCCESS;
 
     size_t width = 0;
     size_t height = 0;
@@ -424,7 +410,7 @@ clgpEnqueuePyramidHalfOctave(
                 input_image,
                 width,
                 height);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         goto end;
     }
     /* Second half-octave */
@@ -436,7 +422,7 @@ clgpEnqueuePyramidHalfOctave(
                 pyramid_image[0],
                 width,
                 height);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         goto end;
     }
     /* Now go through the other octaves until we can't reduce */
@@ -450,7 +436,7 @@ clgpEnqueuePyramidHalfOctave(
                     pyramid_image[level-1],
                     width>>((level-1)>>1),
                     height>>((level-1)>>1));
-        if (err != 0) {
+        if (err != CL_SUCCESS) {
             goto end;
         }
 
@@ -465,7 +451,7 @@ clgpEnqueuePyramidHalfOctave(
                     pyramid_image[level-1],
                     width>>(level>>1),
                     height>>(level>>1));
-        if (err != 0) {
+        if (err != CL_SUCCESS) {
             goto end;
         }
     }
@@ -476,7 +462,7 @@ end:
 
 /* Build an array of images that are the different layers of the half-octave 
  * gaussian pyramid with sqrt2 layout */
-int
+cl_int
 clgpEnqueuePyramidSqrt2(
         cl_command_queue command_queue,
         cl_kernel *kernels,
@@ -484,7 +470,7 @@ clgpEnqueuePyramidSqrt2(
         cl_mem input_image,
         size_t maxlevel)
 {
-    int err = 0;
+    cl_int err = CL_SUCCESS;
 
     size_t width = 0;
     size_t height = 0;
@@ -503,7 +489,7 @@ clgpEnqueuePyramidSqrt2(
                 input_image,
                 width,
                 height);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         goto end;
     }
     /* Second half octave */
@@ -515,7 +501,7 @@ clgpEnqueuePyramidSqrt2(
                 pyramid_image[0], 
                 width,
                 height);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         goto end;
     }
     /* Now go through the other octaves until we can't reduce */
@@ -530,7 +516,7 @@ clgpEnqueuePyramidSqrt2(
                         pyramid_image[level-1], 
                         width >> (level>>1),
                         height >> ((level-1)>>1));
-            if (err != 0) {
+            if (err != CL_SUCCESS) {
                 goto end;
             }
         }
@@ -544,7 +530,7 @@ clgpEnqueuePyramidSqrt2(
                         pyramid_image[level-1], 
                         width >> (level>>1),
                         height >> ((level-1)>>1));
-            if (err != 0) {
+            if (err != CL_SUCCESS) {
                 goto end;
             }
         }

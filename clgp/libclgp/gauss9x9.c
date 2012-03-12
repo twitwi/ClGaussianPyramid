@@ -31,16 +31,12 @@
 # include <OpenCL/opencl.h>
 #endif
 
-#include "error.h"
-
-extern cl_int clgp_clerr;
-
-#define DOWNSAMPLEDGAUSS5X5_ROWS 3
-#define DOWNSAMPLEDGAUSS5X5_COLS 4
+#define GAUSS9X9_ROWS 1
+#define GAUSS9X9_COLS 2
 
 
-int
-clgpEnqueueDownsampledGauss5x5_cols(
+cl_int
+clgpEnqueueGauss9x9(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
@@ -48,72 +44,25 @@ clgpEnqueueDownsampledGauss5x5_cols(
         size_t width,
         size_t height)
 {
-    int err = 0;
+    cl_int err = 0;
 
     size_t local_work_size[2];
     size_t global_work_size[2];
 
-    local_work_size[0] = (width >= 32) ? 16 : width>>1;
-    local_work_size[1] = (height >= 32) ? 16 : height>>1;
-    global_work_size[0] = 
-        ((width/2-1) / local_work_size[0] + 1)*local_work_size[0];
-    global_work_size[1] = 
-        ((height-1) / local_work_size[1] + 1)*local_work_size[1];
-
-    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 1, sizeof(cl_mem), &input_image);
-
-    clgp_clerr = 
-        clEnqueueNDRangeKernel(
-                command_queue, 
-                kernels[DOWNSAMPLEDGAUSS5X5_COLS], 
-                2, 
-                NULL,
-                &global_work_size[0], 
-                &local_work_size[0],
-                0, 
-                NULL, 
-                NULL);
-    if (clgp_clerr != CL_SUCCESS) {
-#ifdef DEBUG 
-        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
-#endif
-        err = CLGP_CL_ERROR;
-        goto end;
-    }
-
-end:
-    return err;
-}
-
-int
-clgpEnqueueDownsampledGauss5x5_rows(
-        cl_command_queue command_queue,
-        cl_kernel *kernels,
-        cl_mem output_image, 
-        cl_mem input_image,
-        size_t width,
-        size_t height)
-{
-    int err = 0;
-
-    size_t local_work_size[2];
-    size_t global_work_size[2];
-
-    local_work_size[0] = (width >= 32) ? 16 : width>>1;
-    local_work_size[1] = (height >= 32) ? 16 : height>>1;
+    local_work_size[0] = (width >= 16) ? 16 : width;
+    local_work_size[1] = (height >= 16) ? 16 : height;
     global_work_size[0] = 
         ((width-1) / local_work_size[0] + 1)*local_work_size[0];
     global_work_size[1] = 
-        ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
+        ((height-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 1, sizeof(cl_mem), &input_image);
+    clSetKernelArg(kernels[GAUSS9X9_ROWS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[GAUSS9X9_ROWS], 1, sizeof(cl_mem), &input_image);
 
-    clgp_clerr = 
+    err = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 
+                kernels[GAUSS9X9_ROWS], 
                 2, 
                 NULL,
                 &global_work_size[0], 
@@ -121,11 +70,31 @@ clgpEnqueueDownsampledGauss5x5_rows(
                 0, 
                 NULL, 
                 NULL);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
-        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
+        fprintf(stderr, "clgp: gauss9x9_rows kernel failure\n");
 #endif
-        err = CLGP_CL_ERROR;
+        goto end;
+    }
+
+    clSetKernelArg(kernels[GAUSS9X9_COLS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[GAUSS9X9_COLS], 1, sizeof(cl_mem), &output_image);
+
+    err = 
+        clEnqueueNDRangeKernel(
+                command_queue, 
+                kernels[GAUSS9X9_COLS], 
+                2, 
+                NULL,
+                &global_work_size[0], 
+                &local_work_size[0],
+                0, 
+                NULL, 
+                NULL);
+    if (err != CL_SUCCESS) {
+#ifdef DEBUG
+        fprintf(stderr, "clgp: gauss9x9_cols kernel failure\n");
+#endif
         goto end;
     }
 

@@ -1,1 +1,0 @@
-../kernels/downscaledgauss5x5.cl

@@ -31,8 +31,8 @@
 # include <OpenCL/opencl.h>
 #endif
 
-#include <clgp.h>
-#include <utils.h>
+#include <clgp/clgp.h>
+#include <clgp/utils.h>
 
 int
 main(void)
@@ -74,7 +74,8 @@ main(void)
         exit(1);
     }
 
-    if (clgpInit(context, &clgpkernels) != 0) {
+    err = clgpInit(context, &clgpkernels);
+    if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
@@ -142,7 +143,7 @@ main(void)
                 pyramid_climage, 
                 input_climage,
                 maxlevel);
-    if (err != 0) {
+    if (err != CL_SUCCESS) {
         fprintf(stderr, "Pyramid failed\n");
         exit(1);
     }

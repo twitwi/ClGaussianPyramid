@@ -35,7 +35,7 @@ extern "C" {
 # include <OpenCL/opencl.h>
 #endif
 
-int
+cl_int
 clgpEnqueueDownsampledGauss5x5_cols(
         cl_command_queue command_queue,
         cl_kernel *kernels,
@@ -44,7 +44,7 @@ clgpEnqueueDownsampledGauss5x5_cols(
         size_t width,
         size_t height);
 
-int
+cl_int
 clgpEnqueueDownsampledGauss5x5_rows(
         cl_command_queue command_queue,
         cl_kernel *kernels,

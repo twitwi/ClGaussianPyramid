@@ -31,14 +31,10 @@
 # include <OpenCL/opencl.h>
 #endif
 
-#include "error.h"
-
-extern cl_int clgp_clerr;
-
-static int
+static cl_int
 clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
 {
-    int err = 0;
+    cl_int err = 0;
 
     cl_platform_id platforms[8];
     cl_uint n_platforms = 0;
@@ -51,22 +47,21 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
     *id = NULL;
 
     /* Enumerate platforms, we take the first available */
-    clgp_clerr =
+    err =
         clGetPlatformIDs(
                 8,
                 platforms,
                 &n_platforms);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
     /* Enumerate devices */
     for (p = 0; p < n_platforms; p++) {
-        clgp_clerr =
+        err =
             clGetDeviceIDs(
                     platforms[p],
                     device_type,
@@ -77,7 +72,6 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
 #endif
-            err = CLGP_CL_ERROR;
             goto end;
         }
         if (n_devs > 0) {
@@ -90,16 +84,16 @@ end:
     return err;
 }
 
-int
+cl_int
 clgpFirstGPU(cl_device_id *id)
 {
     return clgpFirstDevice(id, CL_DEVICE_TYPE_GPU);
 }
 
-int
+cl_int
 clgpMaxflopsGPU(cl_device_id *id)
 {
-    int err = 0;
+    cl_int err = 0;
 
     cl_platform_id platforms[8];
     cl_uint n_platforms = 0;
@@ -116,16 +110,15 @@ clgpMaxflopsGPU(cl_device_id *id)
     unsigned int p = 0;
 
     /* Enumerate platforms, we take the first available */
-    clgp_clerr =
+    err =
         clGetPlatformIDs(
                 8,
                 platforms,
                 &n_platforms);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
@@ -133,7 +126,7 @@ clgpMaxflopsGPU(cl_device_id *id)
 
     /* Enumerate devices */
     for (p = 0; p < n_platforms; p++) {
-        clgp_clerr =
+        err =
             clGetDeviceIDs(
                     platforms[p],
                     CL_DEVICE_TYPE_GPU,
@@ -144,41 +137,38 @@ clgpMaxflopsGPU(cl_device_id *id)
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
 #endif
-            err = CLGP_CL_ERROR;
             goto end;
         }
 
         /* Check each device */
         for (d = 0; d < n_devs; d++) {
             /* Get max clock and compute unit number */
-            clgp_clerr = 
+            err = 
                 clGetDeviceInfo(
                         devices[d],
                         CL_DEVICE_MAX_CLOCK_FREQUENCY,
                         sizeof(cl_uint),
                         &d_clock_freq,
                         NULL);
-            if (clgp_clerr != CL_SUCCESS) {
+            if (err != CL_SUCCESS) {
 #ifdef DEBUG
                 fprintf(stderr, 
                         "clgp: device info (CL_DEVICE_MAX_CLOCK_FREQUENCY) error\n");
 #endif
-                err = CLGP_CL_ERROR;
                 goto end;
             }
-            clgp_clerr = 
+            err = 
                 clGetDeviceInfo(
                         devices[d],
                         CL_DEVICE_MAX_COMPUTE_UNITS,
                         sizeof(cl_uint),
                         &d_compute_unit_nb,
                         NULL);
-            if (clgp_clerr != CL_SUCCESS) {
+            if (err != CL_SUCCESS) {
 #ifdef DEBUG
                 fprintf(stderr, 
                         "clgp: device info (CL_DEVICE_MAX_COMPUTE_UNITS) error\n");
 #endif
-                err = CLGP_CL_ERROR;
                 goto end;
             }
             /* If better than current, take it */
@@ -194,16 +184,16 @@ end:
     return err;
 }
 
-int
+cl_int
 clgpFirstCPU(cl_device_id *id)
 {
     return clgpFirstDevice(id, CL_DEVICE_TYPE_CPU);
 }
 
-int
+cl_int
 clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
 {
-    int err = 0;
+    cl_int err = 0;
 
     cl_platform_id platforms[8];
     cl_uint n_platforms = 0;
@@ -221,22 +211,21 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
     vendorlen = strnlen(vendor, 1024);
 
     /* Enumerate platforms, we take the first with the right vendor */
-    clgp_clerr =
+    err =
         clGetPlatformIDs(
                 8,
                 platforms,
                 &n_platforms);
-    if (clgp_clerr != CL_SUCCESS) {
+    if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
 #endif
-        err = CLGP_CL_ERROR;
         goto end;
     }
 
     /* Enumerate devices */
     for (p = 0; p < n_platforms; p++) {
-        clgp_clerr =
+        err =
             clGetPlatformInfo(
                     platforms[p],
                     CL_PLATFORM_VENDOR,
@@ -247,14 +236,13 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
 #ifdef DEBUG
             fprintf(stderr, "clgp: platform get vendor error\n");
 #endif
-            err = CLGP_CL_ERROR;
             goto end;
         }
         if (strncmp(platform_vendor, vendor, vendorlen) != 0) {
             continue;
         }
 
-        clgp_clerr =
+        err =
             clGetDeviceIDs(
                     platforms[p],
                     CL_DEVICE_TYPE_CPU,
@@ -265,7 +253,6 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
 #endif
-            err = CLGP_CL_ERROR;
             goto end;
         }
         if (n_devs > 0) {

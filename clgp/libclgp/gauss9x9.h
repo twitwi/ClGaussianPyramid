@@ -22,8 +22,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef _CLGP_DOWNSCALEDGAUSS5X5_H_
-#define _CLGP_DOWNSCALEDGAUSS5X5_H_
+#ifndef _CLGP_GAUSS9X9_H_
+#define _CLGP_GAUSS9X9_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -35,8 +35,8 @@ extern "C" {
 # include <OpenCL/opencl.h>
 #endif
 
-int
-clgpEnqueueDownscaledGauss5x5(
+cl_int
+clgpEnqueueGauss9x9(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
@@ -48,5 +48,5 @@ clgpEnqueueDownscaledGauss5x5(
 }
 #endif
 
-#endif /* ndef _CLGP_DOWNSCALEDGAUSS5X5_H_ */
+#endif /* ndef _CLGP_GAUSS9X9_H_ */
 

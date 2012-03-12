@@ -39,8 +39,8 @@
 # include <OpenCL/opencl.h>
 #endif
 
-#include <clgp.h>
-#include <utils.h>
+#include <clgp/clgp.h>
+#include <clgp/utils.h>
 
 #include <wand/MagickWand.h>
 
@@ -65,7 +65,7 @@ pyramidLayoutWidth(size_t width)
 static size_t
 pyramidLayoutHeight(size_t height)
 {
-	return height;
+    return height;
 }
 static size_t 
 pyramidLevelWidth(size_t width, size_t level) 
@@ -80,7 +80,7 @@ pyramidLevelHeight(size_t height, size_t level)
 static size_t
 pyramidLayoutOriginX(size_t level, size_t width, size_t height)
 {
-	height = height;
+    height = height;
     return ((level == 0) \
         ? 0 \
         : (size_t)(((1.f - powf(0.5f, (float)(level))) / (1.f-0.5f)) *(float)width));
@@ -88,9 +88,9 @@ pyramidLayoutOriginX(size_t level, size_t width, size_t height)
 static size_t
 pyramidLayoutOriginY(size_t level, size_t width, size_t height)
 {
-	level = level;
-	width = width;
-	height = height;
+    level = level;
+    width = width;
+    height = height;
     return 0;
 }
 static size_t
@@ -107,7 +107,7 @@ pyramidHalfOctaveLayoutWidth(size_t width)
 static size_t
 pyramidHalfOctaveLayoutHeight(size_t height)
 {
-	return height;
+    return height;
 }
 static size_t 
 pyramidHalfOctaveLevelWidth(size_t width, size_t level) 
@@ -122,7 +122,7 @@ pyramidHalfOctaveLevelHeight(size_t height, size_t level)
 static size_t
 pyramidHalfOctaveLayoutOriginX(size_t level, size_t width, size_t height)
 {
-	height = height;
+    height = height;
     return ((level == 0) \
         ? 0 \
         : (size_t)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width));
@@ -130,7 +130,7 @@ pyramidHalfOctaveLayoutOriginX(size_t level, size_t width, size_t height)
 static size_t
 pyramidHalfOctaveLayoutOriginY(size_t level, size_t width, size_t height)
 {
-	width = width;
+    width = width;
     return ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1)));
 }
 static size_t
@@ -147,7 +147,7 @@ pyramidSqrt2LayoutWidth(size_t width)
 static size_t
 pyramidSqrt2LayoutHeight(size_t height)
 {
-	return 2*height;
+    return 2*height;
 }
 static size_t
 pyramidSqrt2LevelWidth(size_t width, size_t level)
@@ -162,13 +162,13 @@ pyramidSqrt2LevelHeight(size_t height, size_t level)
 static size_t
 pyramidSqrt2LayoutOriginX(size_t level, size_t width, size_t height)
 {
-	height = height;
-	return (level & 0x1) ? (width >> (level>>1)) : 0;
+    height = height;
+    return (level & 0x1) ? (width >> (level>>1)) : 0;
 }
 static size_t
 pyramidSqrt2LayoutOriginY(size_t level, size_t width, size_t height)
 {
-	width = width;
+    width = width;
     return ((level == 0) \
         ? 0 \
         : (size_t)(((1.f - powf(0.5f, (float)(level>>1))) / (1.f-0.5f)) *(float)height));
@@ -196,7 +196,7 @@ main(int argc, char *argv[])
 {
     cl_int err = 0;
 
-	cl_device_type devicetype = CL_DEVICE_TYPE_GPU;
+    cl_device_type devicetype = CL_DEVICE_TYPE_GPU;
     cl_device_id device = NULL;
     cl_context context = NULL;
     cl_command_queue queue = NULL;
@@ -230,7 +230,7 @@ main(int argc, char *argv[])
     
     int i = 0;
 
-	char *outputpath = NULL;
+    char *outputpath = NULL;
 
     
     /* Parse command line arguments */
@@ -271,39 +271,39 @@ main(int argc, char *argv[])
                 usage();
                 exit(0);
                 break;
-			case 'o':
-				outputpath = optarg;
-				break;
+            case 'o':
+                outputpath = optarg;
+                break;
             case 'p':
                 if (strncmp(optarg, "pyramid", 8) == 0) {
-					myLayoutWidth = pyramidLayoutWidth;
-					myLayoutHeight = pyramidLayoutHeight;
-					myLevelWidth = pyramidLevelWidth;
-					myLevelHeight = pyramidLevelHeight;
-					myLayoutOriginX = pyramidLayoutOriginX;
-					myLayoutOriginY = pyramidLayoutOriginY;
-					myMaxlevel = pyramidMaxlevel;
-					myEnqueuePyramid = clgpEnqueuePyramid;
+                    myLayoutWidth = pyramidLayoutWidth;
+                    myLayoutHeight = pyramidLayoutHeight;
+                    myLevelWidth = pyramidLevelWidth;
+                    myLevelHeight = pyramidLevelHeight;
+                    myLayoutOriginX = pyramidLayoutOriginX;
+                    myLayoutOriginY = pyramidLayoutOriginY;
+                    myMaxlevel = pyramidMaxlevel;
+                    myEnqueuePyramid = clgpEnqueuePyramid;
                 }
                 else if (strncmp(optarg, "halfoctave", 11) == 0) {
-					myLayoutWidth = pyramidHalfOctaveLayoutWidth;
-					myLayoutHeight = pyramidHalfOctaveLayoutHeight;
-					myLevelWidth = pyramidHalfOctaveLevelWidth;
-					myLevelHeight = pyramidHalfOctaveLevelHeight;
-					myLayoutOriginX = pyramidHalfOctaveLayoutOriginX;
-					myLayoutOriginY = pyramidHalfOctaveLayoutOriginY;
-					myMaxlevel = pyramidHalfOctaveMaxlevel;
-					myEnqueuePyramid = clgpEnqueuePyramidHalfOctave;
+                    myLayoutWidth = pyramidHalfOctaveLayoutWidth;
+                    myLayoutHeight = pyramidHalfOctaveLayoutHeight;
+                    myLevelWidth = pyramidHalfOctaveLevelWidth;
+                    myLevelHeight = pyramidHalfOctaveLevelHeight;
+                    myLayoutOriginX = pyramidHalfOctaveLayoutOriginX;
+                    myLayoutOriginY = pyramidHalfOctaveLayoutOriginY;
+                    myMaxlevel = pyramidHalfOctaveMaxlevel;
+                    myEnqueuePyramid = clgpEnqueuePyramidHalfOctave;
                 }
                 else if (strncmp(optarg, "sqrt2", 6) == 0) {
-					myLayoutWidth = pyramidSqrt2LayoutWidth;
-					myLayoutHeight = pyramidSqrt2LayoutHeight;
-					myLevelWidth = pyramidSqrt2LevelWidth;
-					myLevelHeight = pyramidSqrt2LevelHeight;
-					myLayoutOriginX = pyramidSqrt2LayoutOriginX;
-					myLayoutOriginY = pyramidSqrt2LayoutOriginY;
-					myMaxlevel = pyramidSqrt2Maxlevel;
-					myEnqueuePyramid = clgpEnqueuePyramidSqrt2;
+                    myLayoutWidth = pyramidSqrt2LayoutWidth;
+                    myLayoutHeight = pyramidSqrt2LayoutHeight;
+                    myLevelWidth = pyramidSqrt2LevelWidth;
+                    myLevelHeight = pyramidSqrt2LevelHeight;
+                    myLayoutOriginX = pyramidSqrt2LayoutOriginX;
+                    myLayoutOriginY = pyramidSqrt2LayoutOriginY;
+                    myMaxlevel = pyramidSqrt2Maxlevel;
+                    myEnqueuePyramid = clgpEnqueuePyramidSqrt2;
                 }
                 else {
                     fprintf(stderr, "-p: invalid pyramid type\n");
@@ -356,7 +356,8 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the clgp library */
-    if (clgpInit(context, &clgpkernels) != 0) {
+    err = clgpInit(context, &clgpkernels);
+    if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
     }
@@ -433,19 +434,19 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     clFinish(queue);
     gettimeofday(&start, NULL);
-	err = 
-		myEnqueuePyramid(
-				queue,
-				clgpkernels,
-				pyramid_climage, 
-				input_climage,
-				maxlevel);
+    err = 
+        myEnqueuePyramid(
+                queue,
+                clgpkernels,
+                pyramid_climage, 
+                input_climage,
+                maxlevel);
     clFinish(queue);
     gettimeofday(&stop, NULL);
-	if (err != 0) {
+    if (err != 0) {
         fprintf(stderr, "Pyramid failed\n");
         exit(1);
-	}
+    }
     compute_time = 
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
     total_time += compute_time;
@@ -469,11 +470,11 @@ main(int argc, char *argv[])
                     0,
                     NULL,
                     NULL);
-		if (err != CL_SUCCESS) {
-			fprintf(stderr, 
-					"Could not copy pyramid data on host (%d)\n", err);
-			exit(1);
-		}
+        if (err != CL_SUCCESS) {
+            fprintf(stderr, 
+                    "Could not copy pyramid data on host (%d)\n", err);
+            exit(1);
+        }
     }
     clFinish(queue);
     gettimeofday(&stop, NULL);
@@ -507,12 +508,12 @@ main(int argc, char *argv[])
             CharPixel, 
             pyramid_data);
     MagickSetImageOpacity(pyramid_wand, 1.0);
-	if (outputpath == NULL) {
-		MagickDisplayImages(pyramid_wand, NULL);
-	}
-	else {
-		MagickWriteImage(pyramid_wand, outputpath);
-	}
+    if (outputpath == NULL) {
+        MagickDisplayImages(pyramid_wand, NULL);
+    }
+    else {
+        MagickWriteImage(pyramid_wand, outputpath);
+    }
 
     /* Free images and ImageMagick */
     free(input_data);

@@ -22,12 +22,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#ifndef _CLGP_GAUSS9X9_H_
-#define _CLGP_GAUSS9X9_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <math.h>
+#include <stdio.h>
 
 #ifndef __APPLE__
 # include <CL/opencl.h>
@@ -35,18 +31,53 @@ extern "C" {
 # include <OpenCL/opencl.h>
 #endif
 
-int
-clgpEnqueueGauss9x9(
+#define DOWNSCALEDGAUSS5X5 0
+
+
+cl_int
+clgpEnqueueDownscaledGauss5x5(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
         cl_mem input_image,
         size_t width,
-        size_t height);
+        size_t height)
+{
+    cl_int err = 0;
 
-#ifdef __cplusplus
-}
+    size_t local_work_size[2];
+    size_t global_work_size[2];
+
+    local_work_size[0] = (width >= 32) ? 16 : width>>1;
+    local_work_size[1] = (height >= 32) ? 16 : height>>1;
+    global_work_size[0] = 
+        ((width/2-1) / local_work_size[0] + 1)*local_work_size[0];
+    global_work_size[1] = 
+        ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
+
+    clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[DOWNSCALEDGAUSS5X5], 1, sizeof(cl_mem), &input_image);
+
+    err = 
+        clEnqueueNDRangeKernel(
+                command_queue, 
+                kernels[DOWNSCALEDGAUSS5X5], 
+                2, 
+                NULL,
+                &global_work_size[0], 
+                &local_work_size[0],
+                0, 
+                NULL, 
+                NULL);
+    if (err != CL_SUCCESS) {
+#ifdef DEBUG
+        fprintf(stderr, "clgp: downscaled5x5 kernel failure\n");
 #endif
+        goto end;
+    }
 
-#endif /* ndef _CLGP_GAUSS9X9_H_ */
+end:
+    return err;
+}
+
 
