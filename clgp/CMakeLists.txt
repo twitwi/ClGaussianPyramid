@@ -1,4 +1,3 @@
-SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
 SET(clgp_CL_SRCS downsampledgauss5x5.cl downscaledgauss5x5.cl gauss9x9.cl)
