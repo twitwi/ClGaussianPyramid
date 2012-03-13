@@ -1,8 +1,8 @@
 ClGaussianPyramid
 =================
-Experiments on Gaussian Pyramid implemented using OpenCL.
+Experiments on Gaussian Pyramid implemented using OpenCL. 
 
-This library implements ideas and algorithms detailed in the following 
+This project implements ideas and algorithms detailed in the following 
 publications:
 * J.L. Crowley, "A Representation for Visual Information", CMU-RI-TR-82-07, 
   Robotics Institute, Carnegie Mellon University, November, 1981. 
@@ -24,33 +24,30 @@ publications:
 
 Requisites
 ----------
-* OpenCL 
-* CMake
-* ImageMagick (for test programs)
-* OpenCV (for GSP module)
-
-This code has been tested under GNU/Linux (Fedora 14,15), MacOS X (10.6) with
-the NVIDIA, Intel and AMD implementations.
+* OpenCL <http://www.khronos.org/opencl/>
+* CMake <http://www.cmake.org/>
+* ImageMagick <http://www.imagemagick.org/>
 
 
 Build instructions
 ------------------
-if some of your headers or libraries are in an uncommon place, you can use
+The project uses the CMake build system, please refer to the cmake website
+(<http://www.cmake.org/>) for documentation and tutorials.
+
+By default, the projet only build the clgp library, a few more options and
+modules are optionaly available:
+* BUILD_JAVAIMPLEMENTATION: Build the JavaImplementation jar
+ * Requires cmake >= 2.8.5 and Java
+* BUILD_GSPMODULE: Build the GSP module
+ * Requires OpenCV >= 2.0 and the GSP (<https://github.com/twitwi/GSP/>)
+* BUILD_TESTS: Build the tests
+
+A few tips for the lazy:
+If some of your headers or libraries are in an uncommon place, you can use
 the CMAKE_INCLUDE_PATH and CMAKE_LIBRARY_PATH environment variables, for example
 if you are using the headers from NVidia's SDK :
 $ export CMAKE_INCLUDE_PATH=[...]/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc
 or
 $ setenv CMAKE_INCLUDE_PATH=[...]/NVIDIA_GPU_Computing_SDK/OpenCL/common/inc
 (you can specify multiples paths with the semicolumn (:) separator)
-
-clgp:
-$ mkdir build 
-$ cd build 
-$ cmake .. 
-$ make 
-$ ./test/test-pyramid ../media/lena512color.png
-
-JavaImplementation:
-$ cd JavaImplementation 
-$ ant run
 
