@@ -56,8 +56,8 @@ void
 clgpRelease(cl_kernel *kernels);
 
 /* Register clgp in opencl context, must be called before everyelse function */
-cl_int
-clgpInit(cl_context context, cl_kernel **kernelsptr)
+cl_kernel *
+clgpInit(cl_context context, cl_int *errcode)
 {
     cl_int err = CL_SUCCESS;
 
@@ -97,6 +97,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
     }
     devices = malloc(ndevices * sizeof(cl_device_id));
     if (devices == NULL) {
+	err = CL_OUT_OF_HOST_MEMORY;
         goto end;
     }
     err = 
@@ -130,6 +131,7 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
             goto end;
         }
         if (has_image == CL_FALSE) {
+            err = CL_IMAGE_FORMAT_NOT_SUPPORTED;
 #ifdef DEBUG
             fprintf(stderr, "clgp: no image support\n");
 #endif
@@ -235,13 +237,13 @@ clgpInit(cl_context context, cl_kernel **kernelsptr)
 end:
     free(devices);
 
+    *errcode = err;
     if (err != CL_SUCCESS) {
         clgpRelease(kernels);
+	kernels = NULL;
     }
 
-    *kernelsptr = kernels;
-
-    return err;
+    return kernels;
 }
 
 /* Release the ressources created by the library */
@@ -321,7 +323,7 @@ cl_int
 clgpEnqueuePyramid(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel)
 {
@@ -343,7 +345,7 @@ clgpEnqueuePyramid(
         clEnqueueCopyImage(
                 command_queue, 
                 input_image, 
-                pyramid_image[0], 
+                pyramid_images[0], 
                 origin, 
                 origin, 
                 region, 
@@ -360,8 +362,8 @@ clgpEnqueuePyramid(
             clgpEnqueueDownscaledGauss5x5(
                     command_queue,
                     kernels,
-                    pyramid_image[level],
-                    pyramid_image[level-1],
+                    pyramid_images[level],
+                    pyramid_images[level-1],
                     width>>(level-1),
                     height>>(level-1));
         if (err != CL_SUCCESS) {
@@ -387,7 +389,7 @@ cl_int
 clgpEnqueuePyramidHalfOctave(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel)
 {
@@ -406,7 +408,7 @@ clgpEnqueuePyramidHalfOctave(
         clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
-                pyramid_image[0], 
+                pyramid_images[0], 
                 input_image,
                 width,
                 height);
@@ -418,8 +420,8 @@ clgpEnqueuePyramidHalfOctave(
         clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
-                pyramid_image[1], 
-                pyramid_image[0],
+                pyramid_images[1], 
+                pyramid_images[0],
                 width,
                 height);
     if (err != CL_SUCCESS) {
@@ -432,8 +434,8 @@ clgpEnqueuePyramidHalfOctave(
             clgpEnqueueDownscaledGauss5x5(
                     command_queue,
                     kernels,
-                    pyramid_image[level],
-                    pyramid_image[level-1],
+                    pyramid_images[level],
+                    pyramid_images[level-1],
                     width>>((level-1)>>1),
                     height>>((level-1)>>1));
         if (err != CL_SUCCESS) {
@@ -447,8 +449,8 @@ clgpEnqueuePyramidHalfOctave(
             clgpEnqueueGauss9x9(
                     command_queue,
                     kernels,
-                    pyramid_image[level], 
-                    pyramid_image[level-1],
+                    pyramid_images[level], 
+                    pyramid_images[level-1],
                     width>>(level>>1),
                     height>>(level>>1));
         if (err != CL_SUCCESS) {
@@ -466,7 +468,7 @@ cl_int
 clgpEnqueuePyramidSqrt2(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel)
 {
@@ -485,7 +487,7 @@ clgpEnqueuePyramidSqrt2(
         clgpEnqueueGauss9x9(
                 command_queue,
                 kernels,
-                pyramid_image[0], 
+                pyramid_images[0], 
                 input_image,
                 width,
                 height);
@@ -497,8 +499,8 @@ clgpEnqueuePyramidSqrt2(
         clgpEnqueueDownsampledGauss5x5_cols(
                 command_queue,
                 kernels,
-                pyramid_image[1], 
-                pyramid_image[0], 
+                pyramid_images[1], 
+                pyramid_images[0], 
                 width,
                 height);
     if (err != CL_SUCCESS) {
@@ -512,8 +514,8 @@ clgpEnqueuePyramidSqrt2(
                 clgpEnqueueDownsampledGauss5x5_cols(
                         command_queue,
                         kernels,
-                        pyramid_image[level], 
-                        pyramid_image[level-1], 
+                        pyramid_images[level], 
+                        pyramid_images[level-1], 
                         width >> (level>>1),
                         height >> ((level-1)>>1));
             if (err != CL_SUCCESS) {
@@ -526,8 +528,8 @@ clgpEnqueuePyramidSqrt2(
                 clgpEnqueueDownsampledGauss5x5_rows(
                         command_queue,
                         kernels,
-                        pyramid_image[level], 
-                        pyramid_image[level-1], 
+                        pyramid_images[level], 
+                        pyramid_images[level-1], 
                         width >> (level>>1),
                         height >> ((level-1)>>1));
             if (err != CL_SUCCESS) {

@@ -37,10 +37,10 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
     cl_int err = 0;
 
     cl_platform_id platforms[8];
-    cl_uint n_platforms = 0;
+    cl_uint nplatforms = 0;
 
     cl_device_id devices[16];
-    cl_uint n_devs = 0;
+    cl_uint ndevices = 0;
 
     unsigned int p = 0;
     
@@ -51,7 +51,7 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
         clGetPlatformIDs(
                 8,
                 platforms,
-                &n_platforms);
+                &nplatforms);
     if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
@@ -60,21 +60,21 @@ clgpFirstDevice(cl_device_id *id, cl_device_type device_type)
     }
 
     /* Enumerate devices */
-    for (p = 0; p < n_platforms; p++) {
+    for (p = 0; p < nplatforms; p++) {
         err =
             clGetDeviceIDs(
                     platforms[p],
                     device_type,
                     16,
                     devices,
-                    &n_devs);
+                    &ndevices);
         if (err != CL_SUCCESS) {
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
 #endif
             goto end;
         }
-        if (n_devs > 0) {
+        if (ndevices > 0) {
             *id = devices[0];
             break;
         }
@@ -96,10 +96,10 @@ clgpMaxflopsGPU(cl_device_id *id)
     cl_int err = 0;
 
     cl_platform_id platforms[8];
-    cl_uint n_platforms = 0;
+    cl_uint nplatforms = 0;
 
     cl_device_id devices[16];
-    cl_uint n_devs = 0;
+    cl_uint ndevices = 0;
 
     unsigned int maxflops = 0;
 
@@ -114,7 +114,7 @@ clgpMaxflopsGPU(cl_device_id *id)
         clGetPlatformIDs(
                 8,
                 platforms,
-                &n_platforms);
+                &nplatforms);
     if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
@@ -125,14 +125,14 @@ clgpMaxflopsGPU(cl_device_id *id)
     *id = NULL;
 
     /* Enumerate devices */
-    for (p = 0; p < n_platforms; p++) {
+    for (p = 0; p < nplatforms; p++) {
         err =
             clGetDeviceIDs(
                     platforms[p],
                     CL_DEVICE_TYPE_GPU,
                     16,
                     devices,
-                    &n_devs);
+                    &ndevices);
         if (err != CL_SUCCESS) {
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
@@ -141,7 +141,7 @@ clgpMaxflopsGPU(cl_device_id *id)
         }
 
         /* Check each device */
-        for (d = 0; d < n_devs; d++) {
+        for (d = 0; d < ndevices; d++) {
             /* Get max clock and compute unit number */
             err = 
                 clGetDeviceInfo(
@@ -196,11 +196,11 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
     cl_int err = 0;
 
     cl_platform_id platforms[8];
-    cl_uint n_platforms = 0;
+    cl_uint nplatforms = 0;
     char platform_vendor[1024];
 
     cl_device_id devices[16];
-    cl_uint n_devs = 0;
+    cl_uint ndevices = 0;
 
     size_t vendorlen = 0;
 
@@ -215,7 +215,7 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
         clGetPlatformIDs(
                 8,
                 platforms,
-                &n_platforms);
+                &nplatforms);
     if (err != CL_SUCCESS) {
 #ifdef DEBUG
         fprintf(stderr, "clgp: platform get error\n");
@@ -224,7 +224,7 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
     }
 
     /* Enumerate devices */
-    for (p = 0; p < n_platforms; p++) {
+    for (p = 0; p < nplatforms; p++) {
         err =
             clGetPlatformInfo(
                     platforms[p],
@@ -248,14 +248,14 @@ clgpFirstCPUWithVendor(cl_device_id *id, const char *vendor)
                     CL_DEVICE_TYPE_CPU,
                     16,
                     devices,
-                    &n_devs);
+                    &ndevices);
         if (err != CL_SUCCESS) {
 #ifdef DEBUG
             fprintf(stderr, "clgp: device get error\n");
 #endif
             goto end;
         }
-        if (n_devs > 0) {
+        if (ndevices > 0) {
             *id = devices[0];
             break;
         }

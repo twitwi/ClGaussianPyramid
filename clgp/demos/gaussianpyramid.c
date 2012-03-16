@@ -219,8 +219,8 @@ main(int argc, char *argv[])
     size_t input_nbchannels = 0, pyramid_nbchannels = 0;
 
     cl_image_format imageformat = {CL_RGBA, CL_UNORM_INT8};
-    cl_mem input_climage, pyramid_climage[32];
-    size_t maxlevel = 0, level = 0;
+    cl_mem input_climage, pyramid_climages[32];
+    size_t maxlevel = 0;
     
     size_t origin[3] = {0, 0, 0};
     size_t region[3] = {0, 0, 1};
@@ -348,7 +348,7 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    /* Create a command queue for the library */
+    /* Create a command queue */
     queue = clCreateCommandQueue(context, device, 0, &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not create a command queue for the device\n");
@@ -356,7 +356,7 @@ main(int argc, char *argv[])
     }
 
     /* Initialize the clgp library */
-    err = clgpInit(context, &clgpkernels);
+    clgpkernels = clgpInit(context, &err);
     if (err != CL_SUCCESS) {
         fprintf(stderr, "Could not init clgp library\n");
         exit(1);
@@ -413,8 +413,8 @@ main(int argc, char *argv[])
         (stop.tv_sec-start.tv_sec)*1000. + (stop.tv_usec-start.tv_usec)/1000.;
 
     maxlevel = myMaxlevel(input_width, input_height);
-    for (level = 0; level < maxlevel; level++) {
-        pyramid_climage[level] =
+    for (size_t level = 0; level < maxlevel; level++) {
+        pyramid_climages[level] =
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
@@ -425,7 +425,7 @@ main(int argc, char *argv[])
                     NULL,
                     &err);
         if (err != CL_SUCCESS) {
-            fprintf(stderr, "Could not allocate pyramid_climage[%lu]\n", level);
+            fprintf(stderr, "Could not allocate pyramid_climages[%lu]\n", level);
             exit(1);
         }
     }
@@ -438,7 +438,7 @@ main(int argc, char *argv[])
         myEnqueuePyramid(
                 queue,
                 clgpkernels,
-                pyramid_climage, 
+                pyramid_climages, 
                 input_climage,
                 maxlevel);
     clFinish(queue);
@@ -454,13 +454,13 @@ main(int argc, char *argv[])
 
     /* Retrieve images */
     gettimeofday(&start, NULL);
-    for (level = 0; level < maxlevel; level++) {
+    for (size_t level = 0; level < maxlevel; level++) {
         region[0] = myLevelWidth(input_width, level);
         region[1] = myLevelHeight(input_height, level);
         err = 
             clEnqueueReadImage(
                     queue,
-                    pyramid_climage[level],
+                    pyramid_climages[level],
                     CL_TRUE,
                     origin,
                     region,
@@ -472,7 +472,7 @@ main(int argc, char *argv[])
                     NULL);
         if (err != CL_SUCCESS) {
             fprintf(stderr, 
-                    "Could not copy pyramid data on host (%d)\n", err);
+                    "Could not copy pyramid data on host\n");
             exit(1);
         }
     }
@@ -488,8 +488,8 @@ main(int argc, char *argv[])
 
     /* Release device ressources */
     clReleaseMemObject(input_climage);
-    for (level = 0; level < maxlevel; level++) {
-        clReleaseMemObject(pyramid_climage[level]);
+    for (size_t level = 0; level < maxlevel; level++) {
+        clReleaseMemObject(pyramid_climages[level]);
     }
 
     clReleaseCommandQueue(queue);

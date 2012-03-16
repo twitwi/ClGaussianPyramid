@@ -36,8 +36,8 @@ extern "C" {
 #endif
 
 /* Initialize the clgp library, must be called before any other function */
-cl_int
-clgpInit(cl_context context, cl_kernel **kernelsptr);
+cl_kernel *
+clgpInit(cl_context context, cl_int *errcode);
 
 /* Release ressources allocated by the clgp library */
 void
@@ -49,13 +49,13 @@ size_t
 clgpMaxlevel(size_t width, size_t height);
 
 /* Create the classic gaussian pyramid from input and store its levels in
- * the pyramid_image array images (whom sizes must be large enough to store 
+ * the pyramid_images array images (whom sizes must be large enough to store 
  * the corresponding level). */
 cl_int
 clgpEnqueuePyramid(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel);
 
@@ -65,24 +65,24 @@ size_t
 clgpMaxlevelHalfOctave(size_t width, size_t height);
 
 /* Create the half-octave gaussian pyramid from input and store its levels in
- * the pyramid_image array images (whom sizes must be large enough to store 
+ * the pyramid_images array images (whom sizes must be large enough to store 
  * the corresponding level). */
 cl_int
 clgpEnqueuePyramidHalfOctave(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel);
 
 /* Create the half-octave gaussian pyramid with its true layout from input and 
- * store its levels in the pyramid_image array images (whom sizes must be large 
+ * store its levels in the pyramid_images array images (whom sizes must be large 
  * enough to store the corresponding level). */
 cl_int
 clgpEnqueuePyramidSqrt2(
         cl_command_queue command_queue,
         cl_kernel *kernels,
-        cl_mem pyramid_image[],
+        cl_mem *pyramid_images,
         cl_mem input_image,
         size_t maxlevel);
 

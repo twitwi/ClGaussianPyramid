@@ -9,6 +9,6 @@ INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR}/clgp/include)
 INCLUDE_DIRECTORIES(${ImageMagick_INCLUDE_DIRS})
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-ADD_EXECUTABLE(clpyramid clpyramid.c)
-TARGET_LINK_LIBRARIES(clpyramid clgp m ${ImageMagick_LIBRARIES})
+ADD_EXECUTABLE(gaussianpyramid gaussianpyramid.c)
+TARGET_LINK_LIBRARIES(gaussianpyramid clgp m ${ImageMagick_LIBRARIES})
 
