@@ -18,7 +18,6 @@ SET(CMAKE_C_FLAGS_DEBUG "-g -O0 -DDEBUG"
     "Flags used by the compiler during debug builds." 
     FORCE)
 
-OPTION(BUILD_JAVAIMPLEMENTATION "Build the JavaImplementation jar" FALSE)
 OPTION(BUILD_JNI "Build the JNI interface to clgp" FALSE)
 OPTION(BUILD_GSPMODULE "Build the GSP module" FALSE)
 OPTION(BUILD_TESTS "Build the tests" FALSE)

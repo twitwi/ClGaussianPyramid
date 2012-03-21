@@ -23,6 +23,18 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 class GaussianPyramidJavaDemo {
+    private static long pyramidLayoutOriginX(long level, long width, long height) {
+        if (level == 0) {
+            return 0;
+        }
+        else {
+            return Double.valueOf(((1. - java.lang.Math.pow(0.5, Long.valueOf(level).doubleValue())) / (1.-0.5)) * Long.valueOf(width).doubleValue()).longValue();
+        }
+    }
+    private static long pyramidLayoutOriginY(long level, long width, long height) {
+         return 0;
+    }
+    
     public static void main(String[] args) {
         int[] err = { CL_SUCCESS };
 
@@ -160,7 +172,7 @@ class GaussianPyramidJavaDemo {
                         new long[]{ input_width>>level, input_height>>level, 1 },
                         pyramid_width*4,
                         0,
-                        Pointer.to(pyramid_data),
+                        Pointer.to(pyramid_data).withByteOffset(pyramidLayoutOriginY(level, input_width, input_height)*pyramid_width*4 + pyramidLayoutOriginX(level, input_width, input_height)*4),
                         0,
                         null,
                         null);

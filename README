@@ -36,8 +36,8 @@ The project uses the CMake build system, please refer to the cmake website
 
 By default, the projet only build the clgp library, a few more options and
 modules are optionaly available:
-* BUILD_JAVAIMPLEMENTATION: Build the JavaImplementation jar
- * Requires cmake >= 2.8.5 and Java
+* BUILD_JNI: Build the JNI bindings to be used with JOCL
+ * Requires cmake >= 2.8.5, Java and JOCL (<www.jocl.org>)
 * BUILD_GSPMODULE: Build the GSP module
  * Requires OpenCV >= 2.0 and the GSP (<https://github.com/twitwi/GSP/>)
 * BUILD_TESTS: Build the tests

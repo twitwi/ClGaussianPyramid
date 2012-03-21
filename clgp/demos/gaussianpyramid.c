@@ -222,9 +222,6 @@ main(int argc, char *argv[])
     cl_mem input_climage, pyramid_climages[32];
     size_t maxlevel = 0;
     
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {0, 0, 1};
-
     struct timeval start, stop;
     double compute_time = 0., total_time = 0.;
     
@@ -455,18 +452,24 @@ main(int argc, char *argv[])
     /* Retrieve images */
     gettimeofday(&start, NULL);
     for (size_t level = 0; level < maxlevel; level++) {
-        region[0] = myLevelWidth(input_width, level);
-        region[1] = myLevelHeight(input_height, level);
         err = 
             clEnqueueReadImage(
                     queue,
                     pyramid_climages[level],
                     CL_TRUE,
-                    origin,
-                    region,
+                    (const size_t[3]){ 
+                        0, 
+                        0, 
+                        0 },
+                    (const size_t[3]){ 
+                        myLevelWidth(input_width, level),
+                        myLevelHeight(input_width, level),
+                        1 },
                     pyramid_width*pyramid_nbchannels*sizeof(char),
                     0,
-                    (void *)((char *)((char *)pyramid_data + myLayoutOriginY(level, input_width, input_height)*pyramid_width*pyramid_nbchannels) + myLayoutOriginX(level, input_width, input_height)*pyramid_nbchannels),
+                    pyramid_data 
+                        + myLayoutOriginY(level, input_width, input_height)*pyramid_width*pyramid_nbchannels 
+                        + myLayoutOriginX(level, input_width, input_height)*pyramid_nbchannels,
                     0,
                     NULL,
                     NULL);
