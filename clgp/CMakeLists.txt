@@ -1,7 +1,7 @@
 SET(cmake_include_current_dir YES)
 INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
 
-SET(CL_SRCS downscaledgauss5x5.cl gauss9x9.cl)
+SET(CL_SRCS downsampledgauss5x5.cl downscaledgauss5x5.cl gauss9x9.cl)
 FOREACH(CL_SRC ${CL_SRCS})
   # Check CL_SRC syntax a first time at compilation time, then build a C source
   # file that will contains a string with the program source from CL_SRC
@@ -19,6 +19,8 @@ ADD_CUSTOM_TARGET(generate_CL_C_SRCS DEPENDS ${CL_C_SRCS})
 SET(clgp_SRCS 
     clgp.c
     clgp.h
+    downsampledgauss5x5.c
+    downsampledgauss5x5.h
     downscaledgauss5x5.c
     downscaledgauss5x5.h
     error.c

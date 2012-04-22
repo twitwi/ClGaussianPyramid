@@ -40,13 +40,12 @@ IF(OPENCL_LIBRARIES)
 ENDIF(OPENCL_LIBRARIES)
 
 IF(APPLE)
-  SET(CL_H OpenCL/opencl.h)
+  SET(CL_DIR OpenCL)
 ELSE(APPLE)
-  SET(CL_H CL/cl.h)
+  SET(CL_DIR CL)
 ENDIF(APPLE)
-FIND_PATH(OPENCL_INCLUDE_DIR ${CL_H} 
+FIND_PATH(OPENCL_INCLUDE_DIR ${CL_DIR}/opencl.h 
     PATHS 
-        ${OPENCL_ROOT}
         /usr/local/cuda/include
         /System/Library/Frameworks/OpenCL.framework/Headers
     PATH_SUFFIXES nvidia)

@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #ifndef __APPLE__
-# include <CL/cl.h>
+# include <CL/opencl.h>
 #else
 # include <OpenCL/opencl.h>
 #endif

@@ -11,12 +11,12 @@
 
 extern cl_int clgp_clerr;
 
-#define GAUSS9X9_ROWS 1
-#define GAUSS9X9_COLS 2
+#define DOWNSAMPLEDGAUSS5X5_ROWS 3
+#define DOWNSAMPLEDGAUSS5X5_COLS 4
 
 
 int
-clgpGauss9x9(
+clgpDownsampledGauss5x5_cols(
         cl_command_queue command_queue,
         cl_kernel *kernels,
         cl_mem output_image, 
@@ -43,20 +43,21 @@ clgpGauss9x9(
     }
 #endif
 
-    local_work_size[0] = (width >= 16) ? 16 : width;
-    local_work_size[1] = (height >= 16) ? 16 : height;
+    local_work_size[0] = (width >= 32) ? 16 : width>>1;
+    local_work_size[1] = (height >= 32) ? 16 : height>>1;
     global_work_size[0] = 
-        ((width-1) / local_work_size[0] + 1)*local_work_size[0];
+        ((width/2-1) / local_work_size[0] + 1)*local_work_size[0];
     global_work_size[1] = 
         ((height-1) / local_work_size[1] + 1)*local_work_size[1];
 
-    clSetKernelArg(kernels[GAUSS9X9_ROWS], 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(kernels[GAUSS9X9_ROWS], 1, sizeof(cl_mem), &input_image);
+    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_COLS], 1, sizeof(cl_mem), &input_image);
+    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                kernels[GAUSS9X9_ROWS], 
+                kernels[DOWNSAMPLEDGAUSS5X5_COLS], 
                 2, 
                 NULL,
                 &global_work_size[0], 
@@ -68,20 +69,45 @@ clgpGauss9x9(
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
     clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the gauss9x9_rows kernel\n");
-        printf("%d\n", clgp_clerr);
+        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
         err = CLGP_CL_ERROR;
         goto end;
     }
 #endif
 
-    clSetKernelArg(kernels[GAUSS9X9_COLS], 0, sizeof(cl_mem), &output_image);
-    clSetKernelArg(kernels[GAUSS9X9_COLS], 1, sizeof(cl_mem), &output_image);
+end:
+    return err;
+}
+
+int
+clgpDownsampledGauss5x5_rows(
+        cl_command_queue command_queue,
+        cl_kernel *kernels,
+        cl_mem output_image, 
+        cl_mem input_image,
+        size_t width,
+        size_t height)
+{
+    int err = 0;
+
+    size_t local_work_size[2];
+    size_t global_work_size[2];
+
+    local_work_size[0] = (width >= 32) ? 16 : width>>1;
+    local_work_size[1] = (height >= 32) ? 16 : height>>1;
+    global_work_size[0] = 
+        ((width-1) / local_work_size[0] + 1)*local_work_size[0];
+    global_work_size[1] = 
+        ((height/2-1) / local_work_size[1] + 1)*local_work_size[1];
+
+    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 0, sizeof(cl_mem), &output_image);
+    clSetKernelArg(kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 1, sizeof(cl_mem), &input_image);
+    clFinish(command_queue);
 
     clgp_clerr = 
         clEnqueueNDRangeKernel(
                 command_queue, 
-                kernels[GAUSS9X9_COLS], 
+                kernels[DOWNSAMPLEDGAUSS5X5_ROWS], 
                 2, 
                 NULL,
                 &global_work_size[0], 
@@ -93,7 +119,7 @@ clgpGauss9x9(
 #ifdef DEBUG /* Systematicaly checking kernel execution is very costly */
     clFinish(command_queue);
     if (clgp_clerr != CL_SUCCESS) {
-        fprintf(stderr, "clgp: Could not run the gauss9x9_cols kernel\n");
+        fprintf(stderr, "clgp: Could not run the downscaled convolution kernel\n");
         err = CLGP_CL_ERROR;
         goto end;
     }

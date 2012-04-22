@@ -29,11 +29,13 @@
 #define LEVEL_ORIGIN_X(level, width, height) \
         ((level == 0) \
             ? 0 \
-            : (int)((( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f)) + 1.f)*(float)width))
+            : ((int)(( (1.f - powf(0.5f, (float)(level>>1)) ) / (1.f-0.5f) )*(float)(width/2)) + width))
 
 /* Get the y origin of the level in the pyramid image */
 #define LEVEL_ORIGIN_Y(level, width, height) \
-        ((level <= 2) ? 0 : (level & 0x1)*(height>>(level>>1))) 
+        ((level <= 2) \
+            ? 0 \
+            : (int)(( (1.f - powf(0.5f, (float)((level-1)>>1)) ) / (1.f-0.5f) )*(float)(height/2)))
 
 int
 main(int argc, char *argv[])
@@ -118,7 +120,7 @@ main(int argc, char *argv[])
 
     /* Create pyramid image */
     pyramid_wand = NewMagickWand();
-    pyramid_width = 3 * input_width;
+    pyramid_width = 2 * input_width;
     pyramid_height = input_height;
     pyramid_nbchannels = input_nbchannels;
     pyramid_data = 
@@ -141,14 +143,14 @@ main(int argc, char *argv[])
         exit(1);
     }
 
-    maxlevel = clgpMaxlevelHalfOctave(input_width, input_height) - 4;
+    maxlevel = clgpMaxlevelHalfOctave(input_width, input_height) - 7;
     for (level = 0; level < maxlevel; level++) {
         pyramid_climage[level] =
             clCreateImage2D(
                     context,
                     CL_MEM_READ_WRITE,
                     &imageformat,
-                    input_width >> (level>>1),
+                    input_width >> ((level+1)>>1),
                     input_height >> (level>>1),
                     0,
                     NULL,
@@ -190,7 +192,7 @@ main(int argc, char *argv[])
     /* At last, call our pyramid function */
     gettimeofday(&start, NULL);
     for (i = 0; i < BUILD_ITERATION_NB; i++) {
-        clgpBuildPyramidHalfOctave(
+        clgpBuildPyramidSqrt2(
                 queue,
                 clgpkernels,
                 pyramid_climage, 
@@ -208,7 +210,7 @@ main(int argc, char *argv[])
     /* Retrieve images */
     gettimeofday(&start, NULL);
     for (level = 0; level < maxlevel; level++) {
-        region[0] = input_width >> (level>>1);
+        region[0] = input_width >> ((level+1)>>1);
         region[1] = input_height >> (level>>1);
         err = 
             clEnqueueReadImage(
