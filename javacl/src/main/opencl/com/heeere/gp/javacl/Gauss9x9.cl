@@ -36,7 +36,7 @@ gauss9x9_rows(
         56.f/256.f,
         28.f/256.f,
         08.f/256.f,
-        01.f/256.f,
+        01.f/256.f
     };
 
     const sampler_t sampler = 
@@ -81,7 +81,7 @@ gauss9x9_cols(
         56.f/256.f,
         28.f/256.f,
         08.f/256.f,
-        01.f/256.f,
+        01.f/256.f
     };
 
     const sampler_t sampler = 
