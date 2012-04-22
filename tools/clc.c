@@ -48,7 +48,7 @@ int clc_optind = 1, clc_opterr, clc_optopt;
 int clc_getopt(int argc, char * const argv[])
 {
     int opt = OPT_UNKNOWN;
-    int i = 0;
+    size_t i = 0;
 
     if (clc_optind >= argc) {
         return -1; /* End of arguments */
@@ -189,7 +189,7 @@ main(int argc, char *argv[])
     err =
         clGetDeviceIDs(
                 platform,
-                CL_DEVICE_TYPE_GPU,
+                CL_DEVICE_TYPE_ALL,
                 1,
                 devices,
                 &n_devs);

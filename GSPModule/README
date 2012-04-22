@@ -1,0 +1,19 @@
+ClGaussianPydamid GSP module
+============================
+This is a basic module for the GSP framework (https://github.com/twitwi/GSP).
+While under work and still subject to changes, it allows to easily using the 
+clgp library in GSP pipelines.
+
+Compilation do not require anything else than the OpenCV library (as the GSP
+relies on IplImage as a de-facto format for loading/displaying/etcing images),
+but running the demo pipeline requires the GSP framework (obviously), utilities
+and the Base modules.
+
+Running pipelines
+-----------------
+GO="LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$GSP/GSPModules/build:../build java -Djava.library.path=.:/usr/lib -cp  $GSP/GSPFramework/target/dependency/*:$GSP/GSPFramework/target/*:$GSP/GSPBaseutils/target/* fr.prima.gsp.Launcher"
+
+$GO ../GSPModule/pipeline.xml
+
+$GO ../GSPModule/pipeline.xml load.url=video:/home/twilight/Films/Video/Zombieland.avi
+

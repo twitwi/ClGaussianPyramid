@@ -1,0 +1,14 @@
+# Check tests-only system dependencies
+INCLUDE(CheckFunctionExists)
+CHECK_FUNCTION_EXISTS(getopt_long HAVE_GETOPT_LONG)
+IF(HAVE_GETOPT_LONG)
+    ADD_DEFINITIONS(-DHAVE_GETOPT_LONG)
+ENDIF(HAVE_GETOPT_LONG)
+
+INCLUDE_DIRECTORIES(${ClGaussianPyramid_SOURCE_DIR}/clgp/include)
+INCLUDE_DIRECTORIES(${ImageMagick_INCLUDE_DIRS})
+INCLUDE_DIRECTORIES(${OPENCL_INCLUDE_DIR})
+
+ADD_EXECUTABLE(gaussianpyramid gaussianpyramid.c)
+TARGET_LINK_LIBRARIES(gaussianpyramid clgp m ${ImageMagick_LIBRARIES})
+

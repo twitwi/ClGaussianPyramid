@@ -1,1 +1,0 @@
-../kernels/gauss9x9.cl

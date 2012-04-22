@@ -1,0 +1,12 @@
+* Cleaning, cleaning, cleaning
+* Provide all pyramids through the module
+* Find how to manage types mangling (for struct like IplImage)
+* This is a good place to think about OpenCL connectors in the GSP
+ * Work on this began, the main obstacle is that modules must share (from init)
+   the opencl context or a command queue depending on what they do
+ * For now, the ugly workaround is : "the first module that uses opencl create
+   the context/command queue, set a global variable that the following modules
+   retrieve".
+* This is also a good place to think about C module macros
+* When a file hierarchy is decided for the GSP, add a install target
+
