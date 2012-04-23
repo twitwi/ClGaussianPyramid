@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800"
+   height="800"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.2 r9819"
+   sodipodi:docname="blurredbars.svg"
+   inkscape:export-filename="/home/twilight/projects/ClGaussianPyramid/media/blurredbars.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <filter
+       inkscape:collect="always"
+       id="filter3888"
+       x="-0.28200007"
+       width="1.5640001"
+       y="-0.030080007"
+       height="1.06016">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="3.7600009"
+         id="feGaussianBlur3890" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3892"
+       x="-0.56400014"
+       width="2.1280003"
+       y="-0.030080007"
+       height="1.06016">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="3.7600009"
+         id="feGaussianBlur3894" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3896"
+       x="-0.56400014"
+       width="2.1280003"
+       y="-0.060160015"
+       height="1.12032">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="7.5200018"
+         id="feGaussianBlur3898" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3900"
+       x="-1.1280003"
+       width="3.2560005"
+       y="-0.060160015"
+       height="1.12032">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="7.5200018"
+         id="feGaussianBlur3902" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3904"
+       x="-0.84600021"
+       width="2.6920004"
+       y="-0.090240022"
+       height="1.18048">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.280003"
+         id="feGaussianBlur3906" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3908"
+       x="-1.6920004"
+       width="4.3840008"
+       y="-0.090240022"
+       height="1.18048">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.280003"
+         id="feGaussianBlur3910" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3912"
+       x="-1.1280003"
+       width="3.2560005"
+       y="-0.12032003"
+       height="1.2406401">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="15.040004"
+         id="feGaussianBlur3914" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3916"
+       x="-2.2560005"
+       width="5.5120011"
+       y="-0.12032003"
+       height="1.2406401">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="15.040004"
+         id="feGaussianBlur3918" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3920"
+       x="-1.4100003"
+       width="3.8200007"
+       y="-0.15040004"
+       height="1.3008001">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="18.800005"
+         id="feGaussianBlur3922" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3924"
+       x="-2.8200007"
+       width="6.6400014"
+       y="-0.15040004"
+       height="1.3008001">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="18.800005"
+         id="feGaussianBlur3926" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3981">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.50968266"
+         id="feGaussianBlur3983" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter3997"
+       x="-0.10703336"
+       width="1.2140667"
+       y="-0.0091153766"
+       height="1.0182308">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.71355572"
+         id="feGaussianBlur3999" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4001"
+       x="-0.1529048"
+       width="1.3058096"
+       y="-0.013021967"
+       height="1.0260439">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.0193653"
+         id="feGaussianBlur4003" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4009"
+       x="-0.21406672"
+       width="1.4281334"
+       y="-0.018230753"
+       height="1.0364615">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.4271114"
+         id="feGaussianBlur4011" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4021"
+       x="-0.43577867"
+       width="1.8715573"
+       y="-0.037112605"
+       height="1.0742252">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.9051911"
+         id="feGaussianBlur4023" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4025"
+       x="-0.61161919"
+       width="2.2232384"
+       y="-0.052087867"
+       height="1.1041757">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="4.0774612"
+         id="feGaussianBlur4027" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4029"
+       x="-0.86498243"
+       width="2.7299649"
+       y="-0.073665265"
+       height="1.1473305">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="5.7665496"
+         id="feGaussianBlur4031" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4033"
+       x="-1.2232384"
+       width="3.4464767"
+       y="-0.10417573"
+       height="1.2083515">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="8.1549225"
+         id="feGaussianBlur4035" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4037"
+       x="-1.7278242"
+       width="4.4556484"
+       y="-0.14714822"
+       height="1.2942964">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.518828"
+         id="feGaussianBlur4039" />
+    </filter>
+    <filter
+       inkscape:collect="always"
+       id="filter4041"
+       x="-2.4464767"
+       width="5.8929535"
+       y="-0.20835147"
+       height="1.4167029">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="16.309845"
+         id="feGaussianBlur4043" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4037-7"
+       x="-1.7278242"
+       width="4.4556484"
+       y="-0.14714822"
+       height="1.2942964">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="11.518828"
+         id="feGaussianBlur4039-0" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4033-0"
+       x="-1.2232383"
+       width="3.4464767"
+       y="-0.10417573"
+       height="1.2083515">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="8.1549225"
+         id="feGaussianBlur4035-8" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4029-5"
+       x="-0.86498243"
+       width="2.729965"
+       y="-0.073665269"
+       height="1.1473305">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="5.7665496"
+         id="feGaussianBlur4031-9" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4025-1"
+       x="-0.61161917"
+       width="2.2232385"
+       y="-0.052087866"
+       height="1.1041757">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="4.0774612"
+         id="feGaussianBlur4027-0" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4021-0"
+       x="-0.43577868"
+       width="1.8715574"
+       y="-0.037112605"
+       height="1.0742252">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="2.9051911"
+         id="feGaussianBlur4023-8" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4009-0"
+       x="-0.21406671"
+       width="1.4281334"
+       y="-0.018230753"
+       height="1.0364615">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.4271114"
+         id="feGaussianBlur4011-4" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter4001-3"
+       x="-0.15290479"
+       width="1.3058096"
+       y="-0.013021967"
+       height="1.0260439">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="1.0193653"
+         id="feGaussianBlur4003-0" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter3997-7"
+       x="-0.10703336"
+       width="1.2140667"
+       y="-0.0091153765"
+       height="1.0182308">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.71355572"
+         id="feGaussianBlur3999-5" />
+    </filter>
+    <filter
+       color-interpolation-filters="sRGB"
+       inkscape:collect="always"
+       id="filter3981-6">
+      <feGaussianBlur
+         inkscape:collect="always"
+         stdDeviation="0.50968266"
+         id="feGaussianBlur3983-4" />
+    </filter>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.70710678"
+     inkscape:cx="364.31831"
+     inkscape:cy="431.14769"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1366"
+     inkscape:window-height="678"
+     inkscape:window-x="0"
+     inkscape:window-y="33"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-252.36218)">
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985"
+       width="16"
+       height="300"
+       x="70.467026"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3900);enable-background:accumulate"
+       id="rect2985-0-3"
+       width="16"
+       height="300"
+       x="389.13361"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3908);enable-background:accumulate"
+       id="rect2985-0-3-9"
+       width="16"
+       height="300"
+       x="496.46692"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3916);enable-background:accumulate"
+       id="rect2985-0-5"
+       width="16"
+       height="300"
+       x="603.80029"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3924);enable-background:accumulate"
+       id="rect2985-0-3-5"
+       width="16"
+       height="300"
+       x="711.13385"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985-03"
+       width="32"
+       height="300"
+       x="62.467022"
+       y="804.33331" />
+    <g
+       id="g3020"
+       transform="translate(104,100)">
+      <rect
+         y="544.33313"
+         x="177.80038"
+         height="300"
+         width="16"
+         id="rect2985-0"
+         style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3892);enable-background:accumulate" />
+      <rect
+         y="704.33331"
+         x="169.80038"
+         height="300"
+         width="32"
+         id="rect2985-0-32"
+         style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3888);enable-background:accumulate" />
+    </g>
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3904);enable-background:accumulate"
+       id="rect2985-0-3-8"
+       width="32"
+       height="300"
+       x="488.46695"
+       y="804.33331" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3920);enable-background:accumulate"
+       id="rect2985-0-3-9-3"
+       width="32"
+       height="300"
+       x="703.13385"
+       y="804.33331" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3896);enable-background:accumulate"
+       id="rect2985-0-5-6"
+       width="32"
+       height="300"
+       x="381.13361"
+       y="804.33331" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;filter:url(#filter3912);enable-background:accumulate"
+       id="rect2985-0-3-5-5"
+       width="32"
+       height="300"
+       x="595.80029"
+       y="804.33331" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985-0-3-9-4"
+       width="16"
+       height="300"
+       x="175.0457"
+       y="644.33313" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985-0-3-9-4-6"
+       width="32"
+       height="300"
+       x="167.0457"
+       y="804.33331" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect2985-3"
+       width="16"
+       height="187.87306"
+       x="70.467026"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter3981)"
+       id="rect2985-3-7"
+       width="16"
+       height="187.87306"
+       x="110.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter3997)"
+       id="rect2985-3-2"
+       width="16"
+       height="187.87306"
+       x="150.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4001)"
+       id="rect2985-3-7-6"
+       width="16"
+       height="187.87306"
+       x="190.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4009)"
+       id="rect2985-3-7-6-2"
+       width="16"
+       height="187.87306"
+       x="230.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4021)"
+       id="rect2985-3-7-6-2-1"
+       width="16"
+       height="187.87306"
+       x="270.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4025)"
+       id="rect2985-3-7-6-2-1-4"
+       width="16"
+       height="187.87306"
+       x="310.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4029)"
+       id="rect2985-3-7-6-2-1-4-2"
+       width="16"
+       height="187.87306"
+       x="350.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4033)"
+       id="rect2985-3-7-6-2-1-4-2-0"
+       width="16"
+       height="187.87306"
+       x="390.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4037)"
+       id="rect2985-3-7-6-2-1-4-2-0-1"
+       width="16"
+       height="187.87306"
+       x="430.46704"
+       y="259.89151" />
+    <rect
+       style="color:#000000;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:5;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;filter:url(#filter4041)"
+       id="rect2985-3-7-6-2-1-4-2-0-1-2"
+       width="16"
+       height="187.87306"
+       x="470.46704"
+       y="259.89151" />
+  </g>
+</svg>
