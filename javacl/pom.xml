@@ -44,6 +44,12 @@
             <groupId>com.nativelibs4java</groupId>
             <artifactId>javacl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>fr.prima</groupId>
+            <artifactId>gsp-framework</artifactId>
+            <version>1.1-SNAPSHOT</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
     <build>

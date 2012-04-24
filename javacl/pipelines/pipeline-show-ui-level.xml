@@ -1,0 +1,33 @@
+
+<pipeline>
+
+    <namespace gsp="fr.prima.gspbaseutils"/>
+    <namespace gst="com.heeere.gsp.gstreamer"/>
+    <namespace vid="com.heeere.gsp.videotools"/>
+    <namespace pyr="com.heeere.gp.javacl"/>
+
+    <!-- create a module named "cons" of type "gsp:Console" -->
+    <m id="cons" type="gsp:Console"/>
+
+    <!-- create a module named "for" of type "gsp:For" -->
+    <m id="for" type="gsp:For" period="1"/>
+
+    <!-- plug the "i" output of "for" into the "info" input of "cons" -->
+    <c chain="for#i - info#cons"/>
+
+    <!-- create an image source (that uses gstreamer) and a view -->
+    <m id="in"   type="gst:ImageSource" uri="data/simple.avi"/>
+    <f id="view" type="vid:ImageView"   title="close me when done"/>
+
+    <m id="py" type="pyr:GaussianPyramid"/>
+    <m id="sel" type="pyr:LevelSelector" level="1"/>
+
+    <!-- plugging them together (understanding this is the goal of the next tutorial) -->
+    <c chain="for - in - py"/>
+    <c chain="in - view"/>
+    <c chain="py - sel - view"/>
+    <c chain="in#end - interrupt#for"/>
+
+    <m id="dgui" type="gsp:DebugGUI" what="sel.level : int(1) ; for.period: int(1)"/>
+
+</pipeline>
