@@ -14,6 +14,18 @@
         <relativePath>..</relativePath>
     </parent>
 
+    <distributionManagement>
+        <repository>
+            <id>gh-repo</id>
+            <url>file:../../maven-repo/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>gh-snap-repo</id>
+            <url>file:../../maven-repo/snapshots</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
     <repositories>
         <repository>
             <id>sonatype</id>
