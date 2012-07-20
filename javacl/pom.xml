@@ -6,60 +6,35 @@
     <artifactId>GaussianPyramidJavaCL</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-	
-    <parent>
-        <groupId>com.nativelibs4java</groupId>
-        <artifactId>javacl-parent</artifactId>
-        <version>1.0.0-RC2</version>
-        <relativePath>..</relativePath>
-    </parent>
-
-    <distributionManagement>
-        <repository>
-            <id>gh-repo</id>
-            <url>file:../../maven-repo/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>gh-snap-repo</id>
-            <url>file:../../maven-repo/snapshots</url>
-            <uniqueVersion>false</uniqueVersion>
-        </snapshotRepository>
-    </distributionManagement>
 
     <repositories>
         <repository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
+            <id>githubtwitw</id>
+            <name>github/twitwi maven repository</name>
+            <url>http://twitwi.github.com/maven-repo/releases</url>
         </repository>
-		<!--repository>
-			<id>nativelibs4java</id>
-			<name>nativelibs4java Maven2 Repository</name>
-			<url>http://nativelibs4java.sourceforge.net/maven</url>
-		</repository-->
     </repositories>
+    
     <pluginRepositories>
+        <!-- We need this repository to get a 1.0-SNAPSHOT for the javacl maven plugin because there has been a necessary fix since 1.0.0-RC2 -->
+        <!-- This will get removed at the next major release of the javacl plugin (1.0.0?). -->
         <pluginRepository>
             <id>sonatype</id>
             <name>Sonatype OSS Snapshots Repository</name>
             <url>http://oss.sonatype.org/content/groups/public</url>
         </pluginRepository>
-		<!--pluginRepository>
-			<id>nativelibs4java</id>
-			<name>nativelibs4java Maven2 Repository</name>
-			<url>http://nativelibs4java.sourceforge.net/maven</url>
-		</pluginRepository-->
     </pluginRepositories>
 	
     <dependencies>
         <dependency>
             <groupId>com.nativelibs4java</groupId>
             <artifactId>javacl</artifactId>
+            <version>1.0.0-RC2</version>
         </dependency>
         <dependency>
             <groupId>fr.prima</groupId>
             <artifactId>gsp-framework</artifactId>
-            <version>1.1-SNAPSHOT</version>
+            <version>1.2</version>
             <type>jar</type>
         </dependency>
     </dependencies>
@@ -67,14 +42,9 @@
     <build>
         <plugins>
             <plugin>
-				<!--
-				This plugin will take all the .cl files in src/main/opencl and :
-				- copy them to target/generated-resources (keeping the correct sub-path)
-				- parse them and generate corresponding JavaCL program wrappers, with one typed method per kernel, in target/generated-sources (in a package that matches the initial .cl file's path)
-				-->
                 <groupId>com.nativelibs4java</groupId>
                 <artifactId>maven-javacl-plugin</artifactId>
-                <version>1.0-SNAPSHOT</version>
+                <version>1.0-SNAPSHOT</version><!-- see comment above -->
                 <executions>
                     <execution>
                         <goals>
@@ -87,8 +57,22 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
             </plugin>
 
         </plugins>
     </build>
+    
+    <distributionManagement>
+        <repository>
+            <id>gh-repo</id>
+            <url>file:../../maven-repo/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>gh-snap-repo</id>
+            <url>file:../../maven-repo/snapshots</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>
