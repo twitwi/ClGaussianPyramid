@@ -4,7 +4,7 @@
     <name>GaussianPyramidJavaCL</name>
     <groupId>com.heeere.gp.javacl</groupId>
     <artifactId>GaussianPyramidJavaCL</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0</version>
     <packaging>jar</packaging>
 
     <repositories>
